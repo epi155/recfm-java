@@ -106,7 +106,7 @@ Commandline
 mvn recfm:generate
 ~~~
 
-Generated java class
+<a name="2-xmpl">Generated java class</a>
 
 ~~~java
 package org.example.sys.file;
@@ -300,7 +300,7 @@ classes:
       - !Abc { name: louie, at: 51, len: 25 }
 ~~~
 
-Generated setter and getter
+<a name="431-xmpl">Generated setter and getter</a>
 
 ~~~java
     public String getHuey(){...}
@@ -383,7 +383,7 @@ addition to the alphanumeric ones. Numeric getters are prefixed with the return 
       - !Num { name: date , at: 9, len: 2, num: true }
 ~~~
 
-Generated java for *year* field
+<a name="432-xmpl">Generated java for *year* field</a>
 
 ~~~java
     public String getYear(){...}
@@ -543,7 +543,7 @@ or (yaml style):
 ~~~
 
 
-Group usage example:
+<a name="437-xmpl">Group usage example:</a>
 
 ~~~java
         val bar=new BarReq();
@@ -611,7 +611,7 @@ Occurs definition example:
       - ...
 ~~~
 
-Occurs usage example:
+<a name="438-xmpl">Occurs usage example:</a>
 
 ~~~java
     val resp=new FooResp();

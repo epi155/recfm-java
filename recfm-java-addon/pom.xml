@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>recfm-java-addon</artifactId>
+    <url>https://github.com/epi155/recfm-java/tree/main/recfm-java-addon</url>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

@@ -9,6 +9,7 @@
 
     <artifactId>recfm-java-lib</artifactId>
   <version> 0.6.0-SNAPSHOT</version>
+    <url>https://github.com/epi155/recfm-java/tree/main/recfm-java-lib</url>
 
     <properties>
         <maven.compiler.source>7</maven.compiler.source>

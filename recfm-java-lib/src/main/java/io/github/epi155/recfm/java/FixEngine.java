@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static io.github.epi155.recfm.java.FixError.FAIL_FIRST;
+
 abstract class FixEngine {
     private static final String FIELD_AT = "Field @";
     private static final String EXPECTED = " expected ";
@@ -229,7 +231,7 @@ abstract class FixEngine {
                         .code(ValidateError.NotNumber)
                         .wrong(c)
                         .build());
-                fault = true;
+                if (FAIL_FIRST) return true; else fault = true;
             }
         }
         return fault;
@@ -251,7 +253,7 @@ abstract class FixEngine {
                             .code(ValidateError.NotBlank)  // ??
                             .wrong(c)
                             .build());
-                    fault = true;
+                    if (FAIL_FIRST) return true; else fault = true;
                 }
             }
         } else if ('0' <= c && c <= '9') {
@@ -268,7 +270,7 @@ abstract class FixEngine {
                             .code(ValidateError.NotNumber)
                             .wrong(c)
                             .build());
-                    fault = true;
+                    if (FAIL_FIRST) return true; else fault = true;
                 }
             }
         } else {
@@ -314,7 +316,7 @@ abstract class FixEngine {
                         .code(ValidateError.NotAscii)
                         .wrong(c)
                         .build());
-                fault = true;
+                if (FAIL_FIRST) return true; else fault = true;
             }
         }
         return fault;
@@ -376,7 +378,7 @@ abstract class FixEngine {
                         .code(ValidateError.NotLatin)
                         .wrong(c)
                         .build());
-                fault = true;
+                if (FAIL_FIRST) return true; else fault = true;
             }
         }
         return fault;
@@ -439,7 +441,7 @@ abstract class FixEngine {
                         .code(ValidateError.NotValid)
                         .wrong(c)
                         .build());
-                fault = true;
+                if (FAIL_FIRST) return true; else fault = true;
             }
         }
         return fault;

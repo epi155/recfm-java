@@ -8,6 +8,11 @@ import java.util.List;
  * Collector of exceptions that can occur in the management of fixed-path records
  */
 public class FixError {
+    /**
+     * sets the behavior in case of multiple errors on the same field: report the first error or all errors
+     */
+    public static volatile boolean FAIL_FIRST = false;
+
     private FixError() {
     }
 

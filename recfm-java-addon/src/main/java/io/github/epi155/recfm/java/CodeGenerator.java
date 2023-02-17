@@ -1,12 +1,15 @@
 package io.github.epi155.recfm.java;
 
 import io.github.epi155.recfm.api.CodeProvider;
-import io.github.epi155.recfm.util.*;
 import io.github.epi155.recfm.java.factory.AccessFactory;
 import io.github.epi155.recfm.java.factory.InitializeFactory;
 import io.github.epi155.recfm.java.factory.PrepareFactory;
 import io.github.epi155.recfm.java.factory.ValidateFactory;
 import io.github.epi155.recfm.type.*;
+import io.github.epi155.recfm.util.DumpFactory;
+import io.github.epi155.recfm.util.DumpInfo;
+import io.github.epi155.recfm.util.GenerateArgs;
+import io.github.epi155.recfm.util.Tools;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +26,7 @@ import java.util.function.IntFunction;
 @Slf4j
 public class CodeGenerator implements IndentAble, CodeProvider {
     private static final String SYSTEM_PACKAGE = "io.github.epi155.recfm.java";
-
+    private static final String OVERRIDE_METHOD = "    @Override%n";
     static void writeCopyright(@NotNull PrintWriter pw, @NotNull GenerateArgs ga) {
         String now = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
         pw.println("/*");
@@ -66,9 +69,10 @@ public class CodeGenerator implements IndentAble, CodeProvider {
     private void writeDump(PrintWriter pw, List<NakedField> fields) {
         List<DumpInfo> l3 = DumpFactory.getInstance(fields);
         if (! l3.isEmpty()) {
-            pw.printf("    @Override%n");
+            pw.printf(OVERRIDE_METHOD);
             pw.printf("    public String toString() {%n");
             pw.printf("        StringBuilder sb = new StringBuilder();%n");
+            pw.printf("        String eol = System.lineSeparator();%n");
             l3.forEach(it -> writeFieldDump(pw, it));
             pw.printf("        return sb.toString();%n");
             closeBrace(pw);
@@ -76,7 +80,7 @@ public class CodeGenerator implements IndentAble, CodeProvider {
     }
 
     private void writeFieldDump(PrintWriter pw, DumpInfo it) {
-        pw.printf("        sb.append(\"%s : \").append(dump(%d,%d)).append('\\n');%n", it.name, it.offset - 1, it.length);
+        pw.printf("        sb.append(\"%s : \").append(dump(%d,%d)).append(eol);%n", it.name, it.offset - 1, it.length);
     }
 
     private void generateGroupCode(FieldGroup fld, PrintWriter pw, int indent, GenerateArgs ga, Defaults defaults, IntFunction<String> pos) {
@@ -138,8 +142,8 @@ public class CodeGenerator implements IndentAble, CodeProvider {
     private void writeValidator(PrintWriter pw, @NotNull ClassDefine struct, Defaults defaults) {
         int padWidth = struct.evalPadWidth(6);
         val validator = ValidateFactory.getInstance(pw, defaults);
-        pw.printf("    @Override%n");
-        pw.printf("    protected boolean validateFields(FieldValidateHandler handler) {%n");
+        pw.printf(OVERRIDE_METHOD);
+        pw.printf("    public boolean validateFails(FieldValidateHandler handler) {%n");
         AtomicBoolean firstCheck = new AtomicBoolean(true);
         for (NakedField fld : struct.getFields()) {
             validator.validate(fld, padWidth, 1, firstCheck);
@@ -151,8 +155,8 @@ public class CodeGenerator implements IndentAble, CodeProvider {
         }
         closeBrace(pw);
 
-        pw.printf("    @Override%n");
-        pw.printf("    protected boolean auditFields(FieldValidateHandler handler) {%n");
+        pw.printf(OVERRIDE_METHOD);
+        pw.printf("    public boolean auditFails(FieldValidateHandler handler) {%n");
         AtomicBoolean firstAudit = new AtomicBoolean(true);
         for (NakedField fld : struct.getFields()) {
             if (fld instanceof CheckAware && ((CheckAware) fld).isAudit()) {

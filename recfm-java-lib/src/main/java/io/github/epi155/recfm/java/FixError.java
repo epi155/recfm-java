@@ -11,7 +11,9 @@ public class FixError {
     /**
      * sets the behavior in case of multiple errors on the same field: report the first error or all errors
      */
-    public static volatile boolean FAIL_FIRST = false;
+    static volatile boolean failFirst = false;
+    public static synchronized void failFirst() { failFirst = true; }
+    public static synchronized void failAll() { failFirst = false; }
 
     private FixError() {
     }
@@ -22,8 +24,13 @@ public class FixError {
     public static class FieldOverFlowException extends RuntimeException {
         private static final long serialVersionUID = 1L;
 
-        public FieldOverFlowException(String s) {
-            super(s);
+        /**
+         * Constructor
+         *
+         * @param message error message
+         */
+        public FieldOverFlowException(String message) {
+            super(message);
         }
     }
 
@@ -33,8 +40,13 @@ public class FixError {
     public static class FieldUnderFlowException extends RuntimeException {
         private static final long serialVersionUID = 1L;
 
-        public FieldUnderFlowException(String s) {
-            super(s);
+        /**
+         * Constructor
+         *
+         * @param message error message
+         */
+        public FieldUnderFlowException(String message) {
+            super(message);
         }
     }
 
@@ -44,8 +56,13 @@ public class FixError {
     public static class RecordOverflowException extends RuntimeException {
         private static final long serialVersionUID = 1L;
 
-        public RecordOverflowException(String s) {
-            super(s);
+        /**
+         * Constructor
+         *
+         * @param message error message
+         */
+        public RecordOverflowException(String message) {
+            super(message);
         }
     }
 
@@ -55,12 +72,26 @@ public class FixError {
     public static class RecordUnderflowException extends RuntimeException {
         private static final long serialVersionUID = 1L;
 
-        public RecordUnderflowException(String s) {
-            super(s);
+        /**
+         * Constructor
+         *
+         * @param message error message
+         */
+        public RecordUnderflowException(String message) {
+            super(message);
         }
     }
 
+    /**
+     * Exception thrown if the value of field is not all ascii chars
+     */
     public static class NotAsciiException extends SetterException {
+        /**
+         * Constructor
+         *
+         * @param c offending char
+         * @param u relative char offset
+         */
         public NotAsciiException(char c, int u) {
             super(c, u);
         }
@@ -107,45 +138,109 @@ public class FixError {
 
     }
 
+    /**
+     * Exception thrown if the value of field is not all latin1 chars
+     */
     public static class NotLatinException extends SetterException {
+        /**
+         * Constructor
+         *
+         * @param c offending char
+         * @param u relative char offset
+         */
         public NotLatinException(int c, int u) {
             super(c, u);
         }
     }
 
+    /**
+     * Exception thrown if the value of field is not all valid UTF-8 chars
+     */
     public static class NotValidException extends SetterException {
+        /**
+         * Constructor
+         *
+         * @param c offending char
+         * @param u relative char offset
+         */
         public NotValidException(char c, int u) {
             super(c, u);
         }
     }
 
+    /**
+     * Exception thrown if the value of field is not all digit chars
+     */
     public static class NotDigitException extends SetterException {
+        /**
+         * Constructor
+         *
+         * @param c offending char
+         * @param u relative char offset
+         */
         public NotDigitException(char c, int u) {
             super(c, u);
         }
     }
 
+    /**
+     * Exception thrown if the value of field is not all SPACE chars
+     */
     public static class NotBlankException extends SetterException {
+        /**
+         * Constructor
+         *
+         * @param c offending char
+         * @param u relative char offset
+         */
         public NotBlankException(char c, int u) {
             super(c, u);
         }
     }
 
+    /**
+     * Exception thrown if the value of field is not in permitted domain
+     */
     public static class NotDomainException extends SetterException {
-        public NotDomainException(String value) {
+        /**
+         * Constructor
+         *
+         * @param value offending value
+         */
+        public NotDomainException(String value) {   // setter
             super(value);
         }
 
-        public NotDomainException(int offset, String value) {
+        /**
+         * Constructor
+         *
+         * @param offset field offset
+         * @param value  offending value
+         */
+        public NotDomainException(int offset, String value) {   // getter
             super(value, offset);
         }
     }
 
+    /**
+     * Exception thrown if the value of field does not match permitted regular expression pattern
+     */
     public static class NotMatchesException extends SetterException {
+        /**
+         * Constructor
+         *
+         * @param value offending value
+         */
         public NotMatchesException(String value) {
             super(value);
         }
 
+        /**
+         * Constructor
+         *
+         * @param offset field offset
+         * @param value  offending value
+         */
         public NotMatchesException(int offset, String value) {
             super(value, offset);
         }

@@ -17,6 +17,7 @@ class TestFields {
     }
     @Test
     void testAbc() {
+        FixError.failFirst();
 
         foo.setAlpha01("A");
         Assertions.assertEquals("A         ", foo.getAlpha01(), "test align/pad");

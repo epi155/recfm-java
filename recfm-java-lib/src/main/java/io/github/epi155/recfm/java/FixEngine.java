@@ -6,19 +6,36 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static io.github.epi155.recfm.java.FixError.FAIL_FIRST;
+import static io.github.epi155.recfm.java.FixError.failFirst;
 
 abstract class FixEngine {
     private static final String FIELD_AT = "Field @";
     private static final String EXPECTED = " expected ";
     private static final String CHARS_FOUND = " chars , found ";
+    private static final String CHARS_FOUND_NULL = " chars , found [NULL]";
     private static final String RECORD_LENGTH = "Record length ";
+    /**
+     * record store area
+     */
     protected final char[] rawData;
 
+    /**
+     * Raw constructor
+     *
+     * @param length record length
+     */
     protected FixEngine(int length) {
         this.rawData = new char[length];
     }
 
+    /**
+     * Copy constructor
+     *
+     * @param c              char array source
+     * @param lrec           record length to be copied
+     * @param overflowError  overflow behaviour
+     * @param underflowError underflow behaviour
+     */
     protected FixEngine(char[] c, int lrec, boolean overflowError, boolean underflowError) {
         if (c.length == lrec) {
             rawData = c;
@@ -35,26 +52,13 @@ abstract class FixEngine {
         }
     }
 
-    private static boolean isBlank(final CharSequence cs) {
-        final int strLen = cs == null ? 0 : cs.length();
-        if (strLen == 0) {
-            return true;
-        }
-        for (int i = 0; i < strLen; i++) {
-            if (!Character.isWhitespace(cs.charAt(i))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    protected abstract void initialize();
-
-    protected String getAbc(int offset, int count) {
-        return new String(rawData, offset, count);
-    }
-
-    protected static void testDigit(String value) {
+    /**
+     * Check that the supplied string is of digits only
+     *
+     * @param value string to be checked
+     * @throws io.github.epi155.recfm.java.FixError.NotDigitException when check fails
+     */
+    protected static void testDigit(String value) { // setter
         if (value == null) return;
         char[] raw = value.toCharArray();
         for (int u = 0; u < raw.length; u++) {
@@ -65,11 +69,13 @@ abstract class FixEngine {
         }
     }
 
-    protected String spaceNull(String s) {
-        return isBlank(s) ? null : s;
-    }
-
-    protected static void testAscii(String value) {
+    /**
+     * Check that the supplied string is of ascii char only
+     *
+     * @param value string to be checked
+     * @throws io.github.epi155.recfm.java.FixError.NotAsciiException when check fails
+     */
+    protected static void testAscii(String value) { // setter
         if (value == null) return;
         char[] raw = value.toCharArray();
         for (int u = 0; u < raw.length; u++) {
@@ -80,7 +86,13 @@ abstract class FixEngine {
         }
     }
 
-    protected static void testLatin(String value) {
+    /**
+     * Check that the supplied string is of latin1 char only
+     *
+     * @param value string to be checked
+     * @throws io.github.epi155.recfm.java.FixError.NotLatinException when check fails
+     */
+    protected static void testLatin(String value) { // setter
         if (value == null) return;
         char[] raw = value.toCharArray();
         for (int u = 0; u < raw.length; u++) {
@@ -91,7 +103,13 @@ abstract class FixEngine {
         }
     }
 
-    protected static void testValid(String value) {
+    /**
+     * Check that the supplied string is of valid UTF-8 char only
+     *
+     * @param value string to be checked
+     * @throws io.github.epi155.recfm.java.FixError.NotValidException when check fails
+     */
+    protected static void testValid(String value) { // setter
         if (value == null) return;
         char[] raw = value.toCharArray();
         for (int u = 0; u < raw.length; u++) {
@@ -102,17 +120,190 @@ abstract class FixEngine {
         }
     }
 
-    protected static void testArray(String value, String[] domain) {
+    /**
+     * Check that the supplied string is all digits or al SPACE char only
+     *
+     * @param value string to be checked
+     * @throws io.github.epi155.recfm.java.FixError.NotBlankException when first char is space but not all SPACES
+     * @throws io.github.epi155.recfm.java.FixError.NotDigitException when not all digits
+     */
+    protected static void testDigitBlank(String value) {    // setter
+        if (value == null) return;
+        char[] raw = value.toCharArray();
+        if (raw[0] == ' ') {
+            for (int u = 1; u < raw.length; u++) {
+                char c = raw[u];
+                if (c != ' ') {
+                    throw new FixError.NotBlankException(c, u + 1);
+                }
+            }
+        } else {
+            for (int u = 0; u < raw.length; u++) {
+                char c = raw[u];
+                if (!('0' <= c && c <= '9')) {
+                    throw new FixError.NotDigitException(c, u + 1);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check that the supplied string is in permitted domain
+     *
+     * @param value  string to be checked
+     * @param domain string array with permitted domain
+     * @throws io.github.epi155.recfm.java.FixError.NotDomainException when check fails
+     */
+    protected static void testArray(String value, String[] domain) {    // setter
         if (value == null) return;
         if (Arrays.binarySearch(domain, value) < 0)
             throw new FixError.NotDomainException(value);
     }
 
-    protected static void testRegex(String value, Pattern pattern) {
+    /**
+     * Check that the supplied string matches regular expression
+     *
+     * @param value   string to be checked
+     * @param pattern regular expression pattern
+     * @throws io.github.epi155.recfm.java.FixError.NotMatchesException when check fails
+     */
+    protected static void testRegex(String value, Pattern pattern) {    // setter
         if (value == null) return;
         Matcher matcher = pattern.matcher(value);
         if (!matcher.matches())
             throw new FixError.NotMatchesException(value);
+    }
+
+    /**
+     * String value normalizer
+     *
+     * @param s               original value
+     * @param overflowAction  overflow behaviour
+     * @param underflowAction underflow behaviour
+     * @param pad             padding char
+     * @param init            initialize char
+     * @param offset          field offset
+     * @param length          field length
+     * @return normalized value
+     */
+    protected static String normalize(String s,
+                                      OverflowAction overflowAction,
+                                      UnderflowAction underflowAction,
+                                      char pad, char init,
+                                      int offset, int length) {
+        if (s == null) {
+            if (underflowAction == UnderflowAction.Error)
+                throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND_NULL);
+            return fill(length, init);
+        } else if (s.length() == length)
+            return s;
+        else if (s.length() < length) {
+            switch (underflowAction) {
+                case PadR:
+                    return rpad(s, length, pad);
+                case PadL:
+                    return lpad(s, length, pad);
+                case Error:
+                    throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND + s.length());
+            }
+        } else switch (overflowAction) {
+            case TruncR:
+                return rtrunc(s, length);
+            case TruncL:
+                return ltrunc(s, length);
+            case Error:
+                throw new FixError.FieldOverFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND + s.length());
+        }
+        return null; // dear branch (?)
+    }
+
+    private static String fill(int t, char pad) {
+        return CharBuffer.allocate(t).toString().replace('\0', pad);
+    }
+
+    private static String rpad(String s, int t, char pad) {
+        int len = s.length();
+        if (len > t) return s.substring(0, t);
+        if (len == t) return s;
+        return s + CharBuffer.allocate(t - len).toString().replace('\0', pad);
+    }
+
+    /**
+     * Number formatting factory
+     *
+     * @param digits number digit length
+     * @return {@link NumberFormat} instance
+     */
+    protected static NumberFormat pic9(int digits) {
+        NumberFormat nf = NumberFormat.getInstance();
+        nf.setMinimumIntegerDigits(digits);
+        nf.setGroupingUsed(false);
+        return nf;
+    }
+
+    private static String ltrunc(String s, int t) {
+        int len = s.length();
+        return (len > t) ? s.substring(len - t) : s;
+    }
+
+    private static String lpad(String s, int t, char pad) {
+        int len = s.length();
+        if (len > t) return s.substring(len - t);
+        if (len == t) return s;
+        return CharBuffer.allocate(t - len).toString().replace('\0', pad) + s;
+    }
+
+    private static String rtrunc(String s, int t) {
+        int len = s.length();
+        return (len > t) ? s.substring(0, t) : s;
+    }
+
+    /**
+     * Initialize the fields of the record
+     */
+    protected abstract void initialize();
+
+    /**
+     * Alphanumeric getter
+     *
+     * @param offset field offset
+     * @param length field length
+     * @return field value
+     */
+    protected String getAbc(int offset, int length) {
+        return new String(rawData, offset, length);
+    }
+
+    /**
+     * Check that the record field is of digits only
+     *
+     * @param offset field offset
+     * @param length field length
+     * @throws io.github.epi155.recfm.java.FixError.NotDigitException when check fails
+     */
+    protected void testDigit(int offset, int length) {  // getter
+        for (int u = offset, v = 0; v < length; u++, v++) {
+            char c = rawData[u];
+            if (!('0' <= c && c <= '9')) {
+                throw new FixError.NotDigitException(c, u + 1);
+            }
+        }
+    }
+
+    /**
+     * Check that the record field is of ascii char only
+     *
+     * @param offset field offset
+     * @param length field length
+     * @throws io.github.epi155.recfm.java.FixError.NotAsciiException when check fails
+     */
+    protected void testAscii(int offset, int length) {  // getter
+        for (int u = offset, v = 0; v < length; u++, v++) {
+            char c = rawData[u];
+            if (!(32 <= c && c <= 127)) {
+                throw new FixError.NotAsciiException(c, u + 1);
+            }
+        }
     }
 
     private void fillChar(int offset, int count, char fill) {
@@ -121,51 +312,35 @@ abstract class FixEngine {
         }
     }
 
-    protected static String normalize(String s,
-                                      OverflowAction overflowAction,
-                                      UnderflowAction underflowAction,
-                                      char pad, char init,
-                                      int offset, int count) {
-        if (s == null) {
-            if (underflowAction == UnderflowAction.Error)
-                throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + count + CHARS_FOUND + " null");
-            return fill(count, init);
-        } else if (s.length() == count)
-            return s;
-        else if (s.length() < count) {
-            switch (underflowAction) {
-                case PadR:
-                    return rpad(s, count, pad);
-                case PadL:
-                    return lpad(s, count, pad);
-                case Error:
-                    throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + count + CHARS_FOUND + s.length());
+    /**
+     * Check that the record field is of latin1 char only
+     *
+     * @param offset field offset
+     * @param length field length
+     * @throws io.github.epi155.recfm.java.FixError.NotAsciiException when check fails
+     */
+    protected void testLatin(int offset, int length) {  // getter
+        for (int u = offset, v = 0; v < length; u++, v++) {
+            int c = rawData[u];
+            if (!(32 <= c && c < 127) && !(160 <= c && c <= 255)) {
+                throw new FixError.NotLatinException(c, u + 1);
             }
-        } else switch (overflowAction) {
-            case TruncR:
-                return rtrunc(s, count);
-            case TruncL:
-                return ltrunc(s, count);
-            case Error:
-                throw new FixError.FieldOverFlowException(FIELD_AT + offset + EXPECTED + count + CHARS_FOUND + s.length());
         }
-        return null; // dear branch (?)
     }
 
-    private static String fill(int t, char pad) {
-        return CharBuffer.allocate( t ).toString().replace( '\0', pad );
-    }
-
-    private static String rpad(String s, int t, char pad) {
-        int len = s.length();
-        if (len > t) return s.substring(0, t);
-        if (len == t) return s;
-        return s + CharBuffer.allocate( t-len ).toString().replace( '\0', pad );
-    }
-
-    protected void fill(int offset, int count, char c) {
-        for (int u = offset, v = 0; v < count; u++, v++) {
-            rawData[u] = c;
+    /**
+     * Check that the record field is of valid UTF-8 char only
+     *
+     * @param offset field offset
+     * @param length field length
+     * @throws io.github.epi155.recfm.java.FixError.NotValidException when check fails
+     */
+    protected void testValid(int offset, int length) {  // getter
+        for (int u = offset, v = 0; v < length; u++, v++) {
+            char c = rawData[u];
+            if (Character.isISOControl(c) || !Character.isDefined(c)) {
+                throw new FixError.NotValidException(c, u + 1);
+            }
         }
     }
 
@@ -181,109 +356,128 @@ abstract class FixEngine {
         }
     }
 
-    protected NumberFormat pic9(int digits) {
-        NumberFormat nf = NumberFormat.getInstance();
-        nf.setMinimumIntegerDigits(digits);
-        nf.setGroupingUsed(false);
-        return nf;
+    /**
+     * Check that the record field is all digits or al SPACE char only
+     *
+     * @param offset field offset
+     * @param length field length
+     * @throws io.github.epi155.recfm.java.FixError.NotBlankException when first char is space but not all SPACES
+     * @throws io.github.epi155.recfm.java.FixError.NotDigitException when not all digits
+     */
+    protected void testDigitBlank(int offset, int length) { // getter
+        char c = rawData[offset];
+        if (c == ' ') {
+            for (int u = offset + 1, v = 1; v < length; u++, v++) {
+                if (rawData[u] != ' ') {
+                    throw new FixError.NotBlankException(c, u + 1);
+                }
+            }
+        } else {
+            for (int u = offset, v = 0; v < length; u++, v++) {
+                c = rawData[u];
+                if (!('0' <= c && c <= '9')) {
+                    throw new FixError.NotDigitException(c, u + 1);
+                }
+            }
+        }
     }
 
+    /**
+     * Check that the record field is in permitted domain
+     *
+     * @param offset field offset
+     * @param length field length
+     * @param domain string array with permitted domain
+     * @throws io.github.epi155.recfm.java.FixError.NotDomainException when check fails
+     */
+    protected void testArray(int offset, int length, String[] domain) {  // getter
+        String value = getAbc(offset, length);
+        if (Arrays.binarySearch(domain, value) < 0)
+            throw new FixError.NotDomainException(offset + 1, value);
+    }
+
+    /**
+     * Check that the record field matches regular expression
+     *
+     * @param offset  field offset
+     * @param length  field length
+     * @param pattern regular expression pattern
+     * @throws io.github.epi155.recfm.java.FixError.NotMatchesException when check fails
+     */
+    protected void testRegex(int offset, int length, Pattern pattern) {  // getter
+        String value = getAbc(offset, length);
+        Matcher matcher = pattern.matcher(value);
+        if (!matcher.matches())
+            throw new FixError.NotMatchesException(offset + 1, value);
+    }
+
+    /**
+     * Record filler
+     *
+     * @param offset record (field) offset
+     * @param length record (field) length
+     * @param c      fill char
+     */
+    protected void fill(int offset, int length, char c) {
+        for (int u = offset, v = 0; v < length; u++, v++) {
+            rawData[u] = c;
+        }
+    }
+
+    /**
+     * Encode current record to string
+     *
+     * @return string serialization of this record
+     */
     public String encode() {
         return new String(rawData);
     }
 
     /**
-     * Valida tutti i campi
+     * Validate all fields
      *
-     * @param handler gestore errore
-     * @return <b>true</b> in caso di errore, <b>false</b> in assenza di errori
+     * @param handler error handler
+     * @return <b>true</b> if there is an error, <b>false</b> if there are no errors
      */
-    public boolean validateFails(FieldValidateHandler handler) {
-        return validateFields(handler);
-    }
+    public abstract boolean validateFails(FieldValidateHandler handler);
 
     /**
-     * Valida i campi marcati con <i>audit</i>: <b>true</b>
+     * Validate fields marked with <i>audit</i>: <b>true</b>
      *
-     * @param handler gestore errore
-     * @return <b>true</b> in caso di errore, <b>false</b> in assenza di errori
+     * @param handler error handler
+     * @return <b>true</b> if there is an error, <b>false</b> if there are no errors
      */
-    public boolean auditFails(FieldValidateHandler handler) {
-        return auditFields(handler);
-    }
+    public abstract boolean auditFails(FieldValidateHandler handler);
 
-    protected abstract boolean validateFields(FieldValidateHandler handler);
-
-    protected abstract boolean auditFields(FieldValidateHandler handler);
-
-    protected boolean checkDigit(String name, int offset, int count, FieldValidateHandler handler) {
+    /**
+     * Check that the record field is of digits only
+     *
+     * @param name    field name
+     * @param offset  field offset
+     * @param length  field length
+     * @param handler error handler
+     * @return <b>true</b> if there is an error, <b>false</b> if there are no errors
+     */
+    protected boolean checkDigit(String name, int offset, int length, FieldValidateHandler handler) {
         boolean fault = false;
-        for (int u = offset, v = 0; v < count; u++, v++) {
+        for (int u = offset, v = 0; v < length; u++, v++) {
             char c = rawData[u];
             if (!('0' <= c && c <= '9')) {
                 handler.error(FixError.Detail
-                        .builder()
-                        .name(name)
-                        .offset(offset)
-                        .length(count)
-                        .value(getAbc(offset, count))
-                        .column(u)
-                        .code(ValidateError.NotNumber)
-                        .wrong(c)
-                        .build());
-                if (FAIL_FIRST) return true; else fault = true;
+                    .builder()
+                    .name(name)
+                    .offset(offset)
+                    .length(length)
+                    .value(getAbc(offset, length))
+                    .column(u)
+                    .code(ValidateError.NotNumber)
+                    .wrong(c)
+                    .build());
+                if (failFirst) return true;
+                else fault = true;
             }
         }
         return fault;
-    }
-
-    protected boolean checkDigitBlank(String name, int offset, int count, FieldValidateHandler handler) {
-        boolean fault = false;
-        char c = rawData[offset];
-        if (c == ' ') {
-            for (int u = offset + 1, v = 1; v < count; u++, v++) {
-                if (rawData[u] != ' ') {
-                    handler.error(FixError.Detail
-                            .builder()
-                            .name(name)
-                            .offset(offset)
-                            .length(count)
-                            .value(getAbc(offset, count))
-                            .column(u)
-                            .code(ValidateError.NotBlank)  // ??
-                            .wrong(c)
-                            .build());
-                    if (FAIL_FIRST) return true; else fault = true;
-                }
-            }
-        } else if ('0' <= c && c <= '9') {
-            for (int u = offset + 1, v = 1; v < count; u++, v++) {
-                c = rawData[u];
-                if (!('0' <= c && c <= '9')) {
-                    handler.error(FixError.Detail
-                            .builder()
-                            .name(name)
-                            .offset(offset)
-                            .length(count)
-                            .value(getAbc(offset, count))
-                            .column(u)
-                            .code(ValidateError.NotNumber)
-                            .wrong(c)
-                            .build());
-                    if (FAIL_FIRST) return true; else fault = true;
-                }
-            }
-        } else {
-            return true;
-        }
-        return fault;
-    }
-
-    private static String lpad(String s, int t, char pad) {
-        int len = s.length();
-        if (len > t) return s.substring(len-t);
-        if (len == t) return s;
-        return CharBuffer.allocate( t-len ).toString().replace( '\0', pad ) + s;
     }
 
     private void padToLeft(String s, int offset, int count, char c) {
@@ -297,26 +491,65 @@ abstract class FixEngine {
         }
     }
 
-    private static String rtrunc(String s, int t) {
-        int len = s.length();
-        return (len > t) ? s.substring(0, t) : s;
+    /**
+     * Check that the record field is of digits only or SPACE only
+     *
+     * @param name    field name
+     * @param offset  field offset
+     * @param length  field length
+     * @param handler error handler
+     * @return <b>true</b> if there is an error, <b>false</b> if there are no errors
+     */
+    protected boolean checkDigitBlank(String name, int offset, int length, FieldValidateHandler handler) {
+        char c = rawData[offset];
+        if (c == ' ') {
+            return checkAllSpace(name, offset, length, handler);
+        } else if ('0' <= c && c <= '9') {
+            return checkAllDigit(name, offset, length, handler);
+        } else {
+            return true;
+        }
     }
-    protected boolean checkAscii(String name, int offset, int count, FieldValidateHandler handler) {
+
+    private boolean checkAllSpace(String name, int offset, int length, FieldValidateHandler handler) {
         boolean fault = false;
-        for (int u = offset, v = 0; v < count; u++, v++) {
+        for (int u = offset + 1, v = 1; v < length; u++, v++) {
             char c = rawData[u];
-            if (!(32 <= c && c < 127)) {
+            if (c != ' ') {
                 handler.error(FixError.Detail
-                        .builder()
-                        .name(name)
-                        .offset(offset)
-                        .length(count)
-                        .value(getAbc(offset, count))
-                        .column(u)
-                        .code(ValidateError.NotAscii)
-                        .wrong(c)
-                        .build());
-                if (FAIL_FIRST) return true; else fault = true;
+                    .builder()
+                    .name(name)
+                    .offset(offset)
+                    .length(length)
+                    .value(getAbc(offset, length))
+                    .column(u)
+                    .code(ValidateError.NotBlank)  // ??
+                    .wrong(c)
+                    .build());
+                if (failFirst) return true;
+                else fault = true;
+            }
+        }
+        return fault;
+    }
+
+    private boolean checkAllDigit(String name, int offset, int length, FieldValidateHandler handler) {
+        boolean fault = false;
+        for (int u = offset + 1, v = 1; v < length; u++, v++) {
+            char c = rawData[u];
+            if (!('0' <= c && c <= '9')) {
+                handler.error(FixError.Detail
+                    .builder()
+                    .name(name)
+                    .offset(offset)
+                    .length(length)
+                    .value(getAbc(offset, length))
+                    .column(u)
+                    .code(ValidateError.NotNumber)
+                    .wrong(c)
+                    .build());
+                if (failFirst) return true;
+                else fault = true;
             }
         }
         return fault;
@@ -339,14 +572,54 @@ abstract class FixEngine {
         }
     }
 
-    protected boolean checkEqual(int offset, int count, FieldValidateHandler handler, String value) {
+    /**
+     * Check that the record field is of ascii char only
+     *
+     * @param name    field name
+     * @param offset  field offset
+     * @param length  field length
+     * @param handler error handler
+     * @return <b>true</b> if there is an error, <b>false</b> if there are no errors
+     */
+    protected boolean checkAscii(String name, int offset, int length, FieldValidateHandler handler) {
         boolean fault = false;
-        if (! getAbc(offset, count).equals(value)) {
+        for (int u = offset, v = 0; v < length; u++, v++) {
+            char c = rawData[u];
+            if (!(32 <= c && c < 127)) {
+                handler.error(FixError.Detail
+                    .builder()
+                    .name(name)
+                    .offset(offset)
+                    .length(length)
+                    .value(getAbc(offset, length))
+                    .column(u)
+                    .code(ValidateError.NotAscii)
+                    .wrong(c)
+                    .build());
+                if (failFirst) return true;
+                else fault = true;
+            }
+        }
+        return fault;
+    }
+
+    /**
+     * Check that the record field matches expected value
+     *
+     * @param offset  field offset
+     * @param length  field length
+     * @param handler error handler
+     * @param value   expected value
+     * @return <b>true</b> if there is an error, <b>false</b> if there are no errors
+     */
+    protected boolean checkEqual(int offset, int length, FieldValidateHandler handler, String value) {
+        boolean fault = false;
+        if (!getAbc(offset, length).equals(value)) {
             handler.error(FixError.Detail
                 .builder()
                 .offset(offset)
-                .length(count)
-                .value(getAbc(offset, count))
+                .length(length)
+                .value(getAbc(offset, length))
                 .code(ValidateError.NotEqual)
                 .build());
             return true;
@@ -354,141 +627,95 @@ abstract class FixEngine {
         return fault;
     }
 
-    protected void testDigit(int offset, int count) {
-        for (int u = offset, v = 0; v < count; u++, v++) {
-            char c = rawData[u];
-            if (!('0' <= c && c <= '9')) {
-                throw new FixError.NotDigitException(c, u + 1);
-            }
-        }
-    }
-
-    protected boolean checkLatin(String name, int offset, int count, FieldValidateHandler handler) {
+    /**
+     * Validate alphanumeric latin1 field type
+     *
+     * @param name    field name
+     * @param offset  field offset
+     * @param length  field length
+     * @param handler error handler
+     * @return <b>true</b> if there is an error, <b>false</b> if there are no errors
+     */
+    protected boolean checkLatin(String name, int offset, int length, FieldValidateHandler handler) {
         boolean fault = false;
-        for (int u = offset, v = 0; v < count; u++, v++) {
+        for (int u = offset, v = 0; v < length; u++, v++) {
             char c = rawData[u];
             if (!(32 <= c && c < 127) && !(160 <= c && c <= 255)) {
                 handler.error(FixError.Detail
-                        .builder()
-                        .name(name)
-                        .offset(offset)
-                        .length(count)
-                        .value(getAbc(offset, count))
-                        .column(u)
-                        .code(ValidateError.NotLatin)
-                        .wrong(c)
-                        .build());
-                if (FAIL_FIRST) return true; else fault = true;
+                    .builder()
+                    .name(name)
+                    .offset(offset)
+                    .length(length)
+                    .value(getAbc(offset, length))
+                    .column(u)
+                    .code(ValidateError.NotLatin)
+                    .wrong(c)
+                    .build());
+                if (failFirst) return true;
+                else fault = true;
             }
         }
         return fault;
     }
 
-    protected void testAscii(int offset, int count) {
-        for (int u = offset, v = 0; v < count; u++, v++) {
-            char c = rawData[u];
-            if (!(32 <= c && c <= 127)) {
-                throw new FixError.NotAsciiException(c, u + 1);
-            }
-        }
-    }
-
-    protected void fill(int offset, int count, String s) {
-        if (s.length() == count)
+    /**
+     * Initialize constant field value
+     *
+     * @param offset field offset
+     * @param length field length
+     * @param s      initialize string constant
+     */
+    protected void fill(int offset, int length, String s) {
+        if (s.length() == length)
             setAsIs(s, offset);
-        else if (s.length() < count) {
-            throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + count + CHARS_FOUND + s.length());
+        else if (s.length() < length) {
+            throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND + s.length());
         } else {
-            throw new FixError.FieldOverFlowException(FIELD_AT + offset + EXPECTED + count + CHARS_FOUND + s.length());
+            throw new FixError.FieldOverFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND + s.length());
         }
     }
 
-    protected void testLatin(int offset, int count) {
-        for (int u = offset, v = 0; v < count; u++, v++) {
-            int c = rawData[u];
-            if (!(32 <= c && c < 127) && !(160 <= c && c <= 255)) {
-                throw new FixError.NotLatinException(c, u + 1);
-            }
-        }
-    }
-
-    protected void testValid(int offset, int count) {
-        for (int u = offset, v = 0; v < count; u++, v++) {
-            char c = rawData[u];
-            if (Character.isISOControl(c) || !Character.isDefined(c)) {
-                throw new FixError.NotValidException(c, u + 1);
-            }
-        }
-    }
-
-    private static String ltrunc(String s, int t) {
-        int len = s.length();
-        return (len > t) ? s.substring(len-t) : s;
-    }
-
-    protected boolean checkValid(String name, int offset, int count, FieldValidateHandler handler) {
+    /**
+     * Validate an alphanumeric UTF-8 field
+     *
+     * @param name    field name
+     * @param offset  field offset
+     * @param length  field length
+     * @param handler error handler
+     * @return <b>true</b> if there is an error, <b>false</b> if there are no errors
+     */
+    protected boolean checkValid(String name, int offset, int length, FieldValidateHandler handler) {
         boolean fault = false;
-        for (int u = offset, v = 0; v < count; u++, v++) {
+        for (int u = offset, v = 0; v < length; u++, v++) {
             char c = rawData[u];
             if (!Character.isDefined(c) || Character.isISOControl(c)) {
                 handler.error(FixError.Detail
-                        .builder()
-                        .name(name)
-                        .offset(offset)
-                        .length(count)
-                        .value(getAbc(offset, count))
-                        .column(u)
-                        .code(ValidateError.NotValid)
-                        .wrong(c)
-                        .build());
-                if (FAIL_FIRST) return true; else fault = true;
+                    .builder()
+                    .name(name)
+                    .offset(offset)
+                    .length(length)
+                    .value(getAbc(offset, length))
+                    .column(u)
+                    .code(ValidateError.NotValid)
+                    .wrong(c)
+                    .build());
+                if (failFirst) return true;
+                else fault = true;
             }
         }
         return fault;
     }
 
-    protected static void testDigitBlank(String value) {
-        if (value == null) return;
-        char[] raw = value.toCharArray();
-        if (raw[0] == ' ') {
-            for (int u = 1; u < raw.length; u++) {
-                char c = raw[u];
-                if (c != ' ') {
-                    throw new FixError.NotBlankException(c, u + 1);
-                }
-            }
-        } else {
-            for (int u = 0; u < raw.length; u++) {
-                char c = raw[u];
-                if (!('0' <= c && c <= '9')) {
-                    throw new FixError.NotDigitException(c, u + 1);
-                }
-            }
-        }
-    }
-
-    protected void testDigitBlank(int offset, int count) {
-        char c = rawData[offset];
-        if (c == ' ') {
-            for (int u = offset + 1, v = 1; v < count; u++, v++) {
-                if (rawData[u] != ' ') {
-                    throw new FixError.NotBlankException(c, u + 1);
-                }
-            }
-        } else {
-            for (int u = offset, v = 0; v < count; u++, v++) {
-                c = rawData[u];
-                if (!('0' <= c && c <= '9')) {
-                    throw new FixError.NotDigitException(c, u + 1);
-                }
-            }
-        }
-    }
-
-
-    protected String dump(int offset, int count) {
+    /**
+     * Dump field value
+     *
+     * @param offset field offset
+     * @param length field length
+     * @return field dump value
+     */
+    protected String dump(int offset, int length) {
         StringBuilder sb = new StringBuilder();
-        for (int k = 0; k < count; k++) {
+        for (int k = 0; k < length; k++) {
             char c = rawData[offset + k];
             if (c <= 32) {
                 c = (char) (0x2400 + c);
@@ -500,120 +727,154 @@ abstract class FixEngine {
         return sb.toString();
     }
 
-    protected void setAbc(String s, int offset, int count) {
+    /**
+     * Set alphanumeric field value
+     *
+     * @param s      field value
+     * @param offset field offset
+     * @param length field length
+     */
+    protected void setAbc(String s, int offset, int length) {
         if (s == null) {
-            throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + count + CHARS_FOUND + " null");
-        } else if (s.length() == count)
+            throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND_NULL);
+        } else if (s.length() == length)
             setAsIs(s, offset);
-        else if (s.length() < count) {
-            throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + count + CHARS_FOUND + s.length());
-        } else  {
-            throw new FixError.FieldOverFlowException(FIELD_AT + offset + EXPECTED + count + CHARS_FOUND + s.length());
+        else if (s.length() < length) {
+            throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND + s.length());
+        } else {
+            throw new FixError.FieldOverFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND + s.length());
         }
     }
 
-    protected void setAbc(String s, int offset, int count, OverflowAction overflowAction, UnderflowAction underflowAction, char pad, char init) {
+    /**
+     * Set alphanumeric field value
+     *
+     * @param s               field value
+     * @param offset          field offset
+     * @param length          field length
+     * @param overflowAction  overflow behaviour
+     * @param underflowAction underflow behaviour
+     * @param pad             padding char
+     * @param init            initialize char
+     */
+    protected void setAbc(String s, int offset, int length, OverflowAction overflowAction, UnderflowAction underflowAction, char pad, char init) {
         if (s == null) {
             if (underflowAction == UnderflowAction.Error)
-                throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + count + CHARS_FOUND + " null");
-            fillChar(offset, count, init);
-        } else if (s.length() == count)
+                throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND_NULL);
+            fillChar(offset, length, init);
+        } else if (s.length() == length)
             setAsIs(s, offset);
-        else if (s.length() < count) {
+        else if (s.length() < length) {
             switch (underflowAction) {
                 case PadR:
-                    padToRight(s, offset, count, pad);
+                    padToRight(s, offset, length, pad);
                     break;
                 case PadL:
-                    padToLeft(s, offset, count, pad);
+                    padToLeft(s, offset, length, pad);
                     break;
                 case Error:
-                    throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + count + CHARS_FOUND + s.length());
+                    throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND + s.length());
             }
         } else switch (overflowAction) {
             case TruncR:
-                truncRight(s, offset, count);
+                truncRight(s, offset, length);
                 break;
             case TruncL:
-                truncLeft(s, offset, count);
+                truncLeft(s, offset, length);
                 break;
             case Error:
-                throw new FixError.FieldOverFlowException(FIELD_AT + offset + EXPECTED + count + CHARS_FOUND + s.length());
+                throw new FixError.FieldOverFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND + s.length());
         }
     }
 
-    protected void setNum(String s, int offset, int count, OverflowAction ovfl, UnderflowAction unfl, char fill) {
+    /**
+     * Set numeric field value
+     *
+     * @param s               field value
+     * @param offset          field offset
+     * @param length          field length
+     * @param overflowAction  overflow behaviour
+     * @param underflowAction underflow behaviour
+     */
+    protected void setNum(String s, int offset, int length, OverflowAction overflowAction, UnderflowAction underflowAction) {
         if (s == null) {
-            if (unfl == UnderflowAction.Error)
-                throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + count + CHARS_FOUND + " null");
-            fillChar(offset, count, fill);
-        } else if (s.length() == count)
+            if (underflowAction == UnderflowAction.Error)
+                throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND_NULL);
+            fillChar(offset, length, '0');
+        } else if (s.length() == length)
             setAsIs(s, offset);
-        else if (s.length() < count) {
-            switch (unfl) {
+        else if (s.length() < length) {
+            switch (underflowAction) {
                 case PadR:
-                    padToRight(s, offset, count, '0');
+                    padToRight(s, offset, length, '0');
                     break;
                 case PadL:
-                    padToLeft(s, offset, count, '0');
+                    padToLeft(s, offset, length, '0');
                     break;
                 case Error:
-                    throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + count + CHARS_FOUND + s.length());
+                    throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND + s.length());
             }
-        } else switch (ovfl) {
+        } else switch (overflowAction) {
             case TruncR:
-                truncRight(s, offset, count);
+                truncRight(s, offset, length);
                 break;
             case TruncL:
-                truncLeft(s, offset, count);
+                truncLeft(s, offset, length);
                 break;
             case Error:
-                throw new FixError.FieldOverFlowException(FIELD_AT + offset + EXPECTED + count + CHARS_FOUND + s.length());
+                throw new FixError.FieldOverFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND + s.length());
         }
     }
 
-    protected boolean checkArray(String name, int offset, int count, FieldValidateHandler handler, String[] domain) {
-        if (Arrays.binarySearch(domain, getAbc(offset, count)) < 0) {
+    /**
+     * Validate domain field type
+     *
+     * @param name    field name
+     * @param offset  field offset
+     * @param length  field length
+     * @param handler error handler
+     * @param domain  domain values
+     * @return <b>true</b> if value not in domain, <b>false</b> if value in domain
+     */
+    protected boolean checkArray(String name, int offset, int length, FieldValidateHandler handler, String[] domain) {
+        if (Arrays.binarySearch(domain, getAbc(offset, length)) < 0) {
             handler.error(FixError.Detail
-                    .builder()
-                    .name(name)
-                    .offset(offset)
-                    .length(count)
-                    .value(getAbc(offset, count))
-                    .code(ValidateError.NotDomain)
-                    .build());
+                .builder()
+                .name(name)
+                .offset(offset)
+                .length(length)
+                .value(getAbc(offset, length))
+                .code(ValidateError.NotDomain)
+                .build());
             return true;
         }
         return false;
     }
 
-    protected boolean checkRegex(String name, int offset, int count, FieldValidateHandler handler, Pattern pattern) {
-        Matcher matcher = pattern.matcher(getAbc(offset, count));
+    /**
+     * Validate regex field type
+     *
+     * @param name    field name
+     * @param offset  field offset
+     * @param length  field length
+     * @param handler error handler
+     * @param pattern regular expression pattern
+     * @return <b>true</b> if value does not match, <b>false</b> if value matches
+     */
+    protected boolean checkRegex(String name, int offset, int length, FieldValidateHandler handler, Pattern pattern) {
+        Matcher matcher = pattern.matcher(getAbc(offset, length));
         if (!matcher.matches()) {
             handler.error(FixError.Detail
-                    .builder()
-                    .name(name)
-                    .offset(offset)
-                    .length(count)
-                    .value(getAbc(offset, count))
-                    .code(ValidateError.NotMatch)
-                    .build());
+                .builder()
+                .name(name)
+                .offset(offset)
+                .length(length)
+                .value(getAbc(offset, length))
+                .code(ValidateError.NotMatch)
+                .build());
             return true;
         }
         return false;
-    }
-
-    protected void testArray(int offset, int count, String[] domain) {
-        String value = getAbc(offset, count);
-        if (Arrays.binarySearch(domain, value) < 0)
-            throw new FixError.NotDomainException(offset + 1, value);
-    }
-
-    protected void testRegex(int offset, int count, Pattern pattern) {
-        String value = getAbc(offset, count);
-        Matcher matcher = pattern.matcher(value);
-        if (!matcher.matches())
-            throw new FixError.NotMatchesException(offset + 1, value);
     }
 
     /**

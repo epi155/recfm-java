@@ -1,7 +1,9 @@
 package io.github.epi155.recfm.java.fields;
 
 import io.github.epi155.recfm.type.FieldNum;
-import io.github.epi155.recfm.util.*;
+import io.github.epi155.recfm.util.GenerateArgs;
+import io.github.epi155.recfm.util.IndentPrinter;
+import io.github.epi155.recfm.util.MutableField;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +16,7 @@ import static io.github.epi155.recfm.java.JavaTools.prefixOf;
 
 @Slf4j
 public class Num extends IndentPrinter implements MutableField<FieldNum> {
+    private static final String TEST_DIGIT_CHECK = "    testDigit(%s, %d);%n";
     public Num(PrintWriter pw, IntFunction<String> pos) {
         super(pw, pos);
     }
@@ -52,7 +55,7 @@ public class Num extends IndentPrinter implements MutableField<FieldNum> {
     private void numeric(FieldNum fld, String wrkName, boolean doc) {
         if (doc) docGetter(fld, "string");
         printf("public String get%s() {%n", wrkName);
-        printf("    testDigit(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());
+        printf(TEST_DIGIT_CHECK, pos.apply(fld.getOffset()), fld.getLength());
         printf("    return getAbc(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());
         printf("}%n");
         if (doc) docSetter(fld, "s string");
@@ -65,15 +68,15 @@ public class Num extends IndentPrinter implements MutableField<FieldNum> {
             printf("    testDigit(s);%n");
         }
         val align = fld.getAlign();
-        printf("    setNum(s, %s, %d, OverflowAction.%s, UnderflowAction.%s, '0');%n",
-                pos.apply(fld.getOffset()), fld.getLength(), fld.safeOverflow().of(align), fld.safeUnderflow().of(align));
+        printf("    setNum(s, %s, %d, OverflowAction.%s, UnderflowAction.%s);%n",
+            pos.apply(fld.getOffset()), fld.getLength(), fld.safeOverflow().of(align), fld.safeUnderflow().of(align));
         printf("}%n");
     }
 
     private void useByte(FieldNum fld, String wrkName, boolean doc) {
         if (doc) docGetter(fld, "byte");
         printf("public byte byte%s() {%n", wrkName);
-        printf("    testDigit(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());
+        printf(TEST_DIGIT_CHECK, pos.apply(fld.getOffset()), fld.getLength());
         printf("    return Byte.parseByte(getAbc(%s, %d), 10);%n", pos.apply(fld.getOffset()), fld.getLength());
         printf("}%n");
         if (doc) docSetter(fld, "n byte");
@@ -89,7 +92,7 @@ public class Num extends IndentPrinter implements MutableField<FieldNum> {
     private void useShort(FieldNum fld, String wrkName, boolean doc) {
         if (doc) docGetter(fld, "short");
         printf("public short short%s() {%n", wrkName);
-        printf("    testDigit(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());
+        printf(TEST_DIGIT_CHECK, pos.apply(fld.getOffset()), fld.getLength());
         printf("    return Short.parseShort(getAbc(%s, %d), 10);%n", pos.apply(fld.getOffset()), fld.getLength());
         printf("}%n");
         if (doc) docSetter(fld, "n short");
@@ -100,7 +103,7 @@ public class Num extends IndentPrinter implements MutableField<FieldNum> {
     private void useInt(FieldNum fld, String wrkName, boolean doc) {
         if (doc) docGetter(fld, "integer");
         printf("public int int%s() {%n", wrkName);
-        printf("    testDigit(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());
+        printf(TEST_DIGIT_CHECK, pos.apply(fld.getOffset()), fld.getLength());
         printf("    return Integer.parseInt(getAbc(%s, %d), 10);%n", pos.apply(fld.getOffset()), fld.getLength());
         printf("}%n");
         if (doc) docSetter(fld, "n integer");
@@ -111,7 +114,7 @@ public class Num extends IndentPrinter implements MutableField<FieldNum> {
     private void useLong(FieldNum fld, String wrkName, boolean doc) {
         if (doc) docGetter(fld, "long");
         printf("public long long%s() {%n", wrkName);
-        printf("    testDigit(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());
+        printf(TEST_DIGIT_CHECK, pos.apply(fld.getOffset()), fld.getLength());
         printf("    return Long.parseLong(getAbc(%s, %d), 10);%n", pos.apply(fld.getOffset()), fld.getLength());
         printf("}%n");
         if (doc) docSetter(fld, "n long");

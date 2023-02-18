@@ -24,24 +24,16 @@ public class Domain extends IndentPrinter implements MutableField<FieldDomain>, 
         pushIndent(indent);
         if (ga.doc) docGetter(fld);
         printf("public String get%s() {%n", wrkName);
-        if (ga.getCheck) chkGetter(fld);
+        printf("    testArray(%1$s, %2$d, DOMAIN_AT%3$sPLUS%2$d);%n", pos.apply(fld.getOffset()), fld.getLength(), pos.apply(fld.getOffset() + 1));
         printf("    return getAbc(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());
         printf("}%n");
         if (ga.doc) docSetter(fld);
         printf("public void set%s(String s) {%n", wrkName);
-        if (ga.setCheck) chkSetter(fld);
-        printf("    setAbc(s, %s, %d);%n",
-                pos.apply(fld.getOffset()), fld.getLength());
+        printf("    testArray(s, DOMAIN_AT%sPLUS%d);%n", pos.apply(fld.getOffset() + 1), fld.getLength());
+        printf("    setDom(s, %s, VALUE_AT%dPLUS%d);%n",
+                pos.apply(fld.getOffset()), fld.getOffset(), fld.getLength());
         printf("}%n");
         popIndent();
-    }
-
-    private void chkSetter(@NotNull FieldDomain fld) {
-        printf("    testArray(s, DOMAIN_AT%sPLUS%d);%n", pos.apply(fld.getOffset() + 1), fld.getLength());
-    }
-
-    private void chkGetter(@NotNull FieldDomain fld) {
-        printf("    testArray(%1$s, %2$d, DOMAIN_AT%3$sPLUS%2$d);%n", pos.apply(fld.getOffset()), fld.getLength(), pos.apply(fld.getOffset() + 1));
     }
 
     public void initialize(@NotNull FieldDomain fld, int bias) {

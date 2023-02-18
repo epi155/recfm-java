@@ -112,8 +112,8 @@ public class Custom extends IndentPrinter implements MutableField<FieldCustom>, 
                     pos.apply(fld.getOffset()), fld.getLength()
             );
             chkSetter(fld);
-            printf("    setAbc(s, %s, %d);%n",
-                    pos.apply(fld.getOffset()), fld.getLength());
+            printf("    setAsIs(s, %s);%n",
+                    pos.apply(fld.getOffset()));
         } else {
             printf("    setAbc(s, %s, %d, OverflowAction.%s, UnderflowAction.%s, '%c', '%c');%n",
                     pos.apply(fld.getOffset()), fld.getLength(),

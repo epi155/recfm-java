@@ -6,13 +6,14 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static io.github.epi155.recfm.java.FixError.RECORD_BASE;
 import static io.github.epi155.recfm.java.FixError.failFirst;
 
 abstract class FixEngine {
     private static final String FIELD_AT = "Field @";
     private static final String EXPECTED = " expected ";
-    private static final String CHARS_FOUND = " chars , found ";
-    private static final String CHARS_FOUND_NULL = " chars , found [NULL]";
+    private static final String CHARS_FOUND = " chars, found ";
+    private static final String CHARS_FOUND_NULL = " chars, found [NULL]";
     private static final String RECORD_LENGTH = "Record length ";
     /**
      * record store area
@@ -41,11 +42,11 @@ abstract class FixEngine {
             rawData = c;
         } else if (c.length > lrec) {
             if (overflowError)
-                throw new FixError.RecordOverflowException(RECORD_LENGTH + c.length + EXPECTED + lrec);
+                throw new RecordOverflowException(RECORD_LENGTH + c.length + EXPECTED + lrec);
             rawData = Arrays.copyOfRange(c, 0, lrec);
         } else {
             if (underflowError)
-                throw new FixError.RecordUnderflowException(RECORD_LENGTH + c.length + EXPECTED + lrec);
+                throw new RecordUnderflowException(RECORD_LENGTH + c.length + EXPECTED + lrec);
             this.rawData = new char[lrec];
             initialize();
             System.arraycopy(c, 0, rawData, 0, c.length);
@@ -56,7 +57,7 @@ abstract class FixEngine {
      * Check that the supplied string is of digits only
      *
      * @param value string to be checked
-     * @throws io.github.epi155.recfm.java.FixError.NotDigitException when check fails
+     * @throws NotDigitException when check fails
      */
     protected static void testDigit(String value) { // setter
         if (value == null) return;
@@ -64,7 +65,7 @@ abstract class FixEngine {
         for (int u = 0; u < raw.length; u++) {
             char c = raw[u];
             if (!('0' <= c && c <= '9')) {
-                throw new FixError.NotDigitException(c, u + 1);
+                throw new NotDigitException(c, u + 1);
             }
         }
     }
@@ -73,7 +74,7 @@ abstract class FixEngine {
      * Check that the supplied string is of ascii char only
      *
      * @param value string to be checked
-     * @throws io.github.epi155.recfm.java.FixError.NotAsciiException when check fails
+     * @throws NotAsciiException when check fails
      */
     protected static void testAscii(String value) { // setter
         if (value == null) return;
@@ -81,7 +82,7 @@ abstract class FixEngine {
         for (int u = 0; u < raw.length; u++) {
             char c = raw[u];
             if (!(32 <= c && c < 127)) {
-                throw new FixError.NotAsciiException(c, u + 1);
+                throw new NotAsciiException(c, u + 1);
             }
         }
     }
@@ -90,7 +91,7 @@ abstract class FixEngine {
      * Check that the supplied string is of latin1 char only
      *
      * @param value string to be checked
-     * @throws io.github.epi155.recfm.java.FixError.NotLatinException when check fails
+     * @throws NotLatinException when check fails
      */
     protected static void testLatin(String value) { // setter
         if (value == null) return;
@@ -98,7 +99,7 @@ abstract class FixEngine {
         for (int u = 0; u < raw.length; u++) {
             int c = raw[u];
             if (!(32 <= c && c < 127) && !(160 <= c && c <= 255)) {
-                throw new FixError.NotLatinException(c, u + 1);
+                throw new NotLatinException(c, u + 1);
             }
         }
     }
@@ -107,7 +108,7 @@ abstract class FixEngine {
      * Check that the supplied string is of valid UTF-8 char only
      *
      * @param value string to be checked
-     * @throws io.github.epi155.recfm.java.FixError.NotValidException when check fails
+     * @throws NotValidException when check fails
      */
     protected static void testValid(String value) { // setter
         if (value == null) return;
@@ -115,7 +116,7 @@ abstract class FixEngine {
         for (int u = 0; u < raw.length; u++) {
             char c = raw[u];
             if (Character.isISOControl(c) || !Character.isDefined(c)) {
-                throw new FixError.NotValidException(c, u + 1);
+                throw new NotValidException(c, u + 1);
             }
         }
     }
@@ -124,8 +125,8 @@ abstract class FixEngine {
      * Check that the supplied string is all digits or al SPACE char only
      *
      * @param value string to be checked
-     * @throws io.github.epi155.recfm.java.FixError.NotBlankException when first char is space but not all SPACES
-     * @throws io.github.epi155.recfm.java.FixError.NotDigitException when not all digits
+     * @throws NotBlankException when first char is space but not all SPACES
+     * @throws NotDigitException when not all digits
      */
     protected static void testDigitBlank(String value) {    // setter
         if (value == null) return;
@@ -134,14 +135,14 @@ abstract class FixEngine {
             for (int u = 1; u < raw.length; u++) {
                 char c = raw[u];
                 if (c != ' ') {
-                    throw new FixError.NotBlankException(c, u + 1);
+                    throw new NotBlankException(c, u + 1);
                 }
             }
         } else {
             for (int u = 0; u < raw.length; u++) {
                 char c = raw[u];
                 if (!('0' <= c && c <= '9')) {
-                    throw new FixError.NotDigitException(c, u + 1);
+                    throw new NotDigitException(c, u + 1);
                 }
             }
         }
@@ -152,12 +153,12 @@ abstract class FixEngine {
      *
      * @param value  string to be checked
      * @param domain string array with permitted domain
-     * @throws io.github.epi155.recfm.java.FixError.NotDomainException when check fails
+     * @throws NotDomainException when check fails
      */
     protected static void testArray(String value, String[] domain) {    // setter
         if (value == null) return;
         if (Arrays.binarySearch(domain, value) < 0)
-            throw new FixError.NotDomainException(value);
+            throw new NotDomainException(value);
     }
 
     /**
@@ -165,13 +166,13 @@ abstract class FixEngine {
      *
      * @param value   string to be checked
      * @param pattern regular expression pattern
-     * @throws io.github.epi155.recfm.java.FixError.NotMatchesException when check fails
+     * @throws NotMatchesException when check fails
      */
     protected static void testRegex(String value, Pattern pattern) {    // setter
         if (value == null) return;
         Matcher matcher = pattern.matcher(value);
         if (!matcher.matches())
-            throw new FixError.NotMatchesException(value);
+            throw new NotMatchesException(value);
     }
 
     /**
@@ -193,7 +194,7 @@ abstract class FixEngine {
                                       int offset, int length) {
         if (s == null) {
             if (underflowAction == UnderflowAction.Error)
-                throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND_NULL);
+                throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND_NULL);
             return fill(length, init);
         } else if (s.length() == length)
             return s;
@@ -204,7 +205,7 @@ abstract class FixEngine {
                 case PadL:
                     return lpad(s, length, pad);
                 case Error:
-                    throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND + s.length());
+                    throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
             }
         } else switch (overflowAction) {
             case TruncR:
@@ -212,7 +213,7 @@ abstract class FixEngine {
             case TruncL:
                 return ltrunc(s, length);
             case Error:
-                throw new FixError.FieldOverFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND + s.length());
+                throw new FieldOverFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
         }
         return null; // dear branch (?)
     }
@@ -279,13 +280,13 @@ abstract class FixEngine {
      *
      * @param offset field offset
      * @param length field length
-     * @throws io.github.epi155.recfm.java.FixError.NotDigitException when check fails
+     * @throws NotDigitException when check fails
      */
     protected void testDigit(int offset, int length) {  // getter
         for (int u = offset, v = 0; v < length; u++, v++) {
             char c = rawData[u];
             if (!('0' <= c && c <= '9')) {
-                throw new FixError.NotDigitException(c, u + 1);
+                throw new NotDigitException(c, u + 1);
             }
         }
     }
@@ -295,13 +296,13 @@ abstract class FixEngine {
      *
      * @param offset field offset
      * @param length field length
-     * @throws io.github.epi155.recfm.java.FixError.NotAsciiException when check fails
+     * @throws NotAsciiException when check fails
      */
     protected void testAscii(int offset, int length) {  // getter
         for (int u = offset, v = 0; v < length; u++, v++) {
             char c = rawData[u];
             if (!(32 <= c && c <= 127)) {
-                throw new FixError.NotAsciiException(c, u + 1);
+                throw new NotAsciiException(c, u + 1);
             }
         }
     }
@@ -317,13 +318,13 @@ abstract class FixEngine {
      *
      * @param offset field offset
      * @param length field length
-     * @throws io.github.epi155.recfm.java.FixError.NotAsciiException when check fails
+     * @throws NotAsciiException when check fails
      */
     protected void testLatin(int offset, int length) {  // getter
         for (int u = offset, v = 0; v < length; u++, v++) {
             int c = rawData[u];
             if (!(32 <= c && c < 127) && !(160 <= c && c <= 255)) {
-                throw new FixError.NotLatinException(c, u + 1);
+                throw new NotLatinException(c, u + 1);
             }
         }
     }
@@ -333,13 +334,13 @@ abstract class FixEngine {
      *
      * @param offset field offset
      * @param length field length
-     * @throws io.github.epi155.recfm.java.FixError.NotValidException when check fails
+     * @throws NotValidException when check fails
      */
     protected void testValid(int offset, int length) {  // getter
         for (int u = offset, v = 0; v < length; u++, v++) {
             char c = rawData[u];
             if (Character.isISOControl(c) || !Character.isDefined(c)) {
-                throw new FixError.NotValidException(c, u + 1);
+                throw new NotValidException(c, u + 1);
             }
         }
     }
@@ -361,22 +362,22 @@ abstract class FixEngine {
      *
      * @param offset field offset
      * @param length field length
-     * @throws io.github.epi155.recfm.java.FixError.NotBlankException when first char is space but not all SPACES
-     * @throws io.github.epi155.recfm.java.FixError.NotDigitException when not all digits
+     * @throws NotBlankException when first char is space but not all SPACES
+     * @throws NotDigitException when not all digits
      */
     protected void testDigitBlank(int offset, int length) { // getter
         char c = rawData[offset];
         if (c == ' ') {
             for (int u = offset + 1, v = 1; v < length; u++, v++) {
                 if (rawData[u] != ' ') {
-                    throw new FixError.NotBlankException(c, u + 1);
+                    throw new NotBlankException(c, u + 1);
                 }
             }
         } else {
             for (int u = offset, v = 0; v < length; u++, v++) {
                 c = rawData[u];
                 if (!('0' <= c && c <= '9')) {
-                    throw new FixError.NotDigitException(c, u + 1);
+                    throw new NotDigitException(c, u + 1);
                 }
             }
         }
@@ -388,12 +389,12 @@ abstract class FixEngine {
      * @param offset field offset
      * @param length field length
      * @param domain string array with permitted domain
-     * @throws io.github.epi155.recfm.java.FixError.NotDomainException when check fails
+     * @throws NotDomainException when check fails
      */
     protected void testArray(int offset, int length, String[] domain) {  // getter
         String value = getAbc(offset, length);
         if (Arrays.binarySearch(domain, value) < 0)
-            throw new FixError.NotDomainException(offset + 1, value);
+            throw new NotDomainException(offset + 1, value);
     }
 
     /**
@@ -402,13 +403,13 @@ abstract class FixEngine {
      * @param offset  field offset
      * @param length  field length
      * @param pattern regular expression pattern
-     * @throws io.github.epi155.recfm.java.FixError.NotMatchesException when check fails
+     * @throws NotMatchesException when check fails
      */
     protected void testRegex(int offset, int length, Pattern pattern) {  // getter
         String value = getAbc(offset, length);
         Matcher matcher = pattern.matcher(value);
         if (!matcher.matches())
-            throw new FixError.NotMatchesException(offset + 1, value);
+            throw new NotMatchesException(offset + 1, value);
     }
 
     /**
@@ -463,7 +464,7 @@ abstract class FixEngine {
         for (int u = offset, v = 0; v < length; u++, v++) {
             char c = rawData[u];
             if (!('0' <= c && c <= '9')) {
-                handler.error(FixError.Detail
+                handler.error(Detail
                     .builder()
                     .name(name)
                     .offset(offset)
@@ -516,7 +517,7 @@ abstract class FixEngine {
         for (int u = offset + 1, v = 1; v < length; u++, v++) {
             char c = rawData[u];
             if (c != ' ') {
-                handler.error(FixError.Detail
+                handler.error(Detail
                     .builder()
                     .name(name)
                     .offset(offset)
@@ -538,7 +539,7 @@ abstract class FixEngine {
         for (int u = offset + 1, v = 1; v < length; u++, v++) {
             char c = rawData[u];
             if (!('0' <= c && c <= '9')) {
-                handler.error(FixError.Detail
+                handler.error(Detail
                     .builder()
                     .name(name)
                     .offset(offset)
@@ -566,12 +567,30 @@ abstract class FixEngine {
         }
     }
 
-    private void setAsIs(String s, int offset) {
+    /**
+     * set validated/normalized field value
+     * @param s         field value
+     * @param offset    field offset
+     */
+    protected void setAsIs(String s, int offset) {
         for (int u = 0, v = offset; u < s.length(); u++, v++) {
             rawData[v] = s.charAt(u);
         }
     }
 
+    /**
+     * set validated/normalized domain field value
+     * @param s         field value
+     * @param offset    field offset
+     * @param init      field default value on null field value
+     */
+    protected void setDom(String s, int offset, String init) {
+        if (s == null) {
+            setAsIs(init, offset);
+        } else {
+            setAsIs(s, offset);
+        }
+    }
     /**
      * Check that the record field is of ascii char only
      *
@@ -586,7 +605,7 @@ abstract class FixEngine {
         for (int u = offset, v = 0; v < length; u++, v++) {
             char c = rawData[u];
             if (!(32 <= c && c < 127)) {
-                handler.error(FixError.Detail
+                handler.error(Detail
                     .builder()
                     .name(name)
                     .offset(offset)
@@ -615,7 +634,7 @@ abstract class FixEngine {
     protected boolean checkEqual(int offset, int length, FieldValidateHandler handler, String value) {
         boolean fault = false;
         if (!getAbc(offset, length).equals(value)) {
-            handler.error(FixError.Detail
+            handler.error(Detail
                 .builder()
                 .offset(offset)
                 .length(length)
@@ -641,7 +660,7 @@ abstract class FixEngine {
         for (int u = offset, v = 0; v < length; u++, v++) {
             char c = rawData[u];
             if (!(32 <= c && c < 127) && !(160 <= c && c <= 255)) {
-                handler.error(FixError.Detail
+                handler.error(Detail
                     .builder()
                     .name(name)
                     .offset(offset)
@@ -669,9 +688,9 @@ abstract class FixEngine {
         if (s.length() == length)
             setAsIs(s, offset);
         else if (s.length() < length) {
-            throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND + s.length());
+            throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
         } else {
-            throw new FixError.FieldOverFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND + s.length());
+            throw new FieldOverFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
         }
     }
 
@@ -689,7 +708,7 @@ abstract class FixEngine {
         for (int u = offset, v = 0; v < length; u++, v++) {
             char c = rawData[u];
             if (!Character.isDefined(c) || Character.isISOControl(c)) {
-                handler.error(FixError.Detail
+                handler.error(Detail
                     .builder()
                     .name(name)
                     .offset(offset)
@@ -730,25 +749,6 @@ abstract class FixEngine {
     /**
      * Set alphanumeric field value
      *
-     * @param s      field value
-     * @param offset field offset
-     * @param length field length
-     */
-    protected void setAbc(String s, int offset, int length) {
-        if (s == null) {
-            throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND_NULL);
-        } else if (s.length() == length)
-            setAsIs(s, offset);
-        else if (s.length() < length) {
-            throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND + s.length());
-        } else {
-            throw new FixError.FieldOverFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND + s.length());
-        }
-    }
-
-    /**
-     * Set alphanumeric field value
-     *
      * @param s               field value
      * @param offset          field offset
      * @param length          field length
@@ -760,7 +760,7 @@ abstract class FixEngine {
     protected void setAbc(String s, int offset, int length, OverflowAction overflowAction, UnderflowAction underflowAction, char pad, char init) {
         if (s == null) {
             if (underflowAction == UnderflowAction.Error)
-                throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND_NULL);
+                throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND_NULL);
             fillChar(offset, length, init);
         } else if (s.length() == length)
             setAsIs(s, offset);
@@ -773,7 +773,7 @@ abstract class FixEngine {
                     padToLeft(s, offset, length, pad);
                     break;
                 case Error:
-                    throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND + s.length());
+                    throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
             }
         } else switch (overflowAction) {
             case TruncR:
@@ -783,7 +783,7 @@ abstract class FixEngine {
                 truncLeft(s, offset, length);
                 break;
             case Error:
-                throw new FixError.FieldOverFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND + s.length());
+                throw new FieldOverFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
         }
     }
 
@@ -799,7 +799,7 @@ abstract class FixEngine {
     protected void setNum(String s, int offset, int length, OverflowAction overflowAction, UnderflowAction underflowAction) {
         if (s == null) {
             if (underflowAction == UnderflowAction.Error)
-                throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND_NULL);
+                throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND_NULL);
             fillChar(offset, length, '0');
         } else if (s.length() == length)
             setAsIs(s, offset);
@@ -812,7 +812,7 @@ abstract class FixEngine {
                     padToLeft(s, offset, length, '0');
                     break;
                 case Error:
-                    throw new FixError.FieldUnderFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND + s.length());
+                    throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
             }
         } else switch (overflowAction) {
             case TruncR:
@@ -822,7 +822,7 @@ abstract class FixEngine {
                 truncLeft(s, offset, length);
                 break;
             case Error:
-                throw new FixError.FieldOverFlowException(FIELD_AT + offset + EXPECTED + length + CHARS_FOUND + s.length());
+                throw new FieldOverFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
         }
     }
 
@@ -838,7 +838,7 @@ abstract class FixEngine {
      */
     protected boolean checkArray(String name, int offset, int length, FieldValidateHandler handler, String[] domain) {
         if (Arrays.binarySearch(domain, getAbc(offset, length)) < 0) {
-            handler.error(FixError.Detail
+            handler.error(Detail
                 .builder()
                 .name(name)
                 .offset(offset)
@@ -864,7 +864,7 @@ abstract class FixEngine {
     protected boolean checkRegex(String name, int offset, int length, FieldValidateHandler handler, Pattern pattern) {
         Matcher matcher = pattern.matcher(getAbc(offset, length));
         if (!matcher.matches()) {
-            handler.error(FixError.Detail
+            handler.error(Detail
                 .builder()
                 .name(name)
                 .offset(offset)

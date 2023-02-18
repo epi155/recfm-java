@@ -18,10 +18,12 @@
         * [4.3.7. Group](#437)
         * [4.3.8. Occurs](#438)
 * [5. Special methods](#5)
-    * [5.1. `static ... decode(String s)`](#51)
-    * [5.2. `String encode()`](#52)
-    * [5.3. `String toString()`](#53)
-    * [5.4. Validation method](#54)
+    * [5.1. Deserialize `static T decode(String s)`](#51)
+    * [5.2. Serialize `String encode()`](#52)
+    * [5.3. Dump `String toString()`](#53)
+    * [5.4. Validation methods](#54)
+    * [5.5. Cast `static T of(FixRecord)`](#55)
+    * [5.6. Clone `T copy()`](#56)
 
 ## <a name="1">1. Introduction</a>
 
@@ -116,7 +118,6 @@ public class FooBody extends FixRecord {
     public static final int LRECL = 543;
     public FooBody() {...}    // empty constructor
     public static FooBody decode(String s) {...}    // de-serialize
-    public String encode() {...}   // serialize
     public static FooBody of(FixRecord r) {...}     // cast-like
     ...
     public String getIbrKey()  {...}
@@ -134,7 +135,9 @@ public class FooBody extends FixRecord {
     public String getReseData() {...}
     public void setReseData(String s) {...}
 
-    public String toString() {...}    // human readable dump
+    public FooBody copy() {...}     // clone - deep copy
+    public String encode() {...}    // serialize
+    public String toString() {...}  // human readable dump
 }
 ~~~
 
@@ -626,22 +629,22 @@ Occurs definition example:
 
 In addition to the setters and getters, the deserialization, serialization and dump methods of the class are defined
 
-## <a name="51">5.1. `static ... decode(String s)`</a>
+## <a name="51">5.1. Deserialize  `static T decode(String s)`</a>
 
 This method is used to create the class from a string. The content of the string is not automatically validated it is
 advisable to validate the class with the appropriate methods before using the class. The class can also be instantiated
 using the empty constructor, in this case all fields are initialized to default values.
 
-## <a name="52">5.2. `String encode()`</a>
+## <a name="52">5.2. Serialize  `String encode()`</a>
 
 `encode` is the serialization methods, it transforms the class into the string that represents it.
 
-## <a name="53">5.3. `String toString()`</a>
+## <a name="53">5.3. Dump `String toString()`</a>
 
 The toString method is used to dump the class. The list of fields is shown and for each field the offset, length and
 value are shown.
 
-## <a name="54">5.4. Validation method</a>
+## <a name="54">5.4. Validation methods</a>
 
 Each generated class defines the validation methods
 
@@ -711,4 +714,10 @@ with the meaning
 `NotValid`
 : character that fails the `Character.isDefined(c)` test in an alphanumeric field where the Valid check is required
 
+## <a name="55">5.5. Cast `static T of(FixRecord)`</a>
 
+The `of` method is used to create a new FixRecord class with the same payload as the original one. The payload is the same, in the sense that a change to the new class also changes the original one. The method is like a cast, not a copy.
+
+## <a name="56">5.6. Clone `T copy()`</a>
+
+The `copy` method creates a copy of the original class.

@@ -52,6 +52,7 @@
                 <version>0.6.0-SNAPSHOT</version>
                 <executions>
                     <execution>
+                        <id>enforced</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
@@ -64,6 +65,22 @@
                                 <setting>J-test.yaml</setting>
                             </settings>
                             <codeProviderClassName>io.github.epi155.recfm.java.CodeGenerator</codeProviderClassName>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>relaxed</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-test-sources</phase>
+                        <configuration>
+                            <enforceGetter>false</enforceGetter>
+                            <enforceSetter>false</enforceSetter>
+                            <settingsDirectory>${project.basedir}/src/test/resources</settingsDirectory>
+                            <generateDirectory>target/generated-test-sources/recfm</generateDirectory>
+                            <settings>
+                                <setting>K-test.yaml</setting>
+                            </settings>
                         </configuration>
                     </execution>
                 </executions>

@@ -147,9 +147,12 @@ class TestFields {
     @Test
     void testErr1() {
         FooDate fDate = FooDate.decode("£023-12-\u00001");
-        if (!fDate.validateFails(it ->
+        if (!fDate.validateFails(it -> {
                 System.out.printf("Error field %s@%d+%d: %s%n",
-                it.name(), it.offset(), it.length(), it.message()))) {
+                    it.name(), it.offset(), it.length(), it.message());
+                it.column();
+                it.wrong();
+            })) {
             System.out.println("Valid Date");
         }
     }
@@ -176,6 +179,7 @@ class TestFields {
         Assertions.assertDoesNotThrow(() -> alpha.setAll(null), "test no check");
 
         alpha.getWeak();
+        alpha.getUtf8();
         String s = alpha.encode();
 
         if (!alpha.validateFails(it ->
@@ -208,6 +212,9 @@ class TestFields {
         Assertions.assertDoesNotThrow(() -> digit.setWeak("123"), "test Num underflow/pad");
         Assertions.assertDoesNotThrow(() -> digit.setWeak("12345"), "test Num overflow/trunc");
 
+        Assertions.assertThrows(NotMatchesException.class, () -> digit.setRex("Hi"), "test Num invalid");
+        ;
+
         FooAlpha alpha = FooAlpha.of(digit);    // cast
         FooDigit numer = digit.copy();      // clone / deep-copy
 
@@ -224,6 +231,16 @@ class TestFields {
             System.out.println("Valid Date");
         }
         Assertions.assertThrows(NotDigitException.class, () -> n.getStrict(), "test Num get");
+        Assertions.assertThrows(NotMatchesException.class, () -> n.getRex(), "test Num get");
+
+        n.setRex("11");
+        System.out.println(n.getRex());
+        if (!n.validateFails(it ->
+            System.out.printf("Error field %s@%d+%d: %s%n",
+                it.name(), it.offset(), it.length(), it.message()))) {
+            System.out.println("Valid Date");
+        }
+        Assertions.assertThrows(NotMatchesException.class, () -> n.setRex(null), "test Num set");
 
         Assertions.assertDoesNotThrow(() -> FooDigit.decode("123"), "test underflow");
         Assertions.assertDoesNotThrow(() -> FooDigit.decode("123456789012"), "test overflow");
@@ -294,5 +311,11 @@ class TestFields {
             System.out.println("Valid Date");
         }
         Assertions.assertThrows(NotBlankException.class, () -> cu4.getDig(), "testCus invalid");
+
+        try {
+            cu4.getDig();
+        } catch (NotBlankException e) {
+            e.printStackTrace();
+        }
     }
 }

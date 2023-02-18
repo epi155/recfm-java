@@ -1,6 +1,7 @@
 package io.github.epi155.recfm.java;
 
 import static io.github.epi155.recfm.java.FixError.explainChar;
+import static io.github.epi155.recfm.java.FixError.explainString;
 
 class Detail implements FieldValidateError {
 
@@ -59,29 +60,10 @@ class Detail implements FieldValidateError {
         if (wrong != null) {
             int position = column - offset + FixError.RECORD_BASE;
             return String.format("%d^%s %s", position, explainChar(wrong), code.name());
-        }
-        if (value != null) {
-            String sanitizeValue = sanitizeValue();
+        } else {    // value != null
+            String sanitizeValue = explainString(value);
             return String.format("\"%s\" %s", sanitizeValue, code.name());
         }
-        return null;
-    }
-
-    private String sanitizeValue() {
-        StringBuilder sb = new StringBuilder();
-        char[] ca = value.toCharArray();
-        for (char c : ca) {
-            Character.UnicodeBlock block = Character.UnicodeBlock.of(c);
-            if (Character.isISOControl(c) ||
-                    !Character.isDefined(c) ||
-                    block == null ||
-                    block == Character.UnicodeBlock.SPECIALS) {
-                sb.append(String.format("(U+%04X)", (int) c));
-            } else {
-                sb.append(c);
-            }
-        }
-        return sb.toString();
     }
 
     static class Builder {
@@ -132,6 +114,9 @@ class Detail implements FieldValidateError {
         }
 
         Detail build() {
+            if (wrong==null && value==null) {   // dead branch
+                throw new IllegalStateException();  // safety exception
+            }
             Detail ei = new Detail();
             ei.name = name;
             ei.offset = offset;

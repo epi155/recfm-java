@@ -409,7 +409,7 @@ abstract class FixEngine {
         String value = getAbc(offset, length);
         Matcher matcher = pattern.matcher(value);
         if (!matcher.matches())
-            throw new NotMatchesException(offset + 1, value);
+            throw new NotMatchesException(offset, value);
     }
 
     /**
@@ -697,11 +697,12 @@ abstract class FixEngine {
     protected void fill(int offset, int length, String s) {
         if (s.length() == length)
             setAsIs(s, offset);
-        else if (s.length() < length) {
-            throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
-        } else {
-            throw new FieldOverFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
-        }
+        else // dead branch
+            if (s.length() < length) {  // buffer underflow protection
+                throw new FieldUnderFlowException(FIELD_AT + (offset + RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
+            } else {                    // buffer overflow protection
+                throw new FieldOverFlowException(FIELD_AT + (offset + RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
+            }
     }
 
     /**
@@ -781,7 +782,7 @@ abstract class FixEngine {
                     break;
                 case Error:
                     throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
-                case PadL:  // dead branch ?
+                case PadL:  // used by relaxed custom fields
                     padToLeft(s, offset, length, pad);
                     break;
             }
@@ -791,7 +792,7 @@ abstract class FixEngine {
                 break;
             case Error:
                 throw new FieldOverFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
-            case TruncL:    // dead branch ?
+            case TruncL:    // used by relaxed custom fields
                 truncLeft(s, offset, length);
                 break;
         }

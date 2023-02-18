@@ -78,7 +78,7 @@ classes:
     fields:
       - !Num { name: strict, at: 1, len: 4, onOverflow: Error, onUnderflow: Error }
       - !Num { name: weak  , at: 5, len: 4, onOverflow: Trunc, onUnderflow: Pad   }
-      - !Fil { at: 9, len: 2 }
+      - !Cus { name: rex   , at: 9, len: 2, regex: "[0-9]*" }
   - name: FooCustom
     length: 10
     fields:

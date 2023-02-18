@@ -34,4 +34,21 @@ public class FixError {
             return String.format("'%c' [%s]", wrong, charName);
         }
     }
+    static String explainString(String value) {
+        StringBuilder sb = new StringBuilder();
+        char[] ca = value.toCharArray();
+        for (char c : ca) {
+            Character.UnicodeBlock block = Character.UnicodeBlock.of(c);
+            if (Character.isISOControl(c) ||
+                !Character.isDefined(c) ||
+                block == null ||
+                block == Character.UnicodeBlock.SPECIALS) {
+                sb.append(String.format("\\u%04x", (int) c));
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+
+    }
 }

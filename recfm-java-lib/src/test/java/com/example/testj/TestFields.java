@@ -1,14 +1,13 @@
 package com.example.testj;
 
-import com.example.sysj.test.FooAlpha;
-import com.example.sysj.test.FooDate;
-import com.example.sysj.test.FooDigit;
-import com.example.sysj.test.FooTest;
+import com.example.sysj.test.*;
 import io.github.epi155.recfm.java.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+
+import java.nio.CharBuffer;
 
 class TestFields {
 
@@ -189,5 +188,61 @@ class TestFields {
 
         FooAlpha alpha = FooAlpha.of(digit);    // cast
         FooDigit numer = digit.copy();      // clone / deep-copy
+    }
+    @Test
+    void testCustom() {
+        FooCustom cust = new FooCustom();
+        Assertions.assertThrows(FieldUnderFlowException.class, () -> cust.setFix(null), "test Cus underflow");
+        Assertions.assertThrows(FieldUnderFlowException.class, () -> cust.setFix("a"), "test Cus underflow");
+        Assertions.assertThrows(FieldOverFlowException.class, () -> cust.setFix("12345"), "testCus overflow");
+        Assertions.assertDoesNotThrow(() -> cust.setFix("ab"), "test Cus fit");
+        cust.setLft("a");  System.out.println(cust.getLft());
+        cust.setLft("ab");  System.out.println(cust.getLft());
+        cust.setLft("abcdefg");  System.out.println(cust.getLft());
+        cust.setLft(null);  System.out.println(cust.getLft());
+
+        cust.setRgt("a");  System.out.println(cust.getRgt());
+        cust.setRgt("abc");  System.out.println(cust.getRgt());
+        cust.setRgt("abcdefg");  System.out.println(cust.getRgt());
+        cust.setRgt(null);  System.out.println(cust.getRgt());
+
+        Assertions.assertThrows(NotDigitException.class, () -> cust.setDig("a"), "testCus invalid");
+
+        cust.setDig("1");
+        cust.setDig("  ");
+        cust.setDig("     ");
+        cust.setDig("12345");
+        System.out.println(cust.toString());
+
+        if (!cust.validateFails(it ->
+                System.out.printf("Error field %s@%d+%d: %s%n",
+                        it.name(), it.offset(), it.length(), it.message()))) {
+            System.out.println("Valid Date");
+        }
+
+        FooCustom cu1 = FooCustom.decode(CharBuffer.allocate(10).toString().replace('\u0000', ' '));
+        if (!cu1.validateFails(it ->
+                System.out.printf("Error field %s@%d+%d: %s%n",
+                        it.name(), it.offset(), it.length(), it.message()))) {
+            System.out.println("Valid Date");
+        }
+        FooCustom cu2 = FooCustom.decode(CharBuffer.allocate(10).toString().replace('\u0000', '*'));
+        if (!cu2.validateFails(it ->
+                System.out.printf("Error field %s@%d+%d: %s%n",
+                        it.name(), it.offset(), it.length(), it.message()))) {
+            System.out.println("Valid Date");
+        }
+        FooCustom cu3 = FooCustom.decode("12345678x0");
+        if (!cu3.validateFails(it ->
+                System.out.printf("Error field %s@%d+%d: %s%n",
+                        it.name(), it.offset(), it.length(), it.message()))) {
+            System.out.println("Valid Date");
+        }
+        FooCustom cu4 = FooCustom.decode("1234567 x0");
+        if (!cu4.validateFails(it ->
+                System.out.printf("Error field %s@%d+%d: %s%n",
+                        it.name(), it.offset(), it.length(), it.message()))) {
+            System.out.println("Valid Date");
+        }
     }
 }

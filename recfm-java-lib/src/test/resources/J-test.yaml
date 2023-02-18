@@ -79,3 +79,11 @@ classes:
       - !Num { name: strict, at: 1, len: 4, onOverflow: Error, onUnderflow: Error }
       - !Num { name: weak  , at: 5, len: 4, onOverflow: Trunc, onUnderflow: Pad   }
       - !Fil { at: 9, len: 2 }
+  - name: FooCustom
+    length: 10
+    fields:
+      - !Cus { name: fix  , at: 1, len: 2, align: LFT, initChar: '.', onOverflow: Error, onUnderflow: Error  }
+      - !Cus { name: rgt  , at: 3, len: 3, align: RGT, padChar: '0', initChar: '*' }
+      - !Cus { name: lft  , at: 6, len: 2, align: LFT, padChar: '*', initChar: '.' }
+      - !Cus { name: dig  , at: 8, len: 2, align: RGT, padChar: '0', initChar: ' ', check: DigitOrBlank }
+      - !Fil { at: 10, len: 1 }

@@ -207,7 +207,7 @@ abstract class FixEngine {
                 case Error:
                     throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
             }
-        } else switch (overflowAction) {
+        } else /* s.length() > length */switch (overflowAction) {
             case TruncR:
                 return rtrunc(s, length);
             case TruncL:
@@ -215,18 +215,16 @@ abstract class FixEngine {
             case Error:
                 throw new FieldOverFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
         }
-        return null; // dear branch (?)
+        return null; // dead branch (?)
     }
 
     private static String fill(int t, char pad) {
         return CharBuffer.allocate(t).toString().replace('\0', pad);
     }
 
-    private static String rpad(String s, int t, char pad) {
+    private static String rpad(String s, int w, char pad) {
         int len = s.length();
-        if (len > t) return s.substring(0, t);
-        if (len == t) return s;
-        return s + CharBuffer.allocate(t - len).toString().replace('\0', pad);
+        return s + CharBuffer.allocate(w - len).toString().replace('\0', pad);
     }
 
     /**
@@ -242,21 +240,18 @@ abstract class FixEngine {
         return nf;
     }
 
-    private static String ltrunc(String s, int t) {
+    private static String ltrunc(String s, int w) {
         int len = s.length();
-        return (len > t) ? s.substring(len - t) : s;
+        return s.substring(len - w);
     }
 
     private static String lpad(String s, int t, char pad) {
         int len = s.length();
-        if (len > t) return s.substring(len - t);
-        if (len == t) return s;
         return CharBuffer.allocate(t - len).toString().replace('\0', pad) + s;
     }
 
-    private static String rtrunc(String s, int t) {
-        int len = s.length();
-        return (len > t) ? s.substring(0, t) : s;
+    private static String rtrunc(String s, int w) {
+        return s.substring(0, w);
     }
 
     /**
@@ -508,6 +503,16 @@ abstract class FixEngine {
         } else if ('0' <= c && c <= '9') {
             return checkAllDigit(name, offset, length, handler);
         } else {
+            handler.error(Detail
+                    .builder()
+                    .name(name)
+                    .offset(offset)
+                    .length(length)
+                    .value(getAbc(offset, length))
+                    .column(offset)
+                    .code(ValidateError.NotDigitBlank)  // ??
+                    .wrong(c)
+                    .build());
             return true;
         }
     }

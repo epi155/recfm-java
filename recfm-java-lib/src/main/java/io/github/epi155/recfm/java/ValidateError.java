@@ -36,4 +36,8 @@ public enum ValidateError {
      * Field does not match regex pattern
      */
     NotMatch,
+    /**
+     * Field DigitOrBlank begins with neither a digit nor a space
+     */
+    NotDigitBlank,
 }

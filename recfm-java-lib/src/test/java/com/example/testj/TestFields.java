@@ -56,7 +56,7 @@ class TestFields {
         Assertions.assertEquals("00012", foo.getCustom01(), "test align/pad");
         foo.setCustom01("1415926535897932384626433832");
         Assertions.assertEquals("33832", foo.getCustom01(), "test align/truncate");
-        Assertions.assertThrows(NotDigitException.class, () -> foo.setCustom01("three"), "test no digit");
+        Assertions.assertThrows(NotDigitBlankException.class, () -> foo.setCustom01("three"), "test no digit");
         Assertions.assertThrows(NotDigitException.class, () -> {
             foo.setCustom01(" ");   // -> "0000 "
         }, "test no digit");
@@ -107,6 +107,9 @@ class TestFields {
             System.out.printf("Value: /%s/%n", it.value());
             System.out.println(it.message());
         });
+
+        foo.setDomain01(null);
+        System.out.println(foo.getDomain01());
     }
     @Test
     void testGrp() {
@@ -172,7 +175,26 @@ class TestFields {
         Assertions.assertDoesNotThrow(() -> alpha.setAll("\u0000"), "test no check");
         Assertions.assertDoesNotThrow(() -> alpha.setAll(null), "test no check");
 
+        alpha.getWeak();
         String s = alpha.encode();
+
+        if (!alpha.validateFails(it ->
+                System.out.printf("Error field %s@%d+%d: %s%n",
+                        it.name(), it.offset(), it.length(), it.message()))) {
+            System.out.println("Valid Date");
+        }
+
+        FooAlpha a = FooAlpha.decode(CharBuffer.allocate(10).toString());
+        Assertions.assertThrows(NotAsciiException.class, () -> a.getStrict(), "test ASCII");
+        Assertions.assertThrows(NotLatinException.class, () -> a.getWeak(), "test Latin1");
+        Assertions.assertThrows(NotValidException.class, () -> a.getUtf8(), "test UTF-8");
+        Assertions.assertDoesNotThrow(() -> a.getAll(), "test no check");
+
+        if (!a.validateFails(it ->
+                System.out.printf("Error field %s@%d+%d: %s%n",
+                        it.name(), it.offset(), it.length(), it.message()))) {
+            System.out.println("Valid Date");
+        }
     }
     @Test
     void testDigit() {
@@ -188,6 +210,23 @@ class TestFields {
 
         FooAlpha alpha = FooAlpha.of(digit);    // cast
         FooDigit numer = digit.copy();      // clone / deep-copy
+
+        if (!digit.validateFails(it ->
+                System.out.printf("Error field %s@%d+%d: %s%n",
+                        it.name(), it.offset(), it.length(), it.message()))) {
+            System.out.println("Valid Date");
+        }
+
+        FooDigit n = FooDigit.decode(CharBuffer.allocate(10).toString());
+        if (!n.validateFails(it ->
+                System.out.printf("Error field %s@%d+%d: %s%n",
+                        it.name(), it.offset(), it.length(), it.message()))) {
+            System.out.println("Valid Date");
+        }
+        Assertions.assertThrows(NotDigitException.class, () -> n.getStrict(), "test Num get");
+
+        Assertions.assertDoesNotThrow(() -> FooDigit.decode("123"), "test underflow");
+        Assertions.assertDoesNotThrow(() -> FooDigit.decode("123456789012"), "test overflow");
     }
     @Test
     void testCustom() {
@@ -212,7 +251,11 @@ class TestFields {
         cust.setDig("  ");
         cust.setDig("     ");
         cust.setDig("12345");
+        cust.setDig(null);
         System.out.println(cust.toString());
+        cust.charAt(1);
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> cust.charAt(0), "test OOB");
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> cust.charAt(11), "test OOB");
 
         if (!cust.validateFails(it ->
                 System.out.printf("Error field %s@%d+%d: %s%n",
@@ -226,23 +269,30 @@ class TestFields {
                         it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
+        cu1.getDig();
+
         FooCustom cu2 = FooCustom.decode(CharBuffer.allocate(10).toString().replace('\u0000', '*'));
         if (!cu2.validateFails(it ->
                 System.out.printf("Error field %s@%d+%d: %s%n",
                         it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
+        Assertions.assertThrows(NotDigitBlankException.class, () -> cu2.getDig(), "testCus invalid");
+
         FooCustom cu3 = FooCustom.decode("12345678x0");
         if (!cu3.validateFails(it ->
                 System.out.printf("Error field %s@%d+%d: %s%n",
                         it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
+        Assertions.assertThrows(NotDigitException.class, () -> cu3.getDig(), "testCus invalid");
+
         FooCustom cu4 = FooCustom.decode("1234567 x0");
         if (!cu4.validateFails(it ->
                 System.out.printf("Error field %s@%d+%d: %s%n",
                         it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
+        Assertions.assertThrows(NotBlankException.class, () -> cu4.getDig(), "testCus invalid");
     }
 }

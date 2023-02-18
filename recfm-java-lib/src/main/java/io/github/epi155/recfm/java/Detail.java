@@ -1,5 +1,7 @@
 package io.github.epi155.recfm.java;
 
+import static io.github.epi155.recfm.java.FixError.explainChar;
+
 class Detail implements FieldValidateError {
 
     private String name;
@@ -55,19 +57,8 @@ class Detail implements FieldValidateError {
     @Override
     public String message() {
         if (wrong != null) {
-            String charName = Character.getName(wrong);
             int position = column - offset + FixError.RECORD_BASE;
-            if (charName == null) {
-                return String.format("%d^(U+%04X) [unassigned char] %s", position, (int) wrong, code.name());
-            }
-            Character.UnicodeBlock block = Character.UnicodeBlock.of(wrong);
-            if (Character.isISOControl(wrong) ||
-                    block == null ||
-                    block == Character.UnicodeBlock.SPECIALS) {
-                return String.format("%d^(U+%04X) [%s] %s", position, (int) wrong, charName, code.name());
-            } else {
-                return String.format("%d^'%c' [%s] %s", position, wrong, charName, code.name());
-            }
+            return String.format("%d^%s %s", position, explainChar(wrong), code.name());
         }
         if (value != null) {
             String sanitizeValue = sanitizeValue();

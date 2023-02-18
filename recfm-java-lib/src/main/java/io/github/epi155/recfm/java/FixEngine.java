@@ -65,7 +65,7 @@ abstract class FixEngine {
         for (int u = 0; u < raw.length; u++) {
             char c = raw[u];
             if (!('0' <= c && c <= '9')) {
-                throw new NotDigitException(c, u + 1);
+                throw new NotDigitException(c, u);
             }
         }
     }
@@ -82,7 +82,7 @@ abstract class FixEngine {
         for (int u = 0; u < raw.length; u++) {
             char c = raw[u];
             if (!(32 <= c && c < 127)) {
-                throw new NotAsciiException(c, u + 1);
+                throw new NotAsciiException(c, u);
             }
         }
     }
@@ -97,9 +97,9 @@ abstract class FixEngine {
         if (value == null) return;
         char[] raw = value.toCharArray();
         for (int u = 0; u < raw.length; u++) {
-            int c = raw[u];
+            char c = raw[u];
             if (!(32 <= c && c < 127) && !(160 <= c && c <= 255)) {
-                throw new NotLatinException(c, u + 1);
+                throw new NotLatinException(c, u);
             }
         }
     }
@@ -116,7 +116,7 @@ abstract class FixEngine {
         for (int u = 0; u < raw.length; u++) {
             char c = raw[u];
             if (Character.isISOControl(c) || !Character.isDefined(c)) {
-                throw new NotValidException(c, u + 1);
+                throw new NotValidException(c, u);
             }
         }
     }
@@ -128,23 +128,25 @@ abstract class FixEngine {
      * @throws NotBlankException when first char is space but not all SPACES
      * @throws NotDigitException when not all digits
      */
-    protected static void testDigitBlank(String value) {    // setter
-        if (value == null) return;
+    protected static void testDigitBlank(/*NotNull*/String value) {    // setter
         char[] raw = value.toCharArray();
-        if (raw[0] == ' ') {
+        char c = raw[0];
+        if (c == ' ') {
             for (int u = 1; u < raw.length; u++) {
-                char c = raw[u];
-                if (c != ' ') {
-                    throw new NotBlankException(c, u + 1);
+                char cu = raw[u];
+                if (cu != ' ') {
+                    throw new NotBlankException(cu, u);
+                }
+            }
+        } else if ('0' <= c && c <= '9'){
+            for (int u = 0; u < raw.length; u++) {
+                char cu = raw[u];
+                if (!('0' <= cu && cu <= '9')) {
+                    throw new NotDigitException(c, u);
                 }
             }
         } else {
-            for (int u = 0; u < raw.length; u++) {
-                char c = raw[u];
-                if (!('0' <= c && c <= '9')) {
-                    throw new NotDigitException(c, u + 1);
-                }
-            }
+            throw new NotDigitBlankException(c, 0);
         }
     }
 
@@ -281,7 +283,7 @@ abstract class FixEngine {
         for (int u = offset, v = 0; v < length; u++, v++) {
             char c = rawData[u];
             if (!('0' <= c && c <= '9')) {
-                throw new NotDigitException(c, u + 1);
+                throw new NotDigitException(c, offset, u);
             }
         }
     }
@@ -297,7 +299,7 @@ abstract class FixEngine {
         for (int u = offset, v = 0; v < length; u++, v++) {
             char c = rawData[u];
             if (!(32 <= c && c <= 127)) {
-                throw new NotAsciiException(c, u + 1);
+                throw new NotAsciiException(c, offset, u);
             }
         }
     }
@@ -317,9 +319,9 @@ abstract class FixEngine {
      */
     protected void testLatin(int offset, int length) {  // getter
         for (int u = offset, v = 0; v < length; u++, v++) {
-            int c = rawData[u];
+            char c = rawData[u];
             if (!(32 <= c && c < 127) && !(160 <= c && c <= 255)) {
-                throw new NotLatinException(c, u + 1);
+                throw new NotLatinException(c, offset, u);
             }
         }
     }
@@ -335,7 +337,7 @@ abstract class FixEngine {
         for (int u = offset, v = 0; v < length; u++, v++) {
             char c = rawData[u];
             if (Character.isISOControl(c) || !Character.isDefined(c)) {
-                throw new NotValidException(c, u + 1);
+                throw new NotValidException(c, offset, u);
             }
         }
     }
@@ -364,17 +366,20 @@ abstract class FixEngine {
         char c = rawData[offset];
         if (c == ' ') {
             for (int u = offset + 1, v = 1; v < length; u++, v++) {
-                if (rawData[u] != ' ') {
-                    throw new NotBlankException(c, u + 1);
+                char cu = rawData[u];
+                if (cu != ' ') {
+                    throw new NotBlankException(cu, offset, u);
+                }
+            }
+        } else if ('0' <= c && c <= '9') {
+            for (int u = offset, v = 0; v < length; u++, v++) {
+                char cu = rawData[u];
+                if (!('0' <= cu && cu <= '9')) {
+                    throw new NotDigitException(cu, offset, u);
                 }
             }
         } else {
-            for (int u = offset, v = 0; v < length; u++, v++) {
-                c = rawData[u];
-                if (!('0' <= c && c <= '9')) {
-                    throw new NotDigitException(c, u + 1);
-                }
-            }
+            throw new NotDigitBlankException(c, offset, offset);
         }
     }
 
@@ -774,21 +779,21 @@ abstract class FixEngine {
                 case PadR:
                     padToRight(s, offset, length, pad);
                     break;
-                case PadL:
-                    padToLeft(s, offset, length, pad);
-                    break;
                 case Error:
                     throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
+                case PadL:  // dead branch ?
+                    padToLeft(s, offset, length, pad);
+                    break;
             }
         } else switch (overflowAction) {
             case TruncR:
                 truncRight(s, offset, length);
                 break;
-            case TruncL:
-                truncLeft(s, offset, length);
-                break;
             case Error:
                 throw new FieldOverFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
+            case TruncL:    // dead branch ?
+                truncLeft(s, offset, length);
+                break;
         }
     }
 
@@ -810,24 +815,24 @@ abstract class FixEngine {
             setAsIs(s, offset);
         else if (s.length() < length) {
             switch (underflowAction) {
-                case PadR:
-                    padToRight(s, offset, length, '0');
-                    break;
                 case PadL:
                     padToLeft(s, offset, length, '0');
                     break;
                 case Error:
                     throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
+                case PadR:  // dead branch
+                    padToRight(s, offset, length, '0');
+                    break;
             }
         } else switch (overflowAction) {
-            case TruncR:
-                truncRight(s, offset, length);
-                break;
             case TruncL:
                 truncLeft(s, offset, length);
                 break;
             case Error:
                 throw new FieldOverFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
+            case TruncR:    // dead branch
+                truncRight(s, offset, length);
+                break;
         }
     }
 

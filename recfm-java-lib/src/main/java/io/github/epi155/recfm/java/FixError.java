@@ -20,4 +20,18 @@ public class FixError {
     private FixError() {
     }
 
+    static String explainChar(char wrong) {
+        String charName = Character.getName(wrong);
+        if (charName == null) {
+            return String.format("(U+%04X) [unassigned char]", (int) wrong);
+        }
+        Character.UnicodeBlock block = Character.UnicodeBlock.of(wrong);
+        if (Character.isISOControl(wrong) ||
+                block == null ||
+                block == Character.UnicodeBlock.SPECIALS) {
+            return String.format("(U+%04X) [%s]", (int) wrong, charName);
+        } else {
+            return String.format("'%c' [%s]", wrong, charName);
+        }
+    }
 }

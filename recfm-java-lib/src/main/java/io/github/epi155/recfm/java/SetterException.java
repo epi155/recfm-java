@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static io.github.epi155.recfm.java.FixError.RECORD_BASE;
+import static io.github.epi155.recfm.java.FixError.explainChar;
+
 class SetterException extends RuntimeException {
     private final String message;
 
@@ -19,10 +22,15 @@ class SetterException extends RuntimeException {
         this.message = String.format("%s.%s, offending value %s @%d", info.name, info.method, value, offset);
     }
 
-    SetterException(int ic, int kp) {
-        super();
+    SetterException(char ic, int ko, int kp) {
+        super();    // getter
         Info info = arrangeStack();
-        this.message = String.format("%s.%s, offending char U+%04x @+%d", info.name, info.method, ic, kp);
+        this.message = String.format("%s.%s, offending char %s @%d^%d", info.name, info.method, explainChar(ic), ko, kp-ko+RECORD_BASE);
+    }
+    SetterException(char ic, int kp) {
+        super();    // setter
+        Info info = arrangeStack();
+        this.message = String.format("%s.%s, offending char %s ^%d", info.name, info.method, explainChar(ic), kp+RECORD_BASE);
     }
 
     private Info arrangeStack() {

@@ -13,4 +13,14 @@ public class NotDigitException extends SetterException {
     public NotDigitException(char c, int u) {
         super(c, u);
     }
+    /**
+     * Constructor
+     *
+     * @param c offending char
+     * @param offs field offset
+     * @param pos offending char offset
+     */
+    public NotDigitException(char c, int offs, int pos) {
+        super(c, offs, pos);
+    }
 }

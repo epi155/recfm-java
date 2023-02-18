@@ -278,8 +278,8 @@ Tag for alphanumeric field is `Abc`, the possible attributes are:
 |[audit](#fld.audit)     |   |boolean| default `false`                    |
 |[onOverflow](#fld.ovfl) |   |[^1]   | default `Trunc`                    |
 |[onUnderflow](#fld.unfl)|   |[^2]   | default `Pad`                      |
-|[padChar](#fld.pchr)    |   |char   | default value `' '`                |
-|[check](#fld.chk)       |   |[^3]   | default value `defaults.abc.check` |
+|[padChar](#fld.pchr)    |pad|char   | default value `' '`                |
+|[check](#fld.chk)       |chk|[^3]   | default value `defaults.abc.check` |
 
 [^1]: Overflow domain: Trunc, Error
 [^2]: Underflow domain: Pad, Error
@@ -404,9 +404,9 @@ Tag for custom field is `Cus`, a custom field is an extension of an alphanumeric
 |[audit](#fld.audit)     |   |boolean| default `false`              |
 |[onOverflow](#fld.ovfl) |   |[^1]   | default `Trunc`              |
 |[onUnderflow](#fld.unfl)|   |[^2]   | default `Pad`                |
-|[padChar](#fld.pchr)    |   |char   | default `defaults.cus.pad`   |
-|[initChar](#fld.ichr)   |   |char   | default `defaults.cus.init`  |
-|[check](#fld.ichk)      |   |[^4]   | default `defaults.cus.check` |
+|[padChar](#fld.pchr)    |pad|char   | default `defaults.cus.pad`   |
+|[initChar](#fld.ichr)   |ini|char   | default `defaults.cus.init`  |
+|[check](#fld.ichk)      |chk|[^4]   | default `defaults.cus.check` |
 |[regex](#fld.regx)      |   |String | default *null*               |
 |[align](#fld.ialign)    |   |[^5]   | default `defaults.cus.align` |
 

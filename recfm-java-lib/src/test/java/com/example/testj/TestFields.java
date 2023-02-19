@@ -199,6 +199,8 @@ class TestFields {
                         it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
+        alpha.setAll("\u007f€");
+        System.out.println(alpha.toString());
     }
     @Test
     void testDigit() {
@@ -317,5 +319,28 @@ class TestFields {
         } catch (NotBlankException e) {
             e.printStackTrace();
         }
+    }
+    @Test
+    void testDomain() {
+        FooDom dom = new FooDom();
+        dom.setCur(null);
+        String domNull = dom.getCur();
+        Assertions.assertEquals("EUR", domNull);
+        Assertions.assertThrows(NotDomainException.class, () -> dom.setCur("AAA"), "test Dom invalid");
+        dom.setCur("USD");
+        if (!dom.validateFails(it ->
+                System.out.printf("Error field %s@%d+%d: %s%n",
+                        it.name(), it.offset(), it.length(), it.message()))) {
+            System.out.println("Valid Date");
+        }
+
+        FooDom d1 = FooDom.decode("AAA");
+        if (!d1.validateFails(it ->
+                System.out.printf("Error field %s@%d+%d: %s%n",
+                        it.name(), it.offset(), it.length(), it.message()))) {
+            System.out.println("Valid Date");
+        }
+        Assertions.assertThrows(NotDomainException.class, () -> d1.getCur(), "test Dom invalid");
+
     }
 }

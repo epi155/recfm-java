@@ -394,7 +394,7 @@ abstract class FixEngine {
     protected void testArray(int offset, int length, String[] domain) {  // getter
         String value = getAbc(offset, length);
         if (Arrays.binarySearch(domain, value) < 0)
-            throw new NotDomainException(offset + 1, value);
+            throw new NotDomainException(offset, value);
     }
 
     /**

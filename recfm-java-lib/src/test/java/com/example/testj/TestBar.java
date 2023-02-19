@@ -1,9 +1,6 @@
 package com.example.testj;
 
-import com.example.sysj.test.BarAlpha;
-import com.example.sysj.test.BarCustom;
-import com.example.sysj.test.BarDigit;
-import com.example.sysj.test.FooAlpha;
+import com.example.sysj.test.*;
 import io.github.epi155.recfm.java.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -21,8 +18,8 @@ public class TestBar {
         Assertions.assertDoesNotThrow(() -> alpha.setWeak("123"), "test Abc underflow/pad");
         Assertions.assertDoesNotThrow(() -> alpha.setWeak("12345"), "test Abc overflow/trunc");
 
-        Assertions.assertThrows(RecordUnderflowException.class, () -> FooAlpha.decode("123"), "test underflow");
-        Assertions.assertThrows(RecordOverflowException.class, () -> FooAlpha.decode("123456789012"), "test overflow");
+        Assertions.assertThrows(RecordUnderflowException.class, () -> BarAlpha.decode("123"), "test underflow");
+        Assertions.assertThrows(RecordOverflowException.class, () -> BarAlpha.decode("123456789012"), "test overflow");
 
         Assertions.assertThrows(FieldUnderFlowException.class, () -> alpha.setStrict("\u0000"), "test ASCII");
         Assertions.assertDoesNotThrow(() -> alpha.setWeak(null), "test Latin1");
@@ -171,5 +168,23 @@ public class TestBar {
         } catch (NotBlankException e) {
             e.printStackTrace();
         }
+    }
+    @Test
+    void testDomain() {
+        BarDom dom = new BarDom();
+        dom.setCur(null);
+        String domNull = dom.getCur();
+        Assertions.assertEquals("EUR", domNull);
+        Assertions.assertThrows(NotDomainException.class, () -> dom.setCur("AAA"), "test Dom invalid");
+        dom.setCur("USD");
+
+        BarDom d1 = BarDom.decode("AAA");
+        if (!d1.validateFails(it ->
+                System.out.printf("Error field %s@%d+%d: %s%n",
+                        it.name(), it.offset(), it.length(), it.message()))) {
+            System.out.println("Valid Date");
+        }
+        Assertions.assertThrows(NotDomainException.class, () -> d1.getCur(), "test Dom invalid");
+
     }
 }

@@ -8,7 +8,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>recfm-java-lib</artifactId>
-  <version> 0.6.0-SNAPSHOT</version>
     <url>https://github.com/epi155/recfm-java/tree/main/recfm-java-lib</url>
 
     <properties>
@@ -49,7 +48,7 @@
             <plugin>
                 <groupId>io.github.epi155</groupId>
                 <artifactId>recfm-maven-plugin</artifactId>
-                <version>0.6.0-SNAPSHOT</version>
+                <version>0.6.0</version>
                 <executions>
                     <execution>
                         <id>enforced</id>

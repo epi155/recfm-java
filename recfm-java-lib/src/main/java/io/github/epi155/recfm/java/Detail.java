@@ -42,7 +42,7 @@ class Detail implements FieldValidateError {
 
     @Override
     public Integer column() {
-        return this.column + FixError.RECORD_BASE;
+        return column==null ? null : column + FixError.RECORD_BASE;
     }
 
     @Override
@@ -57,7 +57,7 @@ class Detail implements FieldValidateError {
 
     @Override
     public String message() {
-        if (wrong != null) {
+        if (wrong != null && column != null) {
             int position = column - offset + FixError.RECORD_BASE;
             return String.format("%d^%s %s", position, explainChar(wrong), code.name());
         } else {    // value != null
@@ -114,9 +114,6 @@ class Detail implements FieldValidateError {
         }
 
         Detail build() {
-            if (wrong==null && value==null) {   // dead branch
-                throw new IllegalStateException();  // safety exception
-            }
             Detail ei = new Detail();
             ei.name = name;
             ei.offset = offset;

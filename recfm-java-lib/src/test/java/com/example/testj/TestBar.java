@@ -1,6 +1,9 @@
 package com.example.testj;
 
-import com.example.sysj.test.*;
+import com.example.sysj.test.BarAlpha;
+import com.example.sysj.test.BarCustom;
+import com.example.sysj.test.BarDigit;
+import com.example.sysj.test.BarDom;
 import io.github.epi155.recfm.java.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -50,6 +53,13 @@ public class TestBar {
                 it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
+        alpha.setWeak("abc  ");
+        Assertions.assertEquals("abc", alpha.getWeak());
+        alpha.setWeak(" ");
+        Assertions.assertEquals("", alpha.getWeak());
+
+        alpha.setUtf8("  ");
+        Assertions.assertEquals(" ", alpha.getUtf8());
     }
     @Test
     void testDigit() {
@@ -95,6 +105,11 @@ public class TestBar {
 
         Assertions.assertDoesNotThrow(() -> BarDigit.decode("123"), "test underflow");
         Assertions.assertDoesNotThrow(() -> BarDigit.decode("123456789012"), "test overflow");
+
+        digit.setWeak("0000");
+        Assertions.assertEquals("0", digit.getWeak());
+        digit.setWeak("0100");
+        Assertions.assertEquals("100", digit.getWeak());
     }
     @Test
     void testCustom() {
@@ -168,6 +183,16 @@ public class TestBar {
         } catch (NotBlankException e) {
             e.printStackTrace();
         }
+
+        cust.setRgt("00");
+        Assertions.assertEquals("", cust.getRgt());
+        cust.setRgt("010");
+        Assertions.assertEquals("10", cust.getRgt());
+
+        cust.setLft("**");
+        Assertions.assertEquals("", cust.getLft());
+        cust.setLft("*1*");
+        Assertions.assertEquals("*1", cust.getLft());
     }
     @Test
     void testDomain() {

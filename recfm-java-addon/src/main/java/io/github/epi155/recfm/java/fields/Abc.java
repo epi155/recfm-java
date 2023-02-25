@@ -3,7 +3,10 @@ package io.github.epi155.recfm.java.fields;
 import io.github.epi155.recfm.java.JavaDoc;
 import io.github.epi155.recfm.type.Defaults;
 import io.github.epi155.recfm.type.FieldAbc;
-import io.github.epi155.recfm.util.*;
+import io.github.epi155.recfm.type.NormalizeMode;
+import io.github.epi155.recfm.util.GenerateArgs;
+import io.github.epi155.recfm.util.IndentPrinter;
+import io.github.epi155.recfm.util.MutableField;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
@@ -65,9 +68,10 @@ public class Abc extends IndentPrinter implements MutableField<FieldAbc>, JavaDo
         printf("public void set%s(String s) {%n", wrkName);
         if (ga.setCheck) chkSetter(fld);
         val align = fld.getAlign();
-        printf("    setAbc(s, %s, %d, OverflowAction.%s, UnderflowAction.%s, '%c', ' ');%n",
-                pos.apply(fld.getOffset()), fld.getLength(), fld.safeOverflow().of(align),
-                fld.safeUnderflow().of(align), fld.getPadChar());
+        val ovfl = notNullOf(fld.getOnOverflow(), defaults.getOnOverflow());
+        val unfl = notNullOf(fld.getOnUnderflow(), defaults.getOnUnderflow());
+        printf("    setAbc(s, %s, %d, Action.Overflow.%s, Action.Underflow.%s, '%c', ' ');%n",
+            pos.apply(fld.getOffset()), fld.getLength(), ovfl.of(align), unfl.of(align), fld.getPadChar());
         printf("}%n");
     }
 
@@ -75,7 +79,13 @@ public class Abc extends IndentPrinter implements MutableField<FieldAbc>, JavaDo
         if (ga.doc) docGetter(fld);
         printf("public String get%s() {%n", wrkName);
         if (ga.getCheck) chkGetter(fld);
-        printf("    return getAbc(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());
+        val norm = notNullOf(fld.getNormalize(), defaults.getNormalize());
+        if (norm == NormalizeMode.None) {
+            printf("    return getAbc(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());
+        } else {
+            printf("    return getAbc(%s, %d, Action.Normalize.R%s, ' ');%n",
+                pos.apply(fld.getOffset()), fld.getLength(), norm.name());
+        }
         printf("}%n");
     }
 

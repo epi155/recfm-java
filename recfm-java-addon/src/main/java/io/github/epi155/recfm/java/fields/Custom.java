@@ -3,6 +3,7 @@ package io.github.epi155.recfm.java.fields;
 import io.github.epi155.recfm.java.JavaDoc;
 import io.github.epi155.recfm.type.Defaults;
 import io.github.epi155.recfm.type.FieldCustom;
+import io.github.epi155.recfm.type.NormalizeMode;
 import io.github.epi155.recfm.util.GenerateArgs;
 import io.github.epi155.recfm.util.IndentPrinter;
 import io.github.epi155.recfm.util.MutableField;
@@ -106,18 +107,20 @@ public class Custom extends IndentPrinter implements MutableField<FieldCustom>, 
         val align = notNullOf(fld.getAlign(), defaults.getAlign());
         val pad = notNullOf(fld.getPadChar(), defaults.getPad());
         val init = notNullOf(fld.getInitChar(), defaults.getInit());
+        val ovfl = notNullOf(fld.getOnOverflow(), defaults.getOnOverflow());
+        val unfl = notNullOf(fld.getOnUnderflow(), defaults.getOnUnderflow());
         if (ga.setCheck) {
-            printf("    s = normalize(s, OverflowAction.%s, UnderflowAction.%s, '%c', '%c', %s, %d);%n",
-                    fld.safeOverflow().of(align), fld.safeUnderflow().of(align), pad, init,
-                    pos.apply(fld.getOffset()), fld.getLength()
+            printf("    s = normalize(s, Action.Overflow.%s, Action.Underflow.%s, '%c', '%c', %s, %d);%n",
+                ovfl.of(align), unfl.of(align), pad, init,
+                pos.apply(fld.getOffset()), fld.getLength()
             );
             chkSetter(fld);
             printf("    setAsIs(s, %s);%n",
                     pos.apply(fld.getOffset()));
         } else {
-            printf("    setAbc(s, %s, %d, OverflowAction.%s, UnderflowAction.%s, '%c', '%c');%n",
-                    pos.apply(fld.getOffset()), fld.getLength(),
-                    fld.safeOverflow().of(align), fld.safeUnderflow().of(align), pad, init);
+            printf("    setAbc(s, %s, %d, Action.Overflow.%s, Action.Underflow.%s, '%c', '%c');%n",
+                pos.apply(fld.getOffset()), fld.getLength(),
+                ovfl.of(align), unfl.of(align), pad, init);
         }
         printf("}%n");
     }
@@ -126,7 +129,14 @@ public class Custom extends IndentPrinter implements MutableField<FieldCustom>, 
         if (ga.doc) docGetter(fld);
         printf("public String get%s() {%n", wrkName);
         if (ga.getCheck) chkGetter(fld);
-        printf("    return getAbc(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());
+        val pad = notNullOf(fld.getPadChar(), defaults.getPad());
+        val norm = notNullOf(fld.getNormalize(), defaults.getNormalize());
+        if (norm == NormalizeMode.None) {
+            printf("    return getAbc(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());
+        } else {
+            printf("    return getAbc(%s, %d, Action.Normalize.%s, '%c');%n",
+                pos.apply(fld.getOffset()), fld.getLength(), norm.of(fld.getAlign()), pad);
+        }
         printf("}%n");
     }
 

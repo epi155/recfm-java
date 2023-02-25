@@ -33,7 +33,7 @@ public class AccessFactory {
      */
     private AccessFactory(PrintWriter pw, Defaults defaults, IntFunction<String> pos) {
         this.delegateAbc = new Abc(pw, defaults.getAbc(), pos);
-        this.delegateNum = new Num(pw, pos);
+        this.delegateNum = new Num(pw, pos, defaults.getNum());
         this.delegateCus = new Custom(pw, defaults.getCus(), pos);
         this.delegateDom = new Domain(pw, pos);
     }

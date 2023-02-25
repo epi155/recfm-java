@@ -15,6 +15,7 @@ abstract class FixEngine {
     private static final String CHARS_FOUND = " chars, found ";
     private static final String CHARS_FOUND_NULL = " chars, found [NULL]";
     private static final String RECORD_LENGTH = "Record length ";
+    private static final String EMPTY_STRING = "";
     /**
      * record store area
      */
@@ -190,12 +191,12 @@ abstract class FixEngine {
      * @return normalized value
      */
     protected static String normalize(String s,
-                                      OverflowAction overflowAction,
-                                      UnderflowAction underflowAction,
+                                      Action.Overflow overflowAction,
+                                      Action.Underflow underflowAction,
                                       char pad, char init,
                                       int offset, int length) {
         if (s == null) {
-            if (underflowAction == UnderflowAction.Error)
+            if (underflowAction == Action.Underflow.Error)
                 throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND_NULL);
             return fill(length, init);
         } else if (s.length() == length)
@@ -270,6 +271,53 @@ abstract class FixEngine {
      */
     protected String getAbc(int offset, int length) {
         return new String(rawData, offset, length);
+    }
+
+    /**
+     * Alphanumeric getter
+     * @param offset    field offset
+     * @param length    field length
+     * @param rule      normalization rule
+     * @param pad       padding char
+     * @return          normalized field value
+     */
+    protected String getAbc(int offset, int length, Action.Normalize rule, char pad) {
+        switch (rule) {
+            case RTrim: return rgtTrim(offset, length, pad);
+            case RTrim1: return rgtTrim1(offset, length, pad);
+            case LTrim: return lftTrim(offset, length, pad);
+            case LTrim1: return lftTrim1(offset, length, pad);
+            case None: return new String(rawData, offset, length);  // String getAbc(int, int) should be used !!
+        }
+        throw new IllegalStateException();  // dead branch
+    }
+
+    private String lftTrim(int offset, int length, char pad) {
+        int min=offset;
+        int top = offset + length;
+        for(;min<top;min++) if (rawData[min]!=pad) break;
+        if (min==top) return EMPTY_STRING;
+        return new String(rawData, min, top-min);
+    }
+    private String lftTrim1(int offset, int length, char pad) {
+        int min=offset;
+        int top = offset + length;
+        for(;min<top;min++) if (rawData[min]!=pad) break;
+        if (min==top) return String.valueOf(pad);
+        return new String(rawData, min, top-min);
+    }
+
+    private String rgtTrim(int offset, int length, char pad) {
+        int max = offset + length - 1;
+        for(;max>=offset;max--) if (rawData[max]!=pad) break;
+        if (max<offset) return EMPTY_STRING;
+        return new String(rawData, offset, max-offset+1);
+    }
+    private String rgtTrim1(int offset, int length, char pad) {
+        int max = offset + length - 1;
+        for(;max>=offset;max--) if (rawData[max]!=pad) break;
+        if (max<offset) return String.valueOf(pad);
+        return new String(rawData, offset, max-offset+1);
     }
 
     /**
@@ -768,9 +816,9 @@ abstract class FixEngine {
      * @param pad             padding char
      * @param init            initialize char
      */
-    protected void setAbc(String s, int offset, int length, OverflowAction overflowAction, UnderflowAction underflowAction, char pad, char init) {
+    protected void setAbc(String s, int offset, int length, Action.Overflow overflowAction, Action.Underflow underflowAction, char pad, char init) {
         if (s == null) {
-            if (underflowAction == UnderflowAction.Error)
+            if (underflowAction == Action.Underflow.Error)
                 throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND_NULL);
             fillChar(offset, length, init);
         } else if (s.length() == length)
@@ -807,9 +855,9 @@ abstract class FixEngine {
      * @param overflowAction  overflow behaviour
      * @param underflowAction underflow behaviour
      */
-    protected void setNum(String s, int offset, int length, OverflowAction overflowAction, UnderflowAction underflowAction) {
+    protected void setNum(String s, int offset, int length, Action.Overflow overflowAction, Action.Underflow underflowAction) {
         if (s == null) {
-            if (underflowAction == UnderflowAction.Error)
+            if (underflowAction == Action.Underflow.Error)
                 throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND_NULL);
             fillChar(offset, length, '0');
         } else if (s.length() == length)
@@ -821,7 +869,7 @@ abstract class FixEngine {
                     break;
                 case Error:
                     throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
-                case PadR:  // dead branch
+                case PadR:  // dead branch, Number are LEFT padded !!
                     padToRight(s, offset, length, '0');
                     break;
             }
@@ -831,7 +879,7 @@ abstract class FixEngine {
                 break;
             case Error:
                 throw new FieldOverFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
-            case TruncR:    // dead branch
+            case TruncR:    // dead branch, Number are LEFT truncated !!
                 truncRight(s, offset, length);
                 break;
         }

@@ -232,8 +232,7 @@ public class CodeGenerator implements IndentAble, CodeProvider {
         pw.println();
         pw.printf("import %s.FieldValidateHandler;%n", CodeGenerator.SYSTEM_PACKAGE);
         pw.printf("import %s.FixRecord;%n", CodeGenerator.SYSTEM_PACKAGE);
-        pw.printf("import %s.OverflowAction;%n", CodeGenerator.SYSTEM_PACKAGE);
-        pw.printf("import %s.UnderflowAction;%n", CodeGenerator.SYSTEM_PACKAGE);
+        pw.printf("import %s.Action;%n", CodeGenerator.SYSTEM_PACKAGE);
         pw.println();
     }
 

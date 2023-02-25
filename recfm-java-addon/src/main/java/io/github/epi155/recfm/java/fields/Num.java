@@ -1,6 +1,8 @@
 package io.github.epi155.recfm.java.fields;
 
+import io.github.epi155.recfm.type.Defaults;
 import io.github.epi155.recfm.type.FieldNum;
+import io.github.epi155.recfm.type.NormalizeMode;
 import io.github.epi155.recfm.util.GenerateArgs;
 import io.github.epi155.recfm.util.IndentPrinter;
 import io.github.epi155.recfm.util.MutableField;
@@ -13,16 +15,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntFunction;
 
 import static io.github.epi155.recfm.java.JavaTools.prefixOf;
+import static io.github.epi155.recfm.util.Tools.notNullOf;
 
 @Slf4j
 public class Num extends IndentPrinter implements MutableField<FieldNum> {
     private static final String TEST_DIGIT_CHECK = "    testDigit(%s, %d);%n";
-    public Num(PrintWriter pw, IntFunction<String> pos) {
+    private final Defaults.NumDefault defaults;
+    public Num(PrintWriter pw, IntFunction<String> pos, Defaults.NumDefault defaults) {
         super(pw, pos);
+        this.defaults = defaults;
     }
 
-    public Num(PrintWriter pw) {
+    public Num(PrintWriter pw, Defaults.NumDefault defaults) {
         super(pw);
+        this.defaults = defaults;
     }
 
 
@@ -56,7 +62,13 @@ public class Num extends IndentPrinter implements MutableField<FieldNum> {
         if (doc) docGetter(fld, "string");
         printf("public String get%s() {%n", wrkName);
         printf(TEST_DIGIT_CHECK, pos.apply(fld.getOffset()), fld.getLength());
-        printf("    return getAbc(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());
+        val norm = notNullOf(fld.getNormalize(), defaults.getNormalize());
+        if (norm == NormalizeMode.None) {
+            printf("    return getAbc(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());
+        } else {
+            printf("    return getAbc(%s, %d, Action.Normalize.LTrim1, '0');%n",
+                pos.apply(fld.getOffset()), fld.getLength());
+        }
         printf("}%n");
         if (doc) docSetter(fld, "s string");
         printf("public void set%s(String s) {%n", wrkName);
@@ -68,8 +80,10 @@ public class Num extends IndentPrinter implements MutableField<FieldNum> {
             printf("    testDigit(s);%n");
         }
         val align = fld.getAlign();
-        printf("    setNum(s, %s, %d, OverflowAction.%s, UnderflowAction.%s);%n",
-            pos.apply(fld.getOffset()), fld.getLength(), fld.safeOverflow().of(align), fld.safeUnderflow().of(align));
+        val ovfl = notNullOf(fld.getOnOverflow(), defaults.getOnOverflow());
+        val unfl = notNullOf(fld.getOnUnderflow(), defaults.getOnUnderflow());
+        printf("    setNum(s, %s, %d, Action.Overflow.%s, Action.Underflow.%s);%n",
+            pos.apply(fld.getOffset()), fld.getLength(), ovfl.of(align), unfl.of(align));
         printf("}%n");
     }
 

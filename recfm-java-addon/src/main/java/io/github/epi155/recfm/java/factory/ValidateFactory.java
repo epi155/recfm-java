@@ -18,7 +18,7 @@ public class ValidateFactory {
 
     private ValidateFactory(PrintWriter pw, Defaults defaults) {
         this.delegateAbc = new Abc(pw, defaults.getAbc());
-        this.delegateNum = new Num(pw);
+        this.delegateNum = new Num(pw, defaults.getNum());
         this.delegateCus = new Custom(pw, defaults.getCus());
         this.delegateDom = new Domain(pw);
         this.delegateFil = new Filler(pw, defaults.getFil());

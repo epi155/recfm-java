@@ -5,12 +5,10 @@ import io.github.epi155.recfm.java.fields.PreCustom;
 import io.github.epi155.recfm.java.fields.PreDomain;
 import io.github.epi155.recfm.type.*;
 import io.github.epi155.recfm.util.PrepareField;
-import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintWriter;
 
-@Slf4j
 public class PrepareFactory {
     private final PrepareField<FieldDomain> delegateDom;
     private final PrepareField<FieldConstant> delegateVal;
@@ -70,7 +68,7 @@ public class PrepareFactory {
         } else if (fld instanceof FieldGroup) {
             prepareGrp((FieldGroup) fld, bias);
         } else {
-            log.warn("Unknown field type {}", fld.getClass().getSimpleName());
+            throw new IllegalStateException("Unknown field type " + fld.getClass().getSimpleName());
         }
     }
 }

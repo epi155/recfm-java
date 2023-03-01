@@ -2,11 +2,10 @@ package io.github.epi155.recfm.java.fields;
 
 import io.github.epi155.recfm.type.Defaults;
 import io.github.epi155.recfm.type.FieldNum;
-import io.github.epi155.recfm.type.NormalizeMode;
+import io.github.epi155.recfm.type.NormalizeNumMode;
 import io.github.epi155.recfm.util.GenerateArgs;
 import io.github.epi155.recfm.util.IndentPrinter;
 import io.github.epi155.recfm.util.MutableField;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +16,6 @@ import java.util.function.IntFunction;
 import static io.github.epi155.recfm.java.JavaTools.prefixOf;
 import static io.github.epi155.recfm.util.Tools.notNullOf;
 
-@Slf4j
 public class Num extends IndentPrinter implements MutableField<FieldNum> {
     private static final String TEST_DIGIT_CHECK = "    testDigit(%s, %d);%n";
     private final Defaults.NumDefault defaults;
@@ -49,7 +47,7 @@ public class Num extends IndentPrinter implements MutableField<FieldNum> {
         numeric(fld, wrkName, ga.doc);
         if (fld.isNumericAccess()) {
             if (fld.getLength() > 19)
-                log.warn("Field {} too large {}-digits for numeric access", fld.getName(), fld.getLength());
+                throw new IllegalStateException("Field "+fld.getName()+" too large "+fld.getLength()+"-digits for numeric access");
             else if (fld.getLength() > 9) useLong(fld, wrkName, ga.doc);    // 10..19
             else if (fld.getLength() > 4 || ga.align == 4) useInt(fld, wrkName, ga.doc);     // 5..9
             else if (fld.getLength() > 2 || ga.align == 2) useShort(fld, wrkName, ga.doc);   // 3..4
@@ -63,7 +61,7 @@ public class Num extends IndentPrinter implements MutableField<FieldNum> {
         printf("public String get%s() {%n", wrkName);
         printf(TEST_DIGIT_CHECK, pos.apply(fld.getOffset()), fld.getLength());
         val norm = notNullOf(fld.getNormalize(), defaults.getNormalize());
-        if (norm == NormalizeMode.None) {
+        if (norm == NormalizeNumMode.None) {
             printf("    return getAbc(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());
         } else {
             printf("    return getAbc(%s, %d, Action.Normalize.LTrim1, '0');%n",

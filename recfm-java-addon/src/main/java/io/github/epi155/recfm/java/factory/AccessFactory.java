@@ -8,7 +8,6 @@ import io.github.epi155.recfm.type.*;
 import io.github.epi155.recfm.util.AccessField;
 import io.github.epi155.recfm.util.GenerateArgs;
 import io.github.epi155.recfm.util.Tools;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,7 +17,6 @@ import java.util.function.IntFunction;
 /**
  * class that generates the java methods for accessing the fields.
  */
-@Slf4j
 public class AccessFactory {
     private final AccessField<FieldAbc> delegateAbc;
     private final AccessField<FieldNum> delegateNum;
@@ -79,7 +77,7 @@ public class AccessFactory {
         } else if (fld instanceof FieldDomain) {
             createMethodsDomain((FieldDomain) fld, indent, ga);
         } else {
-            log.warn("Unknown field type {}: {}", fld.getName(), fld.getClass().getSimpleName());
+            throw new IllegalStateException("Unknown field type " + fld.getName() +": " + fld.getClass().getSimpleName());
         }
     }
 }

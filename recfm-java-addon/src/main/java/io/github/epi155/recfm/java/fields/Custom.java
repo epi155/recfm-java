@@ -3,11 +3,10 @@ package io.github.epi155.recfm.java.fields;
 import io.github.epi155.recfm.java.JavaDoc;
 import io.github.epi155.recfm.type.Defaults;
 import io.github.epi155.recfm.type.FieldCustom;
-import io.github.epi155.recfm.type.NormalizeMode;
+import io.github.epi155.recfm.type.NormalizeAbcMode;
 import io.github.epi155.recfm.util.GenerateArgs;
 import io.github.epi155.recfm.util.IndentPrinter;
 import io.github.epi155.recfm.util.MutableField;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,7 +17,6 @@ import java.util.function.IntFunction;
 import static io.github.epi155.recfm.java.JavaTools.prefixOf;
 import static io.github.epi155.recfm.util.Tools.notNullOf;
 
-@Slf4j
 public class Custom extends IndentPrinter implements MutableField<FieldCustom>, JavaDoc {
     private final Defaults.CusDefault defaults;
 
@@ -131,7 +129,7 @@ public class Custom extends IndentPrinter implements MutableField<FieldCustom>, 
         if (ga.getCheck) chkGetter(fld);
         val pad = notNullOf(fld.getPadChar(), defaults.getPad());
         val norm = notNullOf(fld.getNormalize(), defaults.getNormalize());
-        if (norm == NormalizeMode.None) {
+        if (norm == NormalizeAbcMode.None) {
             printf("    return getAbc(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());
         } else {
             printf("    return getAbc(%s, %d, Action.Normalize.%s, '%c');%n",

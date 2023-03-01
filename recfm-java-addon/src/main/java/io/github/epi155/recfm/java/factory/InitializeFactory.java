@@ -3,13 +3,10 @@ package io.github.epi155.recfm.java.factory;
 import io.github.epi155.recfm.java.fields.*;
 import io.github.epi155.recfm.type.*;
 import io.github.epi155.recfm.util.InitializeField;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.PrintWriter;
 
-@Slf4j
-public
-class InitializeFactory {
+public class InitializeFactory {
     private final InitializeField<FieldAbc> delegateAbc;
     private final InitializeField<FieldNum> delegateNum;
     private final InitializeField<FieldCustom> delegateCus;
@@ -89,7 +86,7 @@ class InitializeFactory {
         } else if (fld instanceof FieldGroup) {
             initializeGrp((FieldGroup) fld, bias);
         } else {
-            log.warn("Unknown field type {}", fld.getClass().getSimpleName());
+            throw new IllegalStateException("Unknown field type " + fld.getClass().getSimpleName());
         }
     }
 

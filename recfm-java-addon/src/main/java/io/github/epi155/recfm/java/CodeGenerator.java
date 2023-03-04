@@ -10,7 +10,6 @@ import io.github.epi155.recfm.util.DumpFactory;
 import io.github.epi155.recfm.util.DumpInfo;
 import io.github.epi155.recfm.util.GenerateArgs;
 import io.github.epi155.recfm.util.Tools;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,7 +22,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntFunction;
 
-@Slf4j
 public class CodeGenerator implements IndentAble, CodeProvider {
     private static final String SYSTEM_PACKAGE = "io.github.epi155.recfm.java";
     private static final String OVERRIDE_METHOD = "    @Override%n";

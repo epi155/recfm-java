@@ -6,7 +6,6 @@ import io.github.epi155.recfm.type.FieldCustom;
 import io.github.epi155.recfm.util.GenerateArgs;
 import io.github.epi155.recfm.util.IndentPrinter;
 import io.github.epi155.recfm.util.MutableField;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +16,6 @@ import java.util.function.IntFunction;
 import static io.github.epi155.recfm.java.JavaTools.prefixOf;
 import static io.github.epi155.recfm.util.Tools.notNullOf;
 
-@Slf4j
 public class Custom extends IndentPrinter implements MutableField<FieldCustom>, JavaDoc {
     private final Defaults.CusDefault defaults;
 

@@ -3,8 +3,9 @@ package io.github.epi155.recfm.java.fields;
 import io.github.epi155.recfm.java.JavaDoc;
 import io.github.epi155.recfm.type.Defaults;
 import io.github.epi155.recfm.type.FieldAbc;
-import io.github.epi155.recfm.util.*;
-import lombok.extern.slf4j.Slf4j;
+import io.github.epi155.recfm.util.GenerateArgs;
+import io.github.epi155.recfm.util.IndentPrinter;
+import io.github.epi155.recfm.util.MutableField;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,7 +16,6 @@ import java.util.function.IntFunction;
 import static io.github.epi155.recfm.java.JavaTools.prefixOf;
 import static io.github.epi155.recfm.util.Tools.notNullOf;
 
-@Slf4j
 public class Abc extends IndentPrinter implements MutableField<FieldAbc>, JavaDoc {
     private final Defaults.AbcDefault defaults;
 

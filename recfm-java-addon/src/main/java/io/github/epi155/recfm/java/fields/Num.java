@@ -4,7 +4,6 @@ import io.github.epi155.recfm.type.FieldNum;
 import io.github.epi155.recfm.util.GenerateArgs;
 import io.github.epi155.recfm.util.IndentPrinter;
 import io.github.epi155.recfm.util.MutableField;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,7 +13,6 @@ import java.util.function.IntFunction;
 
 import static io.github.epi155.recfm.java.JavaTools.prefixOf;
 
-@Slf4j
 public class Num extends IndentPrinter implements MutableField<FieldNum> {
     private static final String TEST_DIGIT_CHECK = "    testDigit(%s, %d);%n";
     public Num(PrintWriter pw, IntFunction<String> pos) {
@@ -43,7 +41,7 @@ public class Num extends IndentPrinter implements MutableField<FieldNum> {
         numeric(fld, wrkName, ga.doc);
         if (fld.isNumericAccess()) {
             if (fld.getLength() > 19)
-                log.warn("Field {} too large {}-digits for numeric access", fld.getName(), fld.getLength());
+                throw new IllegalStateException("Field "+fld.getName()+" too large "+fld.getLength()+"-digits for numeric access");
             else if (fld.getLength() > 9) useLong(fld, wrkName, ga.doc);    // 10..19
             else if (fld.getLength() > 4 || ga.align == 4) useInt(fld, wrkName, ga.doc);     // 5..9
             else if (fld.getLength() > 2 || ga.align == 2) useShort(fld, wrkName, ga.doc);   // 3..4

@@ -289,9 +289,12 @@ Tag for alphanumeric field is `Abc`, the possible attributes are:
 [^3]: CheckA domain: None, Ascii, Latin1, Valid
 
 Some attributes also have a shortened form. The meaning of some attributes is immediate.
-The <a name='fld.offset'>offset</a> attribute indicates the starting position of the field (starting from 1).
-The <a name='fld.length'>length</a> attribute indicates the length of the field.
-The <a name='fld.name'>name</a> attribute indicates the name of the field.
+
+The <ins id='fld.offset'>offset</ins> attribute indicates the starting position of the field (starting from 1).
+
+The <ins id='fld.length'>length</ins> attribute indicates the length of the field.
+
+The <ins id='fld.name'>name</ins> attribute indicates the name of the field.
 
 ~~~yml
 classes:
@@ -316,7 +319,7 @@ classes:
     public void setLouie(String s){...}
 ~~~
 
-The <a name='fld.redef'>redefines</a> attribute indicates that the field is a redefinition of an area, this field will
+The <ins id='fld.redef'>redefines</ins> attribute indicates that the field is a redefinition of an area, this field will
 not be considered in the overlay checks
 
 ~~~yml
@@ -329,20 +332,17 @@ not be considered in the overlay checks
       - !Num { name: day     , at: 9, len: 2, red: true }
 ~~~
 
-To introduce the <a name='fld.audit'>audit</a> attribute see section [5.4](#54).
+To introduce the <ins id='fld.audit'>audit</ins> attribute see section [5.4](#54).
 
-<a name='fld.ovfl'>onOverflow</a> indicates what to do if you try to set a value whose length is greater than the
+<ins id='fld.ovfl'>onOverflow</ins> indicates what to do if you try to set a value whose length is greater than the
 defined one. It is possible to set `Trunc` and `Error`, in the first two cases the value is truncated, respectively to
 the left or to the right, in the last case an exception is thrown.
 
-<a name='fld.unfl'>onUnderflow</a> indicates what to do if you try to set a value whose length is less than the defined
-one. It is possible to set `Pad` and `Error`, in the first two cases the value is padded respectively to the left or to
-the right, in the last case an exception is thrown.
+<ins id='fld.unfl'>onUnderflow</ins> indicates what to do if you try to set a value whose length is less than the defined one. It is possible to set `Pad` and `Error`, in the first two cases the value is padded respectively to the left or to the right, in the last case an exception is thrown.
 
-<a name='fld.pchr'>padchar</a> indicates the character to use for padding, in case of underflow.
+<ins id='fld.pchr'>padchar</ins> indicates the character to use for padding, in case of underflow.
 
-<a name='fld.chk'>check</a> indicates which checks to perform in the *validate* or *audit* phase. The following values
-are available:
+<ins id='fld.chk'>check</ins> indicates which checks to perform in the *validate* or *audit* phase. The following values are available:
 
 `None`
 : no check will be performed
@@ -372,7 +372,7 @@ is necessarily 0, the control is necessarily that the characters are numeric, th
 | [onUnderflow](#fld.unfl)  |     |  [^2]   | default `Pad`         |
 | [numericAccess](#fld.num) | num | boolean | default value `false` |
 
-<a name='fld.num'>numericAccess</a> indicates whether to generate the numeric setters and getters for the field, in
+<ins id='fld.num'>numericAccess</ins> indicates whether to generate the numeric setters and getters for the field, in
 addition to the alphanumeric ones. Numeric getters are prefixed with the return type.
 
 ~~~yml
@@ -416,10 +416,10 @@ Tag for custom field is `Cus`, a custom field is an extension of an alphanumeric
 [^4]: CheckC domain: None, Ascii, Latin1, Valid, Digit, DigitOrBlank
 [^5]: AlignC domain: LFT, RGT
 
-<a name='fld.ichr'>initChar</a> indicates the character to use to initialize the field when the empty constructor is
+<ins id='fld.ichr'>initChar</ins> indicates the character to use to initialize the field when the empty constructor is
 used.
 
-<a name='fld.ichk'>check</a> indicates which checks to perform in the *validate* or *audit* phase. The following values
+<ins id='fld.ichk'>check</ins> indicates which checks to perform in the *validate* or *audit* phase. The following values
 are available:
 
 `None` .. `Valid`
@@ -431,10 +431,10 @@ are available:
 `DigitOrBlank`
 : digit or all space characters is accepted
 
-<a name='fld.regx'>regex</a> if present indicates that the value must satisfy the regular expression, this check
+<ins id='fld.regx'>regex</ins> if present indicates that the value must satisfy the regular expression, this check
 overrides the [check](#fld.ichk) one. Regex control, on setter, is performed after any pad / truncate normalizations
 
-<a name='fld.ialign'>align</a> indicates the direction to align the field in case the supplied length is different from
+<ins id='fld.ialign'>align</ins> indicates the direction to align the field in case the supplied length is different from
 the available one.
 
 #### <a name="434">4.3.4. Domain </a>
@@ -450,7 +450,7 @@ Tag for domain field is `Dom`, a domain field can only take a limited number of 
 | [audit](#fld.audit)     |     | boolean  | default `false` |
 | [items](#fld.items)     |     | String[] | **required**    |
 
-<a name='fld.items'>items</a> indicates the list of possible values that the field can assume. All values supplied must have the expected length for the field. The first value supplied will be used to initialize the field.
+<ins id='fld.items'>items</ins> indicates the list of possible values that the field can assume. All values supplied must have the expected length for the field. The first value supplied will be used to initialize the field.
 
 ~~~yml
   - name: Foo
@@ -475,7 +475,7 @@ for it, the possible attributes are:
 | [fillChar](#fld.fill) |     | char | default value `defaults.fil.fill`  |
 | [check](#fld.chk)     |     | [^3] | default value `defaults.fil.check` |
 
-<a name='fld.fill'>fillChar</a> indicates the character to use to initialize the area
+<ins id='fld.fill'>fillChar</ins> indicates the character to use to initialize the area
 
 #### <a name="436">4.3.6. Constant </a>
 
@@ -489,7 +489,7 @@ verify that the present value coincides with the set one, the possible attribute
 | [value](#fld.val)     | val | String  | **required**    |
 | [audit](#fld.audit)   |     | boolean | default `false` |
 
-<a name='fld.val'>value</a> indicates the value with which to initialize the area
+<ins id='fld.val'>value</ins> indicates the value with which to initialize the area
 
 #### <a name="437">4.3.7. Group </a>
 
@@ -504,12 +504,16 @@ attributes are:
 | [redefines](#grp.redef) | red | boolean | default `false`           |
 | [fields](#grp.flds)     |     |  array  | **required** child fields |
 
-The <a name='grp.offset'>offset</a> attribute indicates the starting position of the group (starting from 1).
-The <a name='grp.length'>length</a> attribute indicates the length of the group.
-The <a name='grp.name'>name</a> attribute indicates the name of the group.
-The <a name='grp.redef'>redefines</a> attribute indicates that the group is a redefinition of an area, this group will
+The <ins id='grp.offset'>offset</ins> attribute indicates the starting position of the group (starting from 1).
+
+The <ins id='grp.length'>length</ins> attribute indicates the length of the group.
+
+The <ins id='grp.name'>name</ins> attribute indicates the name of the group.
+
+The <ins id='grp.redef'>redefines</ins> attribute indicates that the group is a redefinition of an area, this group will
 not be considered in the overlay checks
-The <a name='grp.flds'>fields</a> attribute indicates a definition list of fields
+
+The <ins id='grp.flds'>fields</ins> attribute indicates a definition list of fields
 
 Group definition example (mixed yaml/json):
 
@@ -587,14 +591,19 @@ occurrence and the number of occurrences, the possible attributes are:
 | [fields](#occ.flds)     |     |  array  | **required** child fields |
 | [times](#occ.times)     | x   |   int   | **required** occurrences  |
 
-The <a name='occ.offset'>offset</a> attribute indicates the starting position of the first group (starting from 1).
-The <a name='occ.length'>length</a> attribute indicates the length of a single group.
-The <a name='occ.name'>name</a> attribute indicates the name of the group.
-The <a name='occ.redef'>redefines</a> attribute indicates that the group is a redefinition of an area, this group will
+The <ins id='occ.offset'>offset</ins> attribute indicates the starting position of the first group (starting from 1).
+
+The <ins id='occ.length'>length</ins> attribute indicates the length of a single group.
+
+The <ins id='occ.name'>name</ins> attribute indicates the name of the group.
+
+The <ins id='occ.redef'>redefines</ins> attribute indicates that the group is a redefinition of an area, this group will
 not be considered in the overlay checks
-The <a name='occ.flds'>fields</a> attribute indicates a definition list of fields, the offsets of the fields are those
+
+The <ins id='occ.flds'>fields</ins> attribute indicates a definition list of fields, the offsets of the fields are those
 relative to the first group
-The <a name='occ.times'>times</a> attribute indicates the number of times the group is repeated
+
+The <ins id='occ.times'>times</ins> attribute indicates the number of times the group is repeated
 
 Occurs definition example:
 

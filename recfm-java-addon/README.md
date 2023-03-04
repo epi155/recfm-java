@@ -81,7 +81,7 @@ Configuration plugin example:
         <dependency>
             <groupId>io.github.epi155</groupId>
             <artifactId>recfm-java-addon</artifactId>
-            <version>0.6.0</version>
+            <version>0.6.1</version>
         </dependency>
     </dependencies>
 </plugin>
@@ -147,7 +147,7 @@ Dependencies required by the user code
         <dependency>
             <groupId>io.github.epi155</groupId>
             <artifactId>recfm-java-lib</artifactId>
-            <version>0.6.0</version>
+            <version>0.6.1</version>
         </dependency>
 ~~~
 
@@ -272,17 +272,17 @@ should be defined as a filler.
 
 Tag for alphanumeric field is `Abc`, the possible attributes are:
 
-|attribute  |alt| type  | note                               |
-|-----------|---| :---: |------------------------------------|
-|[offset](#fld.offset)   |at | int   | **required**                       |
-|[length](#fld.length)   |len| int   | **required**                       |
-|[name](#fld.name)       |   |String | **required**                       |
-|[redefines](#fld.redef) |red|boolean| default `false`                    |
-|[audit](#fld.audit)     |   |boolean| default `false`                    |
-|[onOverflow](#fld.ovfl) |   |[^1]   | default `Trunc`                    |
-|[onUnderflow](#fld.unfl)|   |[^2]   | default `Pad`                      |
-|[padChar](#fld.pchr)    |pad|char   | default value `' '`                |
-|[check](#fld.chk)       |chk|[^3]   | default value `defaults.abc.check` |
+| attribute                | alt |  type   | note                               |
+|--------------------------|-----|:-------:|------------------------------------|
+| [offset](#fld.offset)    | at  |   int   | **required**                       |
+| [length](#fld.length)    | len |   int   | **required**                       |
+| [name](#fld.name)        |     | String  | **required**                       |
+| [redefines](#fld.redef)  | red | boolean | default `false`                    |
+| [audit](#fld.audit)      |     | boolean | default `false`                    |
+| [onOverflow](#fld.ovfl)  |     |  [^1]   | default `Trunc`                    |
+| [onUnderflow](#fld.unfl) |     |  [^2]   | default `Pad`                      |
+| [padChar](#fld.pchr)     | pad |  char   | default value `' '`                |
+| [check](#fld.chk)        | chk |  [^3]   | default value `defaults.abc.check` |
 
 [^1]: Overflow domain: Trunc, Error
 [^2]: Underflow domain: Pad, Error
@@ -361,16 +361,16 @@ are available:
 Tag for numeric field is `Num`, many attributes have the same meaning as in the alphanumeric case, the padding character
 is necessarily 0, the control is necessarily that the characters are numeric, the possible attributes are:
 
-|attribute  |alt|type   | note                  |
-|-----------|---| :---: |-----------------------|
-|[offset](#fld.offset)   |at | int   | **required**          |
-|[length](#fld.length)   |len| int   | **required**          |
-|[name](#fld.name)       |   |String | **required**          |
-|[redefines](#fld.redef) |red|boolean| default `false`       |
-|[audit](#fld.audit)     |   |boolean| default `false`       |
-|[onOverflow](#fld.ovfl) |   |[^1]   | default `Trunc`       |
-|[onUnderflow](#fld.unfl)|   |[^2]   | default `Pad`         |
-|[numericAccess](#fld.num)|num|boolean| default value `false` |
+| attribute                 | alt |  type   | note                  |
+|---------------------------|-----|:-------:|-----------------------|
+| [offset](#fld.offset)     | at  |   int   | **required**          |
+| [length](#fld.length)     | len |   int   | **required**          |
+| [name](#fld.name)         |     | String  | **required**          |
+| [redefines](#fld.redef)   | red | boolean | default `false`       |
+| [audit](#fld.audit)       |     | boolean | default `false`       |
+| [onOverflow](#fld.ovfl)   |     |  [^1]   | default `Trunc`       |
+| [onUnderflow](#fld.unfl)  |     |  [^2]   | default `Pad`         |
+| [numericAccess](#fld.num) | num | boolean | default value `false` |
 
 <a name='fld.num'>numericAccess</a> indicates whether to generate the numeric setters and getters for the field, in
 addition to the alphanumeric ones. Numeric getters are prefixed with the return type.
@@ -398,20 +398,20 @@ addition to the alphanumeric ones. Numeric getters are prefixed with the return 
 #### <a name="433">4.3.3. Custom </a>
 Tag for custom field is `Cus`, a custom field is an extension of an alphanumeric field, with some additional parameters
 
-|attribute  |alt| type  | note                         |
-|-----------|---| :---: |------------------------------|
-|[offset](#fld.offset)   |at | int   | **required**                 |
-|[length](#fld.length)   |len| int   | **required**                 |
-|[name](#fld.name)       |   |String | **required**                 |
-|[redefines](#fld.redef) |red|boolean| default `false`              |
-|[audit](#fld.audit)     |   |boolean| default `false`              |
-|[onOverflow](#fld.ovfl) |   |[^1]   | default `Trunc`              |
-|[onUnderflow](#fld.unfl)|   |[^2]   | default `Pad`                |
-|[padChar](#fld.pchr)    |pad|char   | default `defaults.cus.pad`   |
-|[initChar](#fld.ichr)   |ini|char   | default `defaults.cus.init`  |
-|[check](#fld.ichk)      |chk|[^4]   | default `defaults.cus.check` |
-|[regex](#fld.regx)      |   |String | default *null*               |
-|[align](#fld.ialign)    |   |[^5]   | default `defaults.cus.align` |
+| attribute                | alt |  type   | note                         |
+|--------------------------|-----|:-------:|------------------------------|
+| [offset](#fld.offset)    | at  |   int   | **required**                 |
+| [length](#fld.length)    | len |   int   | **required**                 |
+| [name](#fld.name)        |     | String  | **required**                 |
+| [redefines](#fld.redef)  | red | boolean | default `false`              |
+| [audit](#fld.audit)      |     | boolean | default `false`              |
+| [onOverflow](#fld.ovfl)  |     |  [^1]   | default `Trunc`              |
+| [onUnderflow](#fld.unfl) |     |  [^2]   | default `Pad`                |
+| [padChar](#fld.pchr)     | pad |  char   | default `defaults.cus.pad`   |
+| [initChar](#fld.ichr)    | ini |  char   | default `defaults.cus.init`  |
+| [check](#fld.ichk)       | chk |  [^4]   | default `defaults.cus.check` |
+| [regex](#fld.regx)       |     | String  | default *null*               |
+| [align](#fld.ialign)     |     |  [^5]   | default `defaults.cus.align` |
 
 [^4]: CheckC domain: None, Ascii, Latin1, Valid, Digit, DigitOrBlank
 [^5]: AlignC domain: LFT, RGT
@@ -441,14 +441,14 @@ the available one.
 
 Tag for domain field is `Dom`, a domain field can only take a limited number of values, the possible attributes are:
 
-|attribute  |alt| type  | note                           |
-|-----------|---| :---: |--------------------------------|
-|[offset](#fld.offset)   |at | int    | **required**                   |
-|[length](#fld.length)   |len| int    | **required**                   |
-|[name](#fld.name)       |   |String  | **required**                   |
-|[redefines](#fld.redef) |red|boolean | default `false`                |
-|[audit](#fld.audit)     |   |boolean | default `false`                |
-|[items](#fld.items)     |   |String[]| **required**                   |
+| attribute               | alt |   type   | note            |
+|-------------------------|-----|:--------:|-----------------|
+| [offset](#fld.offset)   | at  |   int    | **required**    |
+| [length](#fld.length)   | len |   int    | **required**    |
+| [name](#fld.name)       |     |  String  | **required**    |
+| [redefines](#fld.redef) | red | boolean  | default `false` |
+| [audit](#fld.audit)     |     | boolean  | default `false` |
+| [items](#fld.items)     |     | String[] | **required**    |
 
 <a name='fld.items'>items</a> indicates the list of possible values that the field can assume. All values supplied must have the expected length for the field. The first value supplied will be used to initialize the field.
 
@@ -468,12 +468,12 @@ Tag for domain field is `Dom`, a domain field can only take a limited number of 
 Tag for filler field is `Fil`, a filler is an area we are not interested in, neither getters nor setters are generated
 for it, the possible attributes are:
 
-|attribute  |alt|type   | note                               |
-|-----------|---| :---: |------------------------------------|
-|[offset](#fld.offset)  |at | int   | **required**                       |
-|[length](#fld.length)  |len| int   | **required**                       |
-|[fillChar](#fld.fill)  |   |char   | default value `defaults.fil.fill`  |
-|[check](#fld.chk)      |   |[^3]   | default value `defaults.fil.check` |
+| attribute             | alt | type | note                               |
+|-----------------------|-----|:----:|------------------------------------|
+| [offset](#fld.offset) | at  | int  | **required**                       |
+| [length](#fld.length) | len | int  | **required**                       |
+| [fillChar](#fld.fill) |     | char | default value `defaults.fil.fill`  |
+| [check](#fld.chk)     |     | [^3] | default value `defaults.fil.check` |
 
 <a name='fld.fill'>fillChar</a> indicates the character to use to initialize the area
 
@@ -482,12 +482,12 @@ for it, the possible attributes are:
 Tag for constant field is `Val`, even for a constant field the setters and getters are not generated, the controls
 verify that the present value coincides with the set one, the possible attributes are:
 
-|attribute  |alt|type   |note                            |
-|-----------|---| :---: |--------------------------------|
-|[offset](#fld.offset)  |at | int   | **required**                   |
-|[length](#fld.length)  |len| int   | **required**                   |
-|[value](#fld.val)      |val|String | **required**                   |
-|[audit](#fld.audit)    |   |boolean| default `false`                |
+| attribute             | alt |  type   | note            |
+|-----------------------|-----|:-------:|-----------------|
+| [offset](#fld.offset) | at  |   int   | **required**    |
+| [length](#fld.length) | len |   int   | **required**    |
+| [value](#fld.val)     | val | String  | **required**    |
+| [audit](#fld.audit)   |     | boolean | default `false` |
 
 <a name='fld.val'>value</a> indicates the value with which to initialize the area
 
@@ -496,13 +496,13 @@ verify that the present value coincides with the set one, the possible attribute
 Tag for group field is `Grp`, a group allows you to group multiple fields in order to structure the area, the possible
 attributes are:
 
-|attribute  |alt|type   |note                            |
-|-----------|---| :---: |--------------------------------|
-|[offset](#grp.offset)   |at | int   | **required**                   |
-|[length](#grp.length)   |len| int   | **required**                   |
-|[name](#grp.name)       |   |String | **required**                   |
-|[redefines](#grp.redef) |red|boolean| default `false`                |
-|[fields](#grp.flds)     |   |array  | **required** child fields      |
+| attribute               | alt |  type   | note                      |
+|-------------------------|-----|:-------:|---------------------------|
+| [offset](#grp.offset)   | at  |   int   | **required**              |
+| [length](#grp.length)   | len |   int   | **required**              |
+| [name](#grp.name)       |     | String  | **required**              |
+| [redefines](#grp.redef) | red | boolean | default `false`           |
+| [fields](#grp.flds)     |     |  array  | **required** child fields |
 
 The <a name='grp.offset'>offset</a> attribute indicates the starting position of the group (starting from 1).
 The <a name='grp.length'>length</a> attribute indicates the length of the group.
@@ -578,14 +578,14 @@ A definition like this generates the java class successfully, but fails to gener
 Tag for occurs field is `Occ`, an occurs is basically a repeated group, it is defined with the group data of the first
 occurrence and the number of occurrences, the possible attributes are:
 
-|attribute  |alt|type   |note                            |
-|-----------|---| :---: |--------------------------------|
-|[offset](#occ.offset)   |at | int   | **required**                   |
-|[length](#occ.length)   |len| int   | **required**                   |
-|[name](#occ.name)       |   |String | **required**                   |
-|[redefines](#occ.redef) |red|boolean| default `false`                |
-|[fields](#occ.flds)     |   |array  | **required** child fields      |
-|[times](#occ.times)     |x  | int   | **required** occurrences       |
+| attribute               | alt |  type   | note                      |
+|-------------------------|-----|:-------:|---------------------------|
+| [offset](#occ.offset)   | at  |   int   | **required**              |
+| [length](#occ.length)   | len |   int   | **required**              |
+| [name](#occ.name)       |     | String  | **required**              |
+| [redefines](#occ.redef) | red | boolean | default `false`           |
+| [fields](#occ.flds)     |     |  array  | **required** child fields |
+| [times](#occ.times)     | x   |   int   | **required** occurrences  |
 
 The <a name='occ.offset'>offset</a> attribute indicates the starting position of the first group (starting from 1).
 The <a name='occ.length'>length</a> attribute indicates the length of a single group.

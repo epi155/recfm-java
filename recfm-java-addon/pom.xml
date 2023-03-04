@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.github.epi155</groupId>
         <artifactId>recfm-java</artifactId>
-        <version>0.6.1-SNAPSHOT</version>
+        <version>0.6.1</version>
     </parent>
 
     <artifactId>recfm-java-addon</artifactId>

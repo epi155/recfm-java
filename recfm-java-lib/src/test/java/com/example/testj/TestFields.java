@@ -117,20 +117,23 @@ class TestFields {
         Assertions.assertEquals("HELLO     ", foo.group01().getAlpha01(), "test align/pad");
         foo.group01().setAlpha01("HELLO WORLD");
         Assertions.assertEquals("HELLO WORL", foo.group01().getAlpha01(), "test align/truncate");
-        Assertions.assertThrows(NotAsciiException.class, () -> foo.group01().setAlpha01("привет"), "test ascii");
+        foo.withGroup01(it ->
+                Assertions.assertThrows(NotAsciiException.class, () -> it.setAlpha01("привет"), "test ascii"));
 
         foo.group01().setDigit01("12");
         Assertions.assertEquals("00012", foo.group01().getDigit01(), "test align/pad");
         foo.group01().setDigit01("1415926535897932384626433832");
         Assertions.assertEquals("33832", foo.group01().getDigit01(), "test align/truncate");
-        Assertions.assertThrows(NotDigitException.class, () -> foo.group01().setDigit01("one"), "test digit");
+        foo.withGroup01(it ->
+                Assertions.assertThrows(NotDigitException.class, () -> it.setDigit01("one"), "test digit"));
 
         foo.group01().setCustom01("12");
         Assertions.assertEquals("12   ", foo.group01().getCustom01(), "test align/pad");
         foo.group01().setCustom01("1415926535897932384626433832");
         Assertions.assertEquals("14159", foo.group01().getCustom01(), "test align/truncate");
         Assertions.assertDoesNotThrow(() -> foo.group01().setCustom01("three"), "test plain ascii");
-        Assertions.assertThrows(NotAsciiException.class, () -> foo.group01().setCustom01("Niña"), "test not ascii");
+        foo.withGroup01(it ->
+                Assertions.assertThrows(NotAsciiException.class, () -> it.setCustom01("Niña"), "test not ascii"));
     }
     @Test
     void testOcc() {
@@ -155,6 +158,12 @@ class TestFields {
             })) {
             System.out.println("Valid Date");
         }
+        fDate.withDate(new WithAction<FooDate.Date>() {
+            @Override
+            public void call(FooDate.Date value) {
+                value.setYear(2020);
+            }
+        });
     }
 
     @Test
@@ -189,10 +198,10 @@ class TestFields {
         }
 
         FooAlpha a = FooAlpha.decode(CharBuffer.allocate(10).toString());
-        Assertions.assertThrows(NotAsciiException.class, () -> a.getStrict(), "test ASCII");
-        Assertions.assertThrows(NotLatinException.class, () -> a.getWeak(), "test Latin1");
-        Assertions.assertThrows(NotValidException.class, () -> a.getUtf8(), "test UTF-8");
-        Assertions.assertDoesNotThrow(() -> a.getAll(), "test no check");
+        Assertions.assertThrows(NotAsciiException.class, a::getStrict, "test ASCII");
+        Assertions.assertThrows(NotLatinException.class, a::getWeak, "test Latin1");
+        Assertions.assertThrows(NotValidException.class, a::getUtf8, "test UTF-8");
+        Assertions.assertDoesNotThrow(a::getAll, "test no check");
 
         if (!a.validateFails(it ->
                 System.out.printf("Error field %s@%d+%d: %s%n",
@@ -215,7 +224,6 @@ class TestFields {
         Assertions.assertDoesNotThrow(() -> digit.setWeak("12345"), "test Num overflow/trunc");
 
         Assertions.assertThrows(NotMatchesException.class, () -> digit.setRex("Hi"), "test Num invalid");
-        ;
 
         FooAlpha alpha = FooAlpha.of(digit);    // cast
         FooDigit numer = digit.copy();      // clone / deep-copy

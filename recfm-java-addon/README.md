@@ -559,6 +559,29 @@ or (yaml style):
         val esitoComplTransaction=bar.transactionArea().getEsitoCompl();
 ~~~
 
+Group fields can be handled with a lambda function (java8+)
+
+~~~java
+        val bar=new BarReq();
+        bar.withTransactionArea(it -> {
+            it.setCdTransazione("TR00");
+            it..setEsitoAgg("0");
+        });
+~~~
+
+or with an anonymous class
+
+~~~java
+        val bar=new BarReq();
+        bar.withTransactionArea(new WithAction<TransactionArea>(){
+            public void call(BarReq.TransactionArea it) {
+                it.setCdTransazione("TR00");
+                it.setEsitoAgg("0");
+            }
+        });
+~~~
+
+
 In general two fields can not have the same name (only one of them would be referenceable), but a group is something other than a field. In the Java implementation there are no referencing problems if a field and a group use the same name. But in the Scala implementation this is not possible.
 
 A definition like this generates the java class successfully, but fails to generate the scala class.

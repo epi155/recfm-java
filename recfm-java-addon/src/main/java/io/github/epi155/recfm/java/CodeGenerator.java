@@ -113,6 +113,8 @@ public class CodeGenerator implements IndentAble, CodeProvider {
         indent(pw, indent);
         pw.printf("public %s %s(int k) { return this.%2$s[k-1]; }%n", capName, fld.getName());
         indent(pw, indent);
+        pw.printf("public void with%1$s(int k, WithAction<%1$s> action) { action.call(this.%2$s[k-1]); }%n", capName, fld.getName());
+        indent(pw, indent);
         pw.printf("public class %s {%n", capName);
 
         indent(pw, indent);
@@ -127,6 +129,8 @@ public class CodeGenerator implements IndentAble, CodeProvider {
         pw.printf("private final %s %s = this.new %1$s();%n", capName, name);
         indent(pw, indent);
         pw.printf("public %s %s() { return this.%2$s; }%n", capName, name);
+        indent(pw, indent);
+        pw.printf("public void with%1$s(WithAction<%1$s> action) { action.call(this.%2$s); }%n", capName, name);
         indent(pw, indent);
         pw.printf("public class %s {%n", capName);
     }
@@ -228,10 +232,7 @@ public class CodeGenerator implements IndentAble, CodeProvider {
     private void writeImport(@NotNull PrintWriter pw) {
         pw.printf("import java.util.Arrays;%n");
         pw.println();
-        pw.printf("import %s.FieldValidateHandler;%n", CodeGenerator.SYSTEM_PACKAGE);
-        pw.printf("import %s.FixRecord;%n", CodeGenerator.SYSTEM_PACKAGE);
-        pw.printf("import %s.OverflowAction;%n", CodeGenerator.SYSTEM_PACKAGE);
-        pw.printf("import %s.UnderflowAction;%n", CodeGenerator.SYSTEM_PACKAGE);
+        pw.printf("import %s.*;%n", CodeGenerator.SYSTEM_PACKAGE);
         pw.println();
     }
 

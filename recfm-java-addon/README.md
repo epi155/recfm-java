@@ -565,11 +565,11 @@ Group fields can be handled with a lambda function (java8+)
         val bar=new BarReq();
         bar.withTransactionArea(it -> {
             it.setCdTransazione("TR00");
-            it..setEsitoAgg("0");
+            it.setEsitoAgg("0");
         });
 ~~~
 
-or with an anonymous class
+or with an anonymous class (java5+)
 
 ~~~java
         val bar=new BarReq();

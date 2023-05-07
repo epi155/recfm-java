@@ -45,6 +45,11 @@ public class CodeGenerator implements IndentAble, CodeProvider {
     }
 
     private void generateClassCode(PrintWriter pw, ClassDefine struct, GenerateArgs ga, Defaults defaults, IntFunction<String> pos) {
+        if (ga.doc) {
+            pw.println("/**");
+            tableDoc(pw, 0, struct);
+            pw.println(" */");
+        }
         writeBeginClass(pw, struct);
         writeConstant(pw, struct);
         pw.println();
@@ -62,6 +67,59 @@ public class CodeGenerator implements IndentAble, CodeProvider {
         });
         writeDump(pw, struct.getFields());
         writeEndClass(pw, 0);
+    }
+
+    private void tableDoc(PrintWriter pw, int indent, ParentFields fields) {
+        class IndentPrint {
+            void printf(String fmt, Object...args) {
+                indent(pw, indent);
+                pw.printf(fmt, args);
+            }
+        }
+        val topName = fields.getName();
+        val topWidth = widthOf(fields);
+        val p = new IndentPrint();
+        p.printf(" * <table class='striped'>%n");
+        p.printf(" * <caption>%s component %s</caption>%n", topName, topWidth);
+        p.printf(" * <tr><th>Name</th><th>Type</th><th>Offs</th><th>Size</th></tr>%n");
+        for (NakedField field: fields.getFields()) {
+            if (field instanceof NamedField) {
+                val named = (NamedField) field;
+                if (named.isRedefines())
+                    continue;
+                if (field instanceof FieldOccurs) {
+                    int times = ((FieldOccurs) field).getTimes();
+                    p.printf(" * <tr><td>%s</td><td style='text-align: center'>%s</td><td style='text-align: right'>%d</td><td style='text-align: right'>%d</td><td>x%d</td></tr>%n", named.getName(), typeOf(named), named.getOffset(), named.getLength(), times);
+                } else {
+                    p.printf(" * <tr><td>%s</td><td style='text-align: center'>%s</td><td style='text-align: right'>%d</td><td style='text-align: right'>%d</td></tr>%n", named.getName(), typeOf(named), named.getOffset(), named.getLength());
+                }
+            } else {
+                p.printf(" * <tr><td></td><td style='text-align: center'>%s</td><td style='text-align: right'>%d</td><td style='text-align: right'>%d</td></tr>%n", typeOf(field), field.getOffset(), field.getLength());
+            }
+        }
+        p.printf(" * </table>%n");
+    }
+
+    private String widthOf(ParentFields fields) {
+        int len = fields.getLength();
+        if (fields instanceof FieldOccurs) {
+            val o = (FieldOccurs) fields;
+            int mul = o.getTimes();
+            return String.format("[%d x %d]", len, mul);
+        }
+        return String.format("[%d]", len);
+    }
+
+    private String typeOf(NakedField field) {
+        if (field instanceof FieldOccurs) return "Occ";
+        if (field instanceof FieldGroup) return "Grp";
+        if (field instanceof FieldAbc) return "Abc";
+        if (field instanceof FieldNum) return "Num";
+        if (field instanceof FieldCustom) return "Cus";
+        if (field instanceof FieldDomain) return "Dom";
+        if (field instanceof FieldFiller) return "Fil";
+        if (field instanceof FieldConstant) return "Val";
+        return "???";
     }
 
     private void writeDump(PrintWriter pw, List<NakedField> fields) {
@@ -84,10 +142,10 @@ public class CodeGenerator implements IndentAble, CodeProvider {
     private void generateGroupCode(FieldGroup fld, PrintWriter pw, int indent, GenerateArgs ga, Defaults defaults, IntFunction<String> pos) {
         AccessFactory access;
         if (fld instanceof FieldOccurs) {
-            writeBeginClassOccurs(pw, (FieldOccurs) fld, indent);
+            writeBeginClassOccurs(pw, (FieldOccurs) fld, indent, ga);
             access = AccessFactory.getInstance(pw, defaults, n -> String.format("%d+shift", n - 1));
         } else {
-            writeBeginClassGroup(pw, fld.getName(), indent);
+            writeBeginClassGroup(pw, fld, indent, ga);
             access = AccessFactory.getInstance(pw, defaults, pos);
         }
         fld.getFields().forEach(it -> {
@@ -100,7 +158,7 @@ public class CodeGenerator implements IndentAble, CodeProvider {
         writeEndClass(pw, indent);
     }
 
-    private void writeBeginClassOccurs(PrintWriter pw, @NotNull FieldOccurs fld, int indent) {
+    private void writeBeginClassOccurs(PrintWriter pw, @NotNull FieldOccurs fld, int indent, GenerateArgs ga) {
         String capName = Tools.capitalize(fld.getName());
         indent(pw, indent);
         pw.printf("private final %s[] %s = new %1$s[] {%n", capName, fld.getName());
@@ -110,8 +168,12 @@ public class CodeGenerator implements IndentAble, CodeProvider {
         }
         indent(pw, indent);
         pw.printf("};%n");
+        if (ga.doc)
+            javadocGroupWith(pw, fld, capName, indent);
         indent(pw, indent);
         pw.printf("public %s %s(int k) { return this.%2$s[k-1]; }%n", capName, fld.getName());
+        if (ga.doc)
+            javadocGroup(pw, fld, capName, indent);
         indent(pw, indent);
         pw.printf("public void with%1$s(int k, WithAction<%1$s> action) { action.call(this.%2$s[k-1]); }%n", capName, fld.getName());
         indent(pw, indent);
@@ -123,16 +185,49 @@ public class CodeGenerator implements IndentAble, CodeProvider {
         pw.printf("    private %s(int shift) { this.shift = shift; }%n", capName);
     }
 
-    private void writeBeginClassGroup(PrintWriter pw, String name, int indent) {
+    private void writeBeginClassGroup(PrintWriter pw, FieldGroup group, int indent, GenerateArgs ga) {
+        val name = group.getName();
         String capName = Tools.capitalize(name);
         indent(pw, indent);
         pw.printf("private final %s %s = this.new %1$s();%n", capName, name);
+        if (ga.doc)
+            javadocGroup(pw, group, capName, indent);
         indent(pw, indent);
         pw.printf("public %s %s() { return this.%2$s; }%n", capName, name);
+        if (ga.doc)
+            javadocGroupWith(pw, group, capName, indent);
         indent(pw, indent);
         pw.printf("public void with%1$s(WithAction<%1$s> action) { action.call(this.%2$s); }%n", capName, name);
         indent(pw, indent);
         pw.printf("public class %s {%n", capName);
+    }
+
+    private void javadocGroupWith(PrintWriter pw, FieldGroup group, String capName, int indent) {
+        indent(pw, indent);
+        pw.println("/**");
+        indent(pw, indent);
+        pw.printf(" * Consume %s component %n", capName);
+        indent(pw, indent);
+        pw.println(" * <p>");
+        tableDoc(pw, indent, group);
+        indent(pw, indent);
+        pw.printf(" * @param action {@link %s} consumer%n", capName);
+        indent(pw, indent);
+        pw.println(" */");
+    }
+
+    private void javadocGroup(PrintWriter pw, FieldGroup group, String capName, int indent) {
+        indent(pw, indent);
+        pw.println("/**");
+        indent(pw, indent);
+        pw.printf(" * Access %s component %n", capName);
+        indent(pw, indent);
+        pw.println(" * <p>");
+        tableDoc(pw, indent, group);
+        indent(pw, indent);
+        pw.printf(" * @return {@link %s} instance%n", capName);
+        indent(pw, indent);
+        pw.println(" */");
     }
 
     private void writeEndClass(PrintWriter pw, int indent) {

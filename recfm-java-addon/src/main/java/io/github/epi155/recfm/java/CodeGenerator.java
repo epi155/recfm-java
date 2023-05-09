@@ -89,12 +89,12 @@ public class CodeGenerator implements IndentAble, CodeProvider {
                     continue;
                 if (field instanceof FieldOccurs) {
                     int times = ((FieldOccurs) field).getTimes();
-                    p.printf(" * <tr><td>%s</td><td style='text-align: center'>%s</td><td style='text-align: right'>%d</td><td style='text-align: right'>%d</td><td>x%d</td></tr>%n", named.getName(), typeOf(named), named.getOffset(), named.getLength(), times);
+                    p.printf(" * <tr><td>%s</td><td style='text-align: center'>{@code %s}</td><td style='text-align: right'>{@code %d}</td><td style='text-align: right'>{@code %d}</td><td>x{@code %d}</td></tr>%n", named.getName(), typeOf(named), named.getOffset(), named.getLength(), times);
                 } else {
-                    p.printf(" * <tr><td>%s</td><td style='text-align: center'>%s</td><td style='text-align: right'>%d</td><td style='text-align: right'>%d</td></tr>%n", named.getName(), typeOf(named), named.getOffset(), named.getLength());
+                    p.printf(" * <tr><td>%s</td><td style='text-align: center'>{@code %s}</td><td style='text-align: right'>{@code %d}</td><td style='text-align: right'>{@code %d}</td></tr>%n", named.getName(), typeOf(named), named.getOffset(), named.getLength());
                 }
             } else {
-                p.printf(" * <tr><td></td><td style='text-align: center'>%s</td><td style='text-align: right'>%d</td><td style='text-align: right'>%d</td></tr>%n", typeOf(field), field.getOffset(), field.getLength());
+                p.printf(" * <tr><td></td><td style='text-align: center'>{@code %s}</td><td style='text-align: right'>{@code %d}</td><td style='text-align: right'>{@code %d}</td></tr>%n", typeOf(field), field.getOffset(), field.getLength());
             }
         }
         p.printf(" * </table>%n");

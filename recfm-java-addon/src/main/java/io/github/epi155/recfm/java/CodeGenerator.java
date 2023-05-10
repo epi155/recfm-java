@@ -81,17 +81,22 @@ public class CodeGenerator implements IndentAble, CodeProvider {
         val p = new IndentPrint();
         p.printf(" * <table class='striped'>%n");
         p.printf(" * <caption>%s component %s</caption>%n", topName, topWidth);
-        p.printf(" * <tr><th>Name</th><th>Type</th><th>Offs</th><th>Size</th></tr>%n");
+        p.printf(" * <tr><th>Field Name</th><th>Type</th><th>Start</th><th>Length</th></tr>%n");
         for (NakedField field: fields.getFields()) {
             if (field instanceof NamedField) {
                 val named = (NamedField) field;
+                val capit = Tools.capitalize(named.getName());
                 if (named.isRedefines())
                     continue;
                 if (field instanceof FieldOccurs) {
                     int times = ((FieldOccurs) field).getTimes();
-                    p.printf(" * <tr><td>%s</td><td style='text-align: center'>{@code %s}</td><td style='text-align: right'>{@code %d}</td><td style='text-align: right'>{@code %d}</td><td>x{@code %d}</td></tr>%n", named.getName(), typeOf(named), named.getOffset(), named.getLength(), times);
+                    p.printf(" * <tr><td>{@link %1$s %2$s}</td><td style='text-align: center'>{@code %3$s}</td><td style='text-align: right'>{@code %4$d}</td><td style='text-align: right'>{@code %5$d}</td><td style='text-align: right'>x{@code %6$d}</td></tr>%n",
+                            capit, named.getName(), typeOf(named), named.getOffset(), named.getLength(), times);
+                } else if (field instanceof FieldGroup) {
+                    p.printf(" * <tr><td>{@link %1$s %2$s}</td><td style='text-align: center'>{@code %3$s}</td><td style='text-align: right'>{@code %4$d}</td><td style='text-align: right'>{@code %5$d}</td></tr>%n",
+                            capit, named.getName(), typeOf(named), named.getOffset(), named.getLength());
                 } else {
-                    p.printf(" * <tr><td>%s</td><td style='text-align: center'>{@code %s}</td><td style='text-align: right'>{@code %d}</td><td style='text-align: right'>{@code %d}</td></tr>%n", named.getName(), typeOf(named), named.getOffset(), named.getLength());
+                    p.printf(" * <tr><td>{@code %s}</td><td style='text-align: center'>{@code %s}</td><td style='text-align: right'>{@code %d}</td><td style='text-align: right'>{@code %d}</td></tr>%n", named.getName(), typeOf(named), named.getOffset(), named.getLength());
                 }
             } else {
                 p.printf(" * <tr><td></td><td style='text-align: center'>{@code %s}</td><td style='text-align: right'>{@code %d}</td><td style='text-align: right'>{@code %d}</td></tr>%n", typeOf(field), field.getOffset(), field.getLength());
@@ -168,14 +173,12 @@ public class CodeGenerator implements IndentAble, CodeProvider {
         }
         indent(pw, indent);
         pw.printf("};%n");
-        if (ga.doc)
-            javadocGroupWith(pw, fld, capName, indent);
         indent(pw, indent);
         pw.printf("public %s %s(int k) { return this.%2$s[k-1]; }%n", capName, fld.getName());
-        if (ga.doc)
-            javadocGroup(pw, fld, capName, indent);
         indent(pw, indent);
         pw.printf("public void with%1$s(int k, WithAction<%1$s> action) { action.call(this.%2$s[k-1]); }%n", capName, fld.getName());
+        if (ga.doc)
+            javadocGroup(pw, fld, capName, indent);
         indent(pw, indent);
         pw.printf("public class %s {%n", capName);
 
@@ -190,14 +193,12 @@ public class CodeGenerator implements IndentAble, CodeProvider {
         String capName = Tools.capitalize(name);
         indent(pw, indent);
         pw.printf("private final %s %s = this.new %1$s();%n", capName, name);
-        if (ga.doc)
-            javadocGroup(pw, group, capName, indent);
         indent(pw, indent);
         pw.printf("public %s %s() { return this.%2$s; }%n", capName, name);
-        if (ga.doc)
-            javadocGroupWith(pw, group, capName, indent);
         indent(pw, indent);
         pw.printf("public void with%1$s(WithAction<%1$s> action) { action.call(this.%2$s); }%n", capName, name);
+        if (ga.doc)
+            javadocGroupWith(pw, group, capName, indent);
         indent(pw, indent);
         pw.printf("public class %s {%n", capName);
     }

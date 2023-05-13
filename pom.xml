@@ -8,11 +8,10 @@
     <packaging>pom</packaging>
     <name>recfm java implementation addon and lib</name>
 
+    <!-- mvn versions:display-dependency-updates ! check for new version -->
+    <!-- mvn release:clean ! clean release file -->
+    <!-- mvn release:prepare ! creare RELEASE and next SNAPSHOT -->
     <!-- mvn versions:set -DnewVersion=x.y.z -->
-    <!-- mvn release:clean -->
-    <!-- mvn versions:display-dependency-updates -->
-    <!-- mvn release:prepare -->
-    <!-- mvn release:perform -->
     <!-- mvn release:update-versions -->
     <!-- mvn dependency:tree -->
 

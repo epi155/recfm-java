@@ -24,21 +24,21 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.9.2</version>
+            <version>5.9.3</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.9.2</version>
+            <version>5.9.3</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.junit.vintage/junit-vintage-engine -->
         <dependency>
             <groupId>org.junit.vintage</groupId>
             <artifactId>junit-vintage-engine</artifactId>
-            <version>5.9.2</version>
+            <version>5.9.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -48,7 +48,7 @@
             <plugin>
                 <groupId>io.github.epi155</groupId>
                 <artifactId>recfm-maven-plugin</artifactId>
-                <version>0.6.1-SNAPSHOT</version>
+                <version>0.6.1</version>
                 <executions>
                     <execution>
                         <id>enforced</id>

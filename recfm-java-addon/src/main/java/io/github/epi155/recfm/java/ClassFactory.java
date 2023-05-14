@@ -100,7 +100,7 @@ public class ClassFactory extends CodeFactory {
 //            writeBeginClassOccurs(pw, (FieldOccurs) pxy, indent);
             access = AccessFactory.getInstance(this, defaults, n -> String.format("%d+shift", n - 1));
         } else {
-            writeBeginClassGroupProxy(pxy, pxy.getProxy().getName());
+            writeBeginClassGroupProxy(pxy, pxy.getTypeDef().getName());
             access = AccessFactory.getInstance(this, defaults, pos);
         }
         pushPlusIndent(4);
@@ -155,7 +155,11 @@ public class ClassFactory extends CodeFactory {
 
         if (ga.doc)
             javadocGroupDef(group);
-        printf("public class %s implements %s.%s {%n", capName, wrtPackage, proxyName);
+        if (capName.equals(proxyName)) {
+            printf("public class %s implements %s.%s {%n", capName, wrtPackage, proxyName);
+        } else {
+            printf("public class %s implements %s {%n", capName, proxyName);
+        }
     }
     private void writeCtorVoid(String name) {
         printf("public %s() {%n", name);

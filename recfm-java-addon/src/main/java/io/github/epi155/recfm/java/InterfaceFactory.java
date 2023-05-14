@@ -34,13 +34,15 @@ public class InterfaceFactory extends CodeFactory{
         }
         writeBeginProxy(proxy);
         println();
+        pushIndent(4);
 //        proxy.getFields().forEach(it -> {
 //            if (it instanceof FieldGroup) generateGroupCode((FieldGroup) it, 4);
 //            if (it instanceof FieldGroupProxy) generateGroupCode((FieldGroupProxy) it, 4);
 //        });
         proxy.getFields().forEach(it -> {
-            if (it instanceof SettableField) createMethods((SettableField) it, 4);
+            if (it instanceof SettableField) createMethods((SettableField) it);
         });
+        popIndent();
         writeEndClass();
     }
 
@@ -48,33 +50,30 @@ public class InterfaceFactory extends CodeFactory{
         printf("public interface %s {%n", proxy.getName());
     }
 
-    private void createMethods(SettableField fld, int indent) {
+    private void createMethods(SettableField fld) {
         if (fld instanceof FieldAbc) {
-            createMethodsAbc((FieldAbc) fld, indent);
+            createMethodsAbc((FieldAbc) fld);
         } else if (fld instanceof FieldNum) {
-            createMethodsNum((FieldNum) fld, indent);
+            createMethodsNum((FieldNum) fld);
         } else if (fld instanceof FieldCustom) {
-            createMethodsCustom((FieldCustom) fld, indent);
+            createMethodsCustom((FieldCustom) fld);
         } else if (fld instanceof FieldDomain) {
-            createMethodsDomain((FieldDomain) fld, indent);
+            createMethodsDomain((FieldDomain) fld);
         } else {
             throw new IllegalStateException("Unknown field type " + fld.getName() +": " + fld.getClass().getSimpleName());
         }
     }
 
-    private void createMethodsAbc(FieldAbc fld, int indent) {
+    private void createMethodsAbc(FieldAbc fld) {
         val wrkName = Tools.getWrkName(fld.getName());
-        pushIndent(indent);
         if (ga.doc) docGetter(fld, TAG_ABC);
         printf(STRING_GETTER, wrkName);
         if (ga.doc) docSetter(fld, TAG_ABC);
         printf(STRING_SETTER, wrkName);
-        popIndent();
     }
 
-    private void createMethodsNum(FieldNum fld, int indent) {
+    private void createMethodsNum(FieldNum fld) {
         val wrkName = Tools.getWrkName(fld.getName());
-        pushIndent(indent);
         if (ga.doc) docGetter(fld, TAG_NUM);
         printf(STRING_GETTER, wrkName);
         if (ga.doc) docSetter(fld, TAG_NUM);
@@ -87,7 +86,6 @@ public class InterfaceFactory extends CodeFactory{
             else if (fld.getLength() > 2 || ga.align == 2) useShort(fld, wrkName);   // 3..4
             else useByte(fld, wrkName);  // ..2
         }
-        popIndent();
     }
 
     private void useLong(FieldNum fld, String wrkName) {
@@ -132,24 +130,20 @@ public class InterfaceFactory extends CodeFactory{
         printf(JAVADOC_CLOSE);
     }
 
-    private void createMethodsCustom(FieldCustom fld, int indent) {
+    private void createMethodsCustom(FieldCustom fld) {
         val wrkName = Tools.getWrkName(fld.getName());
-        pushIndent(indent);
         if (ga.doc) docGetter(fld, TAG_CUS);
         printf(STRING_GETTER, wrkName);
         if (ga.doc) docSetter(fld, TAG_CUS);
         printf(STRING_SETTER, wrkName);
-        popIndent();
     }
 
-    private void createMethodsDomain(FieldDomain fld, int indent) {
+    private void createMethodsDomain(FieldDomain fld) {
         val wrkName = Tools.getWrkName(fld.getName());
-        pushIndent(indent);
         if (ga.doc) docGetter(fld, TAG_DOM);
         printf(STRING_GETTER, wrkName);
         if (ga.doc) docSetter(fld, TAG_DOM);
         printf(STRING_SETTER, wrkName);
-        popIndent();
     }
 
     private void docGetter(NakedField fld, String tag) {

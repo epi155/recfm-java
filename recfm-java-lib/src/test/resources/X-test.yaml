@@ -1,9 +1,8 @@
 packageName: com.example.sysj.test
 
-# proxies / proxy
-proxies:
+interfaces:
   - &TransactionArea
-    name: TransactionArea
+    name: ITransactionArea
     length: 12
     fields:
       - !Abc { name: transId   , at:  1, len: 9 }
@@ -12,7 +11,7 @@ proxies:
       - !Val { val: "\n"       , at: 12, len: 1 }
       
   - &MessageArea
-    name: MessageArea
+    name: IMessageArea
     length: 100
     fields:
       - !Abc { name: cdMsgId   , at:  13, len:  8 }
@@ -30,7 +29,7 @@ proxies:
       - !Val { val: "\n"       , at: 112, len:  1 }
 
   - &SegmentArea
-    name: SegmentArea
+    name: ISegmentArea
     length: 11
     fields:
       - !Abc { name: cdSegmento , at: 113, len: 8 }
@@ -43,9 +42,9 @@ classes:
     length: 19324
     fields:
 #      - !GRP { name: messageArea    , at:   1, len: 100, proxy: *MessageArea }
-      - !GRP { name: transactionArea, at:   1, len:  12, proxy: *TransactionArea }
-      - !GRP { name: messageArea    , at:  13, len: 100, proxy: *MessageArea }
-      - !GRP { name: SegmentArea    , at: 113, len:  11, proxy: *SegmentArea }
+      - !GRP { name: transactionArea, at:   1, len:  12, as: *TransactionArea }
+      - !GRP { name: messageArea    , at:  13, len: 100, as: *MessageArea }
+      - !GRP { name: SegmentArea    , at: 113, len:  11, as: *SegmentArea }
       - !Fil {                        at: 124, len: 19201 }
 
 #  - name: B280v3xReq

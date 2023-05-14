@@ -1,22 +1,22 @@
 package io.github.epi155.recfm.java.fields;
 
+import io.github.epi155.recfm.java.factory.CodeWriter;
+import io.github.epi155.recfm.java.factory.DelegateWriter;
+import io.github.epi155.recfm.java.rule.ImmutableField;
 import io.github.epi155.recfm.type.Defaults;
 import io.github.epi155.recfm.type.FieldFiller;
-import io.github.epi155.recfm.util.ImmutableField;
-import io.github.epi155.recfm.util.IndentPrinter;
 import org.apache.commons.text.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.github.epi155.recfm.java.JavaTools.prefixOf;
 import static io.github.epi155.recfm.util.Tools.notNullOf;
 
-public class Filler extends IndentPrinter implements ImmutableField<FieldFiller> {
+public class Filler extends DelegateWriter implements ImmutableField<FieldFiller> {
     private final Defaults.FilDefault defaults;
 
-    public Filler(PrintWriter pw, Defaults.FilDefault defaults) {
+    public Filler(CodeWriter pw, Defaults.FilDefault defaults) {
         super(pw);
         this.defaults = defaults;
     }
@@ -24,7 +24,7 @@ public class Filler extends IndentPrinter implements ImmutableField<FieldFiller>
     @Override
     public void initialize(@NotNull FieldFiller fld, int bias) {
         char c = fld.getFillChar() == null ? defaults.getFill() : fld.getFillChar();
-        printf("        fill(%5d, %4d, '%s');%n",
+        printf("    fill(%5d, %4d, '%s');%n",
                 fld.getOffset() - bias, fld.getLength(), StringEscapeUtils.escapeJava(String.valueOf(c)));
     }
 

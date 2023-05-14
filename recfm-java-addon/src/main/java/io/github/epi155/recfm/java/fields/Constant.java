@@ -1,22 +1,22 @@
 package io.github.epi155.recfm.java.fields;
 
+import io.github.epi155.recfm.java.factory.CodeWriter;
+import io.github.epi155.recfm.java.factory.DelegateWriter;
+import io.github.epi155.recfm.java.rule.ImmutableField;
 import io.github.epi155.recfm.type.FieldConstant;
-import io.github.epi155.recfm.util.ImmutableField;
-import io.github.epi155.recfm.util.IndentPrinter;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.github.epi155.recfm.java.JavaTools.prefixOf;
 
-public class Constant extends IndentPrinter implements ImmutableField<FieldConstant> {
-    public Constant(PrintWriter pw) {
+public class Constant extends DelegateWriter implements ImmutableField<FieldConstant> {
+    public Constant(CodeWriter pw) {
         super(pw);
     }
 
     public void initialize(@NotNull FieldConstant fld, int bias) {
-        printf("        fill(%5d, %4d, VALUE_AT%dPLUS%d);%n",
+        printf("    fill(%5d, %4d, VALUE_AT%dPLUS%d);%n",
                 fld.getOffset() - bias, fld.getLength(), fld.getOffset(), fld.getLength());
     }
 

@@ -34,7 +34,8 @@ class SetterException extends RuntimeException {
 
     private Info arrangeStack() {
         fillInStackTrace();
-        List<StackTraceElement> stack = new ArrayList<>(Arrays.asList(getStackTrace()));
+        @SuppressWarnings("Convert2Diamond")
+        List<StackTraceElement> stack = new ArrayList<StackTraceElement>(Arrays.asList(getStackTrace()));
         StackTraceElement ste;
         String method;
         do {

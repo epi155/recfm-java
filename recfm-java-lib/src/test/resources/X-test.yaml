@@ -1,0 +1,58 @@
+packageName: com.example.sysj.test
+
+# proxies / proxy
+proxies:
+  - &TransactionArea
+    name: TransactionArea
+    length: 12
+    fields:
+      - !Abc { name: transId   , at:  1, len: 9 }
+      - !Num { name: esitoAgg  , at: 10, len: 1 }
+      - !Num { name: esitoCompl, at: 11, len: 1 }
+      - !Val { val: "\n"       , at: 12, len: 1 }
+      
+  - &MessageArea
+    name: MessageArea
+    length: 100
+    fields:
+      - !Abc { name: cdMsgId   , at:  13, len:  8 }
+      - !Num { name: versMsg   , at:  21, len:  4 }
+      - !Abc { name: cdInterno1, at:  25, len:  1 }
+      - !Num { name: abiEmitt  , at:  26, len:  5 }
+      - !Abc { name: cdInterno2, at:  31, len:  1 }
+      - !Abc { name: cdInterno3, at:  32, len:  1 }
+      - !Abc { name: cdUtente  , at:  33, len:  8 }
+      - !Abc { name: abi       , at:  41, len:  5 }
+      - !Abc { name: cdSegm1   , at:  46, len:  5 }
+      - !Abc { name: cdSegm2   , at:  51, len:  5 }
+      - !Abc { name: tsMsg     , at:  56, len: 26 }
+      - !Abc { name: areaCode  , at:  82, len: 30 }
+      - !Val { val: "\n"       , at: 112, len:  1 }
+
+  - &SegmentArea
+    name: SegmentArea
+    length: 11
+    fields:
+      - !Abc { name: cdSegmento , at: 113, len: 8 }
+      - !Num { name: esitoAgg   , at: 121, len: 1 }
+      - !Num { name: esitoCompl , at: 122, len: 1 }
+      - !Val { val: "\n"        , at: 123, len: 1 }
+      
+classes:
+  - name: B280v2xReq
+    length: 19324
+    fields:
+#      - !GRP { name: messageArea    , at:   1, len: 100, proxy: *MessageArea }
+      - !GRP { name: transactionArea, at:   1, len:  12, proxy: *TransactionArea }
+      - !GRP { name: messageArea    , at:  13, len: 100, proxy: *MessageArea }
+      - !GRP { name: SegmentArea    , at: 113, len:  11, proxy: *SegmentArea }
+      - !Fil {                        at: 124, len: 19201 }
+
+#  - name: B280v3xReq
+#    length: 19324
+#    fields:
+#      #      - !GRP { name: messageArea    , at:   1, len: 100, proxy: *MessageArea }
+#      - !GRP { name: transactionArea, at:   1, len:  12, proxy: *TransactionArea }
+#      - !GRP { name: messageArea    , at:  13, len: 100, proxy: *MessageArea }
+#      - !GRP { name: SegmentArea    , at: 113, len:  12, proxy: *SegmentArea }
+#      - !Fil {                        at: 125, len: 19200 }

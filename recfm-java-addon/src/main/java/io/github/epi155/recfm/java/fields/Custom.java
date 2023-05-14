@@ -1,31 +1,31 @@
 package io.github.epi155.recfm.java.fields;
 
 import io.github.epi155.recfm.java.JavaDoc;
+import io.github.epi155.recfm.java.factory.CodeWriter;
+import io.github.epi155.recfm.java.factory.DelegateWriter;
+import io.github.epi155.recfm.java.rule.MutableField;
 import io.github.epi155.recfm.type.Defaults;
 import io.github.epi155.recfm.type.FieldCustom;
 import io.github.epi155.recfm.type.NormalizeAbcMode;
 import io.github.epi155.recfm.util.GenerateArgs;
-import io.github.epi155.recfm.util.IndentPrinter;
-import io.github.epi155.recfm.util.MutableField;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntFunction;
 
 import static io.github.epi155.recfm.java.JavaTools.prefixOf;
 import static io.github.epi155.recfm.util.Tools.notNullOf;
 
-public class Custom extends IndentPrinter implements MutableField<FieldCustom>, JavaDoc {
+public class Custom extends DelegateWriter implements MutableField<FieldCustom>, JavaDoc {
     private final Defaults.CusDefault defaults;
 
-    public Custom(PrintWriter pw, Defaults.CusDefault defaults, IntFunction<String> pos) {
+    public Custom(CodeWriter pw, Defaults.CusDefault defaults, IntFunction<String> pos) {
         super(pw, pos);
         this.defaults = defaults;
     }
 
-    public Custom(PrintWriter pw, Defaults.CusDefault defaults) {
+    public Custom(CodeWriter pw, Defaults.CusDefault defaults) {
         super(pw);
         this.defaults = defaults;
     }
@@ -33,7 +33,7 @@ public class Custom extends IndentPrinter implements MutableField<FieldCustom>, 
     @Override
     public void initialize(@NotNull FieldCustom fld, int bias) {
         val init = notNullOf(fld.getInitChar(), defaults.getInit());
-        printf("        fill(%5d, %4d, '%c');%n", fld.getOffset() - bias, fld.getLength(), init);
+        printf("    fill(%5d, %4d, '%c');%n", fld.getOffset() - bias, fld.getLength(), init);
     }
 
     @Override
@@ -75,12 +75,10 @@ public class Custom extends IndentPrinter implements MutableField<FieldCustom>, 
     }
 
     @Override
-    public void access(FieldCustom fld, String wrkName, int indent, @NotNull GenerateArgs ga) {
-        pushIndent(indent);
+    public void access(FieldCustom fld, String wrkName, @NotNull GenerateArgs ga) {
         buildGetter(fld, wrkName, ga);
         buildSetter(fld, wrkName, ga);
         buildInitialize(fld, wrkName, ga);
-        popIndent();
     }
 
     private void buildInitialize(FieldCustom fld, String wrkName, GenerateArgs ga) {

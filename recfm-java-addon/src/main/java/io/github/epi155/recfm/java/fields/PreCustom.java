@@ -1,16 +1,15 @@
 package io.github.epi155.recfm.java.fields;
 
+import io.github.epi155.recfm.java.factory.CodeWriter;
+import io.github.epi155.recfm.java.factory.DelegateWriter;
+import io.github.epi155.recfm.java.rule.PrepareField;
 import io.github.epi155.recfm.type.FieldCustom;
-import io.github.epi155.recfm.util.AbstractPrinter;
-import io.github.epi155.recfm.util.PrepareField;
 import lombok.val;
 import org.apache.commons.text.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.PrintWriter;
-
-public class PreCustom extends AbstractPrinter implements PrepareField<FieldCustom> {
-    public PreCustom(PrintWriter pw) {
+public class PreCustom extends DelegateWriter implements PrepareField<FieldCustom> {
+    public PreCustom(CodeWriter pw) {
         super(pw);
     }
 

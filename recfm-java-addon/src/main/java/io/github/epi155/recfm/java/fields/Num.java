@@ -1,30 +1,30 @@
 package io.github.epi155.recfm.java.fields;
 
+import io.github.epi155.recfm.java.factory.CodeWriter;
+import io.github.epi155.recfm.java.factory.DelegateWriter;
+import io.github.epi155.recfm.java.rule.MutableField;
 import io.github.epi155.recfm.type.Defaults;
 import io.github.epi155.recfm.type.FieldNum;
 import io.github.epi155.recfm.type.NormalizeNumMode;
 import io.github.epi155.recfm.util.GenerateArgs;
-import io.github.epi155.recfm.util.IndentPrinter;
-import io.github.epi155.recfm.util.MutableField;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntFunction;
 
 import static io.github.epi155.recfm.java.JavaTools.prefixOf;
 import static io.github.epi155.recfm.util.Tools.notNullOf;
 
-public class Num extends IndentPrinter implements MutableField<FieldNum> {
+public class Num extends DelegateWriter implements MutableField<FieldNum> {
     private static final String TEST_DIGIT_CHECK = "    testDigit(%s, %d);%n";
     private final Defaults.NumDefault defaults;
-    public Num(PrintWriter pw, IntFunction<String> pos, Defaults.NumDefault defaults) {
+    public Num(CodeWriter pw, IntFunction<String> pos, Defaults.NumDefault defaults) {
         super(pw, pos);
         this.defaults = defaults;
     }
 
-    public Num(PrintWriter pw, Defaults.NumDefault defaults) {
+    public Num(CodeWriter pw, Defaults.NumDefault defaults) {
         super(pw);
         this.defaults = defaults;
     }
@@ -32,7 +32,7 @@ public class Num extends IndentPrinter implements MutableField<FieldNum> {
 
     @Override
     public void initialize(@NotNull FieldNum fld, int bias) {
-        printf("        fill(%5d, %4d, '0');%n", fld.getOffset() - bias, fld.getLength());
+        printf("    fill(%5d, %4d, '0');%n", fld.getOffset() - bias, fld.getLength());
     }
 
     @Override
@@ -42,8 +42,7 @@ public class Num extends IndentPrinter implements MutableField<FieldNum> {
     }
 
     @Override
-    public void access(FieldNum fld, String wrkName, int indent, @NotNull GenerateArgs ga) {
-        pushIndent(indent);
+    public void access(FieldNum fld, String wrkName, @NotNull GenerateArgs ga) {
         numeric(fld, wrkName, ga.doc);
         if (fld.isNumericAccess()) {
             if (fld.getLength() > 19)
@@ -53,7 +52,6 @@ public class Num extends IndentPrinter implements MutableField<FieldNum> {
             else if (fld.getLength() > 2 || ga.align == 2) useShort(fld, wrkName, ga.doc);   // 3..4
             else useByte(fld, wrkName, ga.doc);  // ..2
         }
-        popIndent();
     }
 
     private void numeric(FieldNum fld, String wrkName, boolean doc) {

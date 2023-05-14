@@ -1,37 +1,37 @@
 package io.github.epi155.recfm.java.fields;
 
 import io.github.epi155.recfm.java.JavaDoc;
+import io.github.epi155.recfm.java.factory.CodeWriter;
+import io.github.epi155.recfm.java.factory.DelegateWriter;
+import io.github.epi155.recfm.java.rule.MutableField;
 import io.github.epi155.recfm.type.Defaults;
 import io.github.epi155.recfm.type.FieldAbc;
 import io.github.epi155.recfm.type.NormalizeAbcMode;
 import io.github.epi155.recfm.util.GenerateArgs;
-import io.github.epi155.recfm.util.IndentPrinter;
-import io.github.epi155.recfm.util.MutableField;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntFunction;
 
 import static io.github.epi155.recfm.java.JavaTools.prefixOf;
 import static io.github.epi155.recfm.util.Tools.notNullOf;
 
-public class Abc extends IndentPrinter implements MutableField<FieldAbc>, JavaDoc {
+public class Abc extends DelegateWriter implements MutableField<FieldAbc>, JavaDoc {
     private final Defaults.AbcDefault defaults;
 
-    public Abc(PrintWriter pw, Defaults.AbcDefault defaults) {
+    public Abc(CodeWriter pw, Defaults.AbcDefault defaults) {
         super(pw);
         this.defaults = defaults;
     }
 
-    public Abc(PrintWriter pw, Defaults.AbcDefault defaults, IntFunction<String> pos) {
+    public Abc(CodeWriter pw, Defaults.AbcDefault defaults, IntFunction<String> pos) {
         super(pw, pos);
         this.defaults = defaults;
     }
 
     public void initialize(@NotNull FieldAbc fld, int bias) {
-        printf("        fill(%5d, %4d, ' ');%n", fld.getOffset() - bias, fld.getLength());
+        printf("    fill(%5d, %4d, ' ');%n", fld.getOffset() - bias, fld.getLength());
     }
 
     public void validate(@NotNull FieldAbc fld, int w, int bias, AtomicBoolean isFirst) {
@@ -54,11 +54,9 @@ public class Abc extends IndentPrinter implements MutableField<FieldAbc>, JavaDo
         }
     }
 
-    public void access(FieldAbc fld, String wrkName, int indent, @NotNull GenerateArgs ga) {
-        pushIndent(indent);
+    public void access(FieldAbc fld, String wrkName, @NotNull GenerateArgs ga) {
         buildGetter(fld, wrkName, ga);
         buildSetter(fld, wrkName, ga);
-        popIndent();
     }
 
     private void buildSetter(FieldAbc fld, String wrkName, GenerateArgs ga) {
@@ -124,4 +122,5 @@ public class Abc extends IndentPrinter implements MutableField<FieldAbc>, JavaDo
     public String tag() {
         return "Abc";
     }
+
 }

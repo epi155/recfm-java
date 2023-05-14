@@ -1,11 +1,10 @@
 package io.github.epi155.recfm.java.factory;
 
 import io.github.epi155.recfm.java.fields.*;
+import io.github.epi155.recfm.java.rule.ValidateField;
 import io.github.epi155.recfm.type.*;
-import io.github.epi155.recfm.util.ValidateField;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ValidateFactory {
@@ -16,7 +15,7 @@ public class ValidateFactory {
     private final ValidateField<FieldConstant> delegateVal;
     private final ValidateField<FieldDomain> delegateDom;
 
-    private ValidateFactory(PrintWriter pw, Defaults defaults) {
+    private ValidateFactory(CodeWriter pw, Defaults defaults) {
         this.delegateAbc = new Abc(pw, defaults.getAbc());
         this.delegateNum = new Num(pw, defaults.getNum());
         this.delegateCus = new Custom(pw, defaults.getCus());
@@ -25,7 +24,7 @@ public class ValidateFactory {
         this.delegateVal = new Constant(pw);
     }
 
-    public static ValidateFactory getInstance(PrintWriter pw, Defaults defaults) {
+    public static ValidateFactory getInstance(CodeWriter pw, Defaults defaults) {
         return new ValidateFactory(pw, defaults);
     }
 

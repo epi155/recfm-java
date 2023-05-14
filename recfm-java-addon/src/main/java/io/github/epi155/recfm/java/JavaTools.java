@@ -6,9 +6,9 @@ public class JavaTools {
 
     public static String prefixOf(boolean isFirst) {
         if (isFirst) {
-            return "        boolean error =";
+            return "    boolean error =";
         } else {
-            return "        error |=";
+            return "    error |=";
         }
     }
 }

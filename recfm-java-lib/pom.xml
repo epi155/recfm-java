@@ -11,8 +11,8 @@
     <url>https://github.com/epi155/recfm-java/tree/recfm-java-${project.version}/recfm-java-lib</url>
 
     <properties>
-        <maven.compiler.source>7</maven.compiler.source>
-        <maven.compiler.target>7</maven.compiler.target>
+        <maven.compiler.source>5</maven.compiler.source>
+        <maven.compiler.target>5</maven.compiler.target>
         <maven.compiler.testSource>8</maven.compiler.testSource>
         <maven.compiler.testTarget>8</maven.compiler.testTarget>
         <maven.recfm.addCompileSourceRoot>false</maven.recfm.addCompileSourceRoot>
@@ -24,21 +24,21 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.9.2</version>
+            <version>5.9.3</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.9.2</version>
+            <version>5.9.3</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.junit.vintage/junit-vintage-engine -->
         <dependency>
             <groupId>org.junit.vintage</groupId>
             <artifactId>junit-vintage-engine</artifactId>
-            <version>5.9.2</version>
+            <version>5.9.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -62,6 +62,7 @@
                             <generateDirectory>target/generated-test-sources/recfm</generateDirectory>
                             <settings>
                                 <setting>J-test.yaml</setting>
+                                <setting>X-test.yaml</setting>
                             </settings>
                             <codeProviderClassName>io.github.epi155.recfm.java.CodeGenerator</codeProviderClassName>
                         </configuration>
@@ -88,6 +89,51 @@
                         <groupId>io.github.epi155</groupId>
                         <artifactId>recfm-java-addon</artifactId>
                         <version>0.7.0-SNAPSHOT</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <executions>
+                    <execution>
+                        <id>default-compile</id>
+                        <!-- recompile with Java 9 only the module-info.java -->
+                        <configuration>
+                            <includes>
+                                <include>module-info.java</include>
+                            </includes>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF/versions/9</outputDirectory>
+                            <!--                            <release>9</release>-->
+                            <!-- still need this for IntelliJ -->
+                            <source>9</source>
+                            <target>9</target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>java8-compile</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <!-- recompile everything with Java 8 except the module-info.java -->
+                        <configuration>
+                            <fork>true</fork>
+                            <executable>/usr/lib/jvm/java-8-openjdk/bin/javac</executable>
+                            <excludes>
+                                <exclude>module-info.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <!-- upgrade to final ASM 6.0 release -->
+                    <!-- https://mvnrepository.com/artifact/org.ow2.asm/asm -->
+                    <dependency>
+                        <groupId>org.ow2.asm</groupId>
+                        <artifactId>asm</artifactId>
+                        <version>9.5</version>
                     </dependency>
                 </dependencies>
             </plugin>

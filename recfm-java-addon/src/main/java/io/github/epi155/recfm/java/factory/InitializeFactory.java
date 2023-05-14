@@ -1,10 +1,8 @@
 package io.github.epi155.recfm.java.factory;
 
 import io.github.epi155.recfm.java.fields.*;
+import io.github.epi155.recfm.java.rule.InitializeField;
 import io.github.epi155.recfm.type.*;
-import io.github.epi155.recfm.util.InitializeField;
-
-import java.io.PrintWriter;
 
 public class InitializeFactory {
     private final InitializeField<FieldAbc> delegateAbc;
@@ -14,7 +12,7 @@ public class InitializeFactory {
     private final InitializeField<FieldFiller> delegateFil;
     private final InitializeField<FieldConstant> delegateVal;
 
-    private InitializeFactory(PrintWriter pw, Defaults defaults) {
+    private InitializeFactory(CodeWriter pw, Defaults defaults) {
         this.delegateAbc = new Abc(pw, defaults.getAbc());
         this.delegateNum = new Num(pw, defaults.getNum());
         this.delegateCus = new Custom(pw, defaults.getCus());
@@ -23,7 +21,7 @@ public class InitializeFactory {
         this.delegateVal = new Constant(pw);
     }
 
-    public static InitializeFactory getInstance(PrintWriter pw, Defaults defaults) {
+    public static InitializeFactory getInstance(CodeWriter pw, Defaults defaults) {
         return new InitializeFactory(pw, defaults);
     }
 
@@ -46,6 +44,10 @@ public class InitializeFactory {
     }
 
     protected void initializeGrp(FieldGroup fld, int bias) {
+        if (fld.isRedefines()) return;
+        fld.getFields().forEach(it -> initialize(it, bias));
+    }
+    protected void initializeGrpPxy(FieldGroupProxy fld, int bias) {
         if (fld.isRedefines()) return;
         fld.getFields().forEach(it -> initialize(it, bias));
     }
@@ -85,6 +87,8 @@ public class InitializeFactory {
             initializeOcc((FieldOccurs) fld, bias);
         } else if (fld instanceof FieldGroup) {
             initializeGrp((FieldGroup) fld, bias);
+        } else if (fld instanceof FieldGroupProxy) {
+            initializeGrpPxy((FieldGroupProxy) fld, bias);
         } else {
             throw new IllegalStateException("Unknown field type " + fld.getClass().getSimpleName());
         }

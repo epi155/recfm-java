@@ -1,18 +1,18 @@
 package io.github.epi155.recfm.java.fields;
 
+import io.github.epi155.recfm.java.factory.CodeWriter;
+import io.github.epi155.recfm.java.factory.DelegateWriter;
+import io.github.epi155.recfm.java.rule.PrepareField;
 import io.github.epi155.recfm.type.FieldDomain;
-import io.github.epi155.recfm.util.AbstractPrinter;
-import io.github.epi155.recfm.util.PrepareField;
 import lombok.val;
 import org.apache.commons.text.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public class PreDomain extends AbstractPrinter implements PrepareField<FieldDomain> {
-    public PreDomain(PrintWriter pw) {
+public class PreDomain extends DelegateWriter implements PrepareField<FieldDomain> {
+    public PreDomain(CodeWriter pw) {
         super(pw);
     }
 

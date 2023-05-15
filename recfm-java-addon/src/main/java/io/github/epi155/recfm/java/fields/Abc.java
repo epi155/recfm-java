@@ -3,6 +3,7 @@ package io.github.epi155.recfm.java.fields;
 import io.github.epi155.recfm.java.JavaDoc;
 import io.github.epi155.recfm.java.factory.CodeWriter;
 import io.github.epi155.recfm.java.factory.DelegateWriter;
+import io.github.epi155.recfm.java.rule.Action;
 import io.github.epi155.recfm.java.rule.MutableField;
 import io.github.epi155.recfm.type.Defaults;
 import io.github.epi155.recfm.type.FieldAbc;
@@ -66,8 +67,9 @@ public class Abc extends DelegateWriter implements MutableField<FieldAbc>, JavaD
         val align = fld.getAlign();
         val ovfl = notNullOf(fld.getOnOverflow(), defaults.getOnOverflow());
         val unfl = notNullOf(fld.getOnUnderflow(), defaults.getOnUnderflow());
-        printf("    setAbc(s, %s, %d, Action.Overflow.%s, Action.Underflow.%s, '%c', ' ');%n",
-            pos.apply(fld.getOffset()), fld.getLength(), ovfl.of(align), unfl.of(align), fld.getPadChar());
+        val flag = Action.flagSetter(ovfl, unfl, align);
+        printf("    setAbc(s, %s, %d, %d, '%c', ' ');%n",
+            pos.apply(fld.getOffset()), fld.getLength(), flag, fld.getPadChar());
         printf("}%n");
     }
 
@@ -79,8 +81,8 @@ public class Abc extends DelegateWriter implements MutableField<FieldAbc>, JavaD
         if (norm == NormalizeAbcMode.None) {
             printf("    return getAbc(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());
         } else {
-            printf("    return getAbc(%s, %d, Action.Normalize.R%s, ' ');%n",
-                pos.apply(fld.getOffset()), fld.getLength(), norm.name());
+            printf("    return getAbc(%s, %d, %d, ' ');%n",
+                pos.apply(fld.getOffset()), fld.getLength(), Action.flagGetter(norm, fld.getAlign()));
         }
         printf("}%n");
     }

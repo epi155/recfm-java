@@ -2,6 +2,7 @@ package io.github.epi155.recfm.java.fields;
 
 import io.github.epi155.recfm.java.factory.CodeWriter;
 import io.github.epi155.recfm.java.factory.DelegateWriter;
+import io.github.epi155.recfm.java.rule.Action;
 import io.github.epi155.recfm.java.rule.MutableField;
 import io.github.epi155.recfm.type.Defaults;
 import io.github.epi155.recfm.type.FieldNum;
@@ -62,8 +63,8 @@ public class Num extends DelegateWriter implements MutableField<FieldNum> {
         if (norm == NormalizeNumMode.None) {
             printf("    return getAbc(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());
         } else {
-            printf("    return getAbc(%s, %d, Action.Normalize.LTrim1, '0');%n",
-                pos.apply(fld.getOffset()), fld.getLength());
+            printf("    return getAbc(%s, %d, %d, '0');%n",
+                pos.apply(fld.getOffset()), fld.getLength(), Action.F_NRM_LT1);
         }
         printf("}%n");
         if (doc) docSetter(fld, "s string");
@@ -78,8 +79,9 @@ public class Num extends DelegateWriter implements MutableField<FieldNum> {
         val align = fld.getAlign();
         val ovfl = notNullOf(fld.getOnOverflow(), defaults.getOnOverflow());
         val unfl = notNullOf(fld.getOnUnderflow(), defaults.getOnUnderflow());
-        printf("    setNum(s, %s, %d, Action.Overflow.%s, Action.Underflow.%s);%n",
-            pos.apply(fld.getOffset()), fld.getLength(), ovfl.of(align), unfl.of(align));
+        val flag = Action.flagSetter(ovfl, unfl, align);
+        printf("    setNum(s, %s, %d, %d);%n",
+            pos.apply(fld.getOffset()), fld.getLength(), flag);
         printf("}%n");
     }
 

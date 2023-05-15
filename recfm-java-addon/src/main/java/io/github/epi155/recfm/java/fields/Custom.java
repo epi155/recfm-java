@@ -3,6 +3,7 @@ package io.github.epi155.recfm.java.fields;
 import io.github.epi155.recfm.java.JavaDoc;
 import io.github.epi155.recfm.java.factory.CodeWriter;
 import io.github.epi155.recfm.java.factory.DelegateWriter;
+import io.github.epi155.recfm.java.rule.Action;
 import io.github.epi155.recfm.java.rule.MutableField;
 import io.github.epi155.recfm.type.Defaults;
 import io.github.epi155.recfm.type.FieldCustom;
@@ -105,21 +106,23 @@ public class Custom extends DelegateWriter implements MutableField<FieldCustom>,
         val init = notNullOf(fld.getInitChar(), defaults.getInit());
         val ovfl = notNullOf(fld.getOnOverflow(), defaults.getOnOverflow());
         val unfl = notNullOf(fld.getOnUnderflow(), defaults.getOnUnderflow());
+        val flag = Action.flagSetter(ovfl, unfl, align);
         if (ga.setCheck) {
-            printf("    s = normalize(s, Action.Overflow.%s, Action.Underflow.%s, '%c', '%c', %s, %d);%n",
-                ovfl.of(align), unfl.of(align), pad, init,
+            printf("    s = normalize(s, %d, '%c', '%c', %s, %d);%n",
+                flag, pad, init,
                 pos.apply(fld.getOffset()), fld.getLength()
             );
             chkSetter(fld);
             printf("    setAsIs(s, %s);%n",
                     pos.apply(fld.getOffset()));
         } else {
-            printf("    setAbc(s, %s, %d, Action.Overflow.%s, Action.Underflow.%s, '%c', '%c');%n",
+            printf("    setAbc(s, %s, %d, %d, '%c', '%c');%n",
                 pos.apply(fld.getOffset()), fld.getLength(),
-                ovfl.of(align), unfl.of(align), pad, init);
+                flag, pad, init);
         }
         printf("}%n");
     }
+
 
     private void buildGetter(FieldCustom fld, String wrkName, GenerateArgs ga) {
         if (ga.doc) docGetter(fld);
@@ -130,11 +133,13 @@ public class Custom extends DelegateWriter implements MutableField<FieldCustom>,
         if (norm == NormalizeAbcMode.None) {
             printf("    return getAbc(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());
         } else {
-            printf("    return getAbc(%s, %d, Action.Normalize.%s, '%c');%n",
-                pos.apply(fld.getOffset()), fld.getLength(), norm.of(fld.getAlign()), pad);
+            val flag = Action.flagGetter(norm, fld.getAlign());
+            printf("    return getAbc(%s, %d, %d, '%c');%n",
+                pos.apply(fld.getOffset()), fld.getLength(), flag, pad);
         }
         printf("}%n");
     }
+
 
     private void chkSetter(@NotNull FieldCustom fld) {
         if (fld.getRegex() != null) {

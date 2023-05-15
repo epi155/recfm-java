@@ -182,8 +182,7 @@ abstract class FixEngine {
      * String value normalizer
      *
      * @param s               original value
-     * @param overflowAction  overflow behaviour
-     * @param underflowAction underflow behaviour
+     * @param flg             behaviour
      * @param pad             padding char
      * @param init            initialize char
      * @param offset          field offset
@@ -191,34 +190,36 @@ abstract class FixEngine {
      * @return normalized value
      */
     protected static String normalize(String s,
-                                      Action.Overflow overflowAction,
-                                      Action.Underflow underflowAction,
+                                      int flg,
                                       char pad, char init,
                                       int offset, int length) {
+        int flgUnf = flg & Action.F_UNF_MSK;
+        int flgOvf = flg & Action.F_OVF_MSK;
         if (s == null) {
-            if (underflowAction == Action.Underflow.Error)
+            if (flgUnf == Action.F_UNF_ERR)
                 throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND_NULL);
             return fill(length, init);
         } else if (s.length() == length)
             return s;
         else if (s.length() < length) {
-            switch (underflowAction) {
-                case PadR:
+            switch (flgUnf) {
+                case Action.F_UNF_PAR:
                     return rpad(s, length, pad);
-                case PadL:
+                case Action.F_UNF_PAL:
                     return lpad(s, length, pad);
-                case Error:
+                case Action.F_UNF_ERR:
+                default:
                     throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
             }
-        } else /* s.length() > length */switch (overflowAction) {
-            case TruncR:
+        } else /* s.length() > length */switch (flgOvf) {
+            case Action.F_OVF_TRR:
                 return rtrunc(s, length);
-            case TruncL:
+            case Action.F_OVF_TRL:
                 return ltrunc(s, length);
-            case Error:
+            case Action.F_OVF_ERR:
+            default:
                 throw new FieldOverFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
         }
-        return null; // dead branch (?)
     }
 
     private static String fill(int t, char pad) {
@@ -277,19 +278,21 @@ abstract class FixEngine {
      * Alphanumeric getter
      * @param offset    field offset
      * @param length    field length
-     * @param rule      normalization rule
+     * @param flg       normalization rule
      * @param pad       padding char
      * @return          normalized field value
      */
-    protected String getAbc(int offset, int length, Action.Normalize rule, char pad) {
-        switch (rule) {
-            case RTrim: return rgtTrim(offset, length, pad);
-            case RTrim1: return rgtTrim1(offset, length, pad);
-            case LTrim: return lftTrim(offset, length, pad);
-            case LTrim1: return lftTrim1(offset, length, pad);
-            case None: return new String(rawData, offset, length);  // String getAbc(int, int) should be used !!
+    protected String getAbc(int offset, int length, int flg, char pad) {
+        int flgRule = flg & Action.F_NRM_MSK;
+        switch (flgRule) {
+            case Action.F_NRM_RT0: return rgtTrim(offset, length, pad);
+            case Action.F_NRM_RT1: return rgtTrim1(offset, length, pad);
+            case Action.F_NRM_LT0: return lftTrim(offset, length, pad);
+            case Action.F_NRM_LT1: return lftTrim1(offset, length, pad);
+            case Action.F_NRM_NOX: return new String(rawData, offset, length);  // String getAbc(int, int) should be used !!
+            default:
+                throw new IllegalStateException();  // dead branch
         }
-        throw new IllegalStateException();  // dead branch
     }
 
     private String lftTrim(int offset, int length, char pad) {
@@ -811,38 +814,41 @@ abstract class FixEngine {
      * @param s               field value
      * @param offset          field offset
      * @param length          field length
-     * @param overflowAction  overflow behaviour
-     * @param underflowAction underflow behaviour
+     * @param flg             behaviour
      * @param pad             padding char
      * @param init            initialize char
      */
-    protected void setAbc(String s, int offset, int length, Action.Overflow overflowAction, Action.Underflow underflowAction, char pad, char init) {
+    protected void setAbc(String s, int offset, int length, int flg, char pad, char init) {
+        int flgUnf = flg & Action.F_UNF_MSK;
+        int flgOvf = flg & Action.F_OVF_MSK;
         if (s == null) {
-            if (underflowAction == Action.Underflow.Error)
+            if (flgUnf == Action.F_UNF_ERR)
                 throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND_NULL);
             fillChar(offset, length, init);
         } else if (s.length() == length)
             setAsIs(s, offset);
         else if (s.length() < length) {
-            switch (underflowAction) {
-                case PadR:
+            switch (flgUnf) {
+                case Action.F_UNF_PAR:
                     padToRight(s, offset, length, pad);
                     break;
-                case Error:
-                    throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
-                case PadL:  // used by relaxed custom fields
+                case Action.F_UNF_PAL:  // used by relaxed custom fields
                     padToLeft(s, offset, length, pad);
                     break;
+                case Action.F_UNF_ERR:
+                default:
+                    throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
             }
-        } else switch (overflowAction) {
-            case TruncR:
+        } else switch (flgOvf) {
+            case Action.F_OVF_TRR:
                 truncRight(s, offset, length);
                 break;
-            case Error:
-                throw new FieldOverFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
-            case TruncL:    // used by relaxed custom fields
+            case Action.F_OVF_TRL:    // used by relaxed custom fields
                 truncLeft(s, offset, length);
                 break;
+            case Action.F_OVF_ERR:
+            default:
+                throw new FieldOverFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
         }
     }
 
@@ -852,36 +858,39 @@ abstract class FixEngine {
      * @param s               field value
      * @param offset          field offset
      * @param length          field length
-     * @param overflowAction  overflow behaviour
-     * @param underflowAction underflow behaviour
+     * @param flg             behaviour
      */
-    protected void setNum(String s, int offset, int length, Action.Overflow overflowAction, Action.Underflow underflowAction) {
+    protected void setNum(String s, int offset, int length, int flg) {
+        int flgUnf = flg & Action.F_UNF_MSK;
+        int flgOvf = flg & Action.F_OVF_MSK;
         if (s == null) {
-            if (underflowAction == Action.Underflow.Error)
+            if (flgUnf == Action.F_UNF_ERR)
                 throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND_NULL);
             fillChar(offset, length, '0');
         } else if (s.length() == length)
             setAsIs(s, offset);
         else if (s.length() < length) {
-            switch (underflowAction) {
-                case PadL:
+            switch (flgUnf) {
+                case Action.F_UNF_PAL:
                     padToLeft(s, offset, length, '0');
                     break;
-                case Error:
-                    throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
-                case PadR:  // dead branch, Number are LEFT padded !!
+                case Action.F_UNF_PAR:  // dead branch, Number are LEFT padded !!
                     padToRight(s, offset, length, '0');
                     break;
+                case Action.F_UNF_ERR:
+                default:
+                    throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
             }
-        } else switch (overflowAction) {
-            case TruncL:
+        } else switch (flgOvf) {
+            case Action.F_OVF_TRL:
                 truncLeft(s, offset, length);
                 break;
-            case Error:
-                throw new FieldOverFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
-            case TruncR:    // dead branch, Number are LEFT truncated !!
+            case Action.F_OVF_TRR:    // dead branch, Number are LEFT truncated !!
                 truncRight(s, offset, length);
                 break;
+            case Action.F_OVF_ERR:
+            default:
+                throw new FieldOverFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
         }
     }
 

@@ -122,6 +122,10 @@ public abstract class CodeFactory implements CodeWriter {
                     int times = ((FieldOccurs) field).getTimes();
                     printf(" * <tr><td>{@link %1$s %2$s}</td><td style='text-align: center'>{@code %3$s}</td><td style='text-align: right'>{@code %4$d}</td><td style='text-align: right'>{@code %5$d}</td><td style='text-align: right'>x{@code %6$d}</td></tr>%n",
                             capit, named.getName(), typeOf(named), named.getOffset(), named.getLength(), times);
+                } else if (field instanceof FieldOccursProxy) {
+                    int times = ((FieldOccursProxy) field).getTimes();
+                    printf(" * <tr><td>{@link %1$s %2$s}</td><td style='text-align: center'>{@code %3$s}</td><td style='text-align: right'>{@code %4$d}</td><td style='text-align: right'>{@code %5$d}</td><td style='text-align: right'>x{@code %6$d}</td></tr>%n",
+                            capit, named.getName(), typeOf(named), named.getOffset(), named.getLength(), times);
                 } else if (field instanceof FieldGroup || field instanceof FieldGroupProxy) {
                     printf(" * <tr><td>{@link %1$s %2$s}</td><td style='text-align: center'>{@code %3$s}</td><td style='text-align: right'>{@code %4$d}</td><td style='text-align: right'>{@code %5$d}</td></tr>%n",
                             capit, named.getName(), typeOf(named), named.getOffset(), named.getLength());
@@ -151,9 +155,16 @@ public abstract class CodeFactory implements CodeWriter {
                     int times = ((FieldOccurs) field).getTimes();
                     printf(" * <tr><td>{@link %1$s %2$s}</td><td style='text-align: center'>{@code %3$s}</td><td style='text-align: right'>{@code %4$d+}</td><td style='text-align: right'>{@code %5$d}</td><td style='text-align: right'>x{@code %6$d}</td></tr>%n",
                             capit, named.getName(), typeOf(named), named.getOffset()-backShift, named.getLength(), times);
+                } else if (field instanceof FieldOccursProxy) {
+                    int times = ((FieldOccursProxy) field).getTimes();
+                    printf(" * <tr><td>{@link %1$s %2$s}</td><td style='text-align: center'>{@code %3$s}</td><td style='text-align: right'>{@code %4$d+}</td><td style='text-align: right'>{@code %5$d}</td><td style='text-align: right'>x{@code %6$d}</td></tr>%n",
+                            ((FieldOccursProxy) field).getTypeDef().getName(), named.getName(), typeOf(named), named.getOffset()-backShift, named.getLength(), times);
                 } else if (field instanceof FieldGroup) {
                     printf(" * <tr><td>{@link %1$s %2$s}</td><td style='text-align: center'>{@code %3$s}</td><td style='text-align: right'>{@code %4$d+}</td><td style='text-align: right'>{@code %5$d}</td></tr>%n",
                             capit, named.getName(), typeOf(named), named.getOffset()-backShift, named.getLength());
+                } else if (field instanceof FieldGroupProxy) {
+                    printf(" * <tr><td>{@link %1$s %2$s}</td><td style='text-align: center'>{@code %3$s}</td><td style='text-align: right'>{@code %4$d+}</td><td style='text-align: right'>{@code %5$d}</td></tr>%n",
+                            ((FieldGroupProxy) field).getTypeDef().getName(), named.getName(), typeOf(named), named.getOffset()-backShift, named.getLength());
                 } else {
                     printf(" * <tr><td>{@code %s}</td><td style='text-align: center'>{@code %s}</td><td style='text-align: right'>{@code %d+}</td><td style='text-align: right'>{@code %d}</td></tr>%n", named.getName(), typeOf(named), named.getOffset()-backShift, named.getLength());
                 }

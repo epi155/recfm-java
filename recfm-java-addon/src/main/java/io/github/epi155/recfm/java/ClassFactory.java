@@ -13,6 +13,8 @@ import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintWriter;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntFunction;
@@ -20,6 +22,7 @@ import java.util.function.IntFunction;
 public class ClassFactory extends CodeFactory {
     private static final IntFunction<String> BASE_ONE = n -> String.format("%d", n - 1);
     private final Defaults defaults;
+    private final Deque<String> trace = new LinkedList<>();
 
     private ClassFactory(PrintWriter pw, String wrtPackage, GenerateArgs ga, Defaults defaults) {
         super(pw, wrtPackage, ga);
@@ -97,13 +100,14 @@ public class ClassFactory extends CodeFactory {
     private void generateGroupCode(FieldGroupProxy pxy, IntFunction<String> pos) {
         AccessFactory access;
         if (pxy instanceof FieldOccursProxy) {
-//            writeBeginClassOccurs(pw, (FieldOccurs) pxy, indent);
+            writeBeginClassOccursProxy((FieldOccursProxy) pxy, pxy.getTypeDef().getName());
             access = AccessFactory.getInstance(this, defaults, n -> String.format("%d+shift", n - 1));
         } else {
             writeBeginClassGroupProxy(pxy, pxy.getTypeDef().getName());
             access = AccessFactory.getInstance(this, defaults, pos);
         }
         pushPlusIndent(4);
+        trace.addLast(pxy.getTypeDef().getName());
         pxy.getFields().forEach(it -> {
             if (it instanceof SelfCheck) ((SelfCheck) it).selfCheck();
             if (it instanceof FieldGroup) generateGroupCode((FieldGroup) it, pos);
@@ -112,22 +116,55 @@ public class ClassFactory extends CodeFactory {
         pxy.getFields().forEach(it -> {
             if (it instanceof FloatingField) access.createMethods((FloatingField) it, ga);
         });
+        trace.removeLast();
         popIndent();
         writeEndClass();
     }
-
-    private void writeBeginClassOccurs(@NotNull FieldOccurs fld) {
-        String capName = Tools.capitalize(fld.getName());
-        printf("private final %s[] %s = new %1$s[] {%n", capName, fld.getName());
-        for (int k = 0, shift = 0; k < fld.getTimes(); k++, shift += fld.getLength()) {
+    private void writeBeginClassOccursProxy(FieldOccursProxy occurs, String proxyName) {
+        String capName = Tools.capitalize(occurs.getName());
+        printf("private final %s[] %s = new %1$s[] {%n", capName, occurs.getName());
+        for (int k = 0, shift = 0; k < occurs.getTimes(); k++, shift += occurs.getLength()) {
             printf("    this.new %s(%d),%n", capName, shift);
         }
         printf("};%n");
-        printf("public %s %s(int k) { return this.%2$s[k-1]; }%n", capName, fld.getName());
-        printf("public class %s {%n", capName);
+        printf("public %s %s(int k) { return this.%2$s[k-1]; }%n", capName, occurs.getName());
+        if (ga.doc)
+            javadocGroupDef(occurs);
+        if (capName.equals(proxyName)) {
+            printf("public class %s implements %s.%s {%n", capName, wrtPackage, proxyName);
+        } else {
+            printf("public class %s implements %s {%n", capName, proxyName);
+        }
 
-        printf("private final int shift;%n");
-        printf("private %s(int shift) { this.shift = shift; }%n", capName);
+        printf("    private final int shift;%n");
+        printf("    private %s(int shift) { this.shift = shift; }%n", capName);
+    }
+
+
+    private void writeBeginClassOccurs(@NotNull FieldOccurs occurs) {
+        String capName = Tools.capitalize(occurs.getName());
+        printf("private final %s[] %s = new %1$s[] {%n", capName, occurs.getName());
+        for (int k = 0, shift = 0; k < occurs.getTimes(); k++, shift += occurs.getLength()) {
+            printf("    this.new %s(%d),%n", capName, shift);
+        }
+        printf("};%n");
+        printf("public %s %s(int k) { return this.%2$s[k-1]; }%n", capName, occurs.getName());
+        if (ga.doc)
+            javadocGroupDef(occurs);
+        if (trace.isEmpty()) {
+            printf("public class %s {%n", capName);
+        } else {
+            String trait = String.join(".", trace);
+            printf("public class %1$s implements %2$s.%1$s {%n", capName, trait);
+        }
+
+        printf("    private final int shift;%n");
+        printf("    private %s(int shift) { this.shift = shift; }%n", capName);
+    }
+    private void javadocGroupDef(ParentFields group) {
+        println("/**");
+        tableDoc(group);
+        println(" */");
     }
     private void writeBeginClassGroup(FieldGroup group) {
         val name = group.getName();
@@ -138,14 +175,14 @@ public class ClassFactory extends CodeFactory {
 
         if (ga.doc)
             javadocGroupDef(group);
-        printf("public class %s {%n", capName);
+        if (trace.isEmpty()) {
+            printf("public class %s {%n", capName);
+        } else {
+            String trait = String.join(".", trace);
+            printf("public class %1$s implements %2$s.%1$s {%n", capName, trait);
+        }
     }
 
-    private void javadocGroupDef(ParentFields group) {
-        println("/**");
-        tableDoc(group);
-        println(" */");
-    }
     private void writeBeginClassGroupProxy(FieldGroupProxy group, String proxyName) {
         val name = group.getName();
         String capName = Tools.capitalize(name);

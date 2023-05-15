@@ -13,8 +13,8 @@ public class InterfaceFactory extends CodeFactory{
     private static final String TAG_CUS = "Cus";
     private static final String TAG_ABC = "Abc";
     private static final String TAG_NUM = "Num";
-    private static final String STRING_SETTER = "public void set%s(String s);%n";
-    private static final String STRING_GETTER = "public String get%s();%n";
+    private static final String STRING_SETTER = "void set%s(String s);%n";
+    private static final String STRING_GETTER = "String get%s();%n";
     private static final String JAVADOC_OPEN = "/**%n";
     private static final String JAVADOC_CLOSE = " */%n";
 
@@ -35,15 +35,69 @@ public class InterfaceFactory extends CodeFactory{
         writeBeginProxy(proxy);
         println();
         pushIndent(4);
-//        proxy.getFields().forEach(it -> {
-//            if (it instanceof FieldGroup) generateGroupCode((FieldGroup) it, 4);
-//            if (it instanceof FieldGroupProxy) generateGroupCode((FieldGroupProxy) it, 4);
-//        });
+        proxy.getFields().forEach(it -> {
+            if (it instanceof FieldGroup) generateGroupCode((FieldGroup) it);
+            if (it instanceof FieldGroupProxy) createMethodsGroupProxy((FieldGroupProxy) it);
+        });
         proxy.getFields().forEach(it -> {
             if (it instanceof SettableField) createMethods((SettableField) it);
         });
         popIndent();
         writeEndClass();
+    }
+
+    private void generateGroupCode(FieldGroup fld) {
+        if (fld instanceof FieldOccurs) {
+            writeBeginClassOccurs((FieldOccurs) fld);
+        } else {
+            writeBeginClassGroup(fld);
+        }
+        pushPlusIndent(4);
+        fld.getFields().forEach(it -> {
+            if (it instanceof FieldGroup) generateGroupCode((FieldGroup) it);
+        });
+        fld.getFields().forEach(it -> {
+            if (it instanceof FloatingField) createMethods((FloatingField) it);
+        });
+        popIndent();
+        writeEndClass();
+    }
+
+    private void writeBeginClassOccurs(FieldOccurs occurs) {
+        String capName = Tools.capitalize(occurs.getName());
+        printf("%s %s(int k);%n", capName, occurs.getName());
+        if (ga.doc)
+            javadocGroupDef(occurs);
+        printf("interface %s {%n", capName);
+    }
+
+    private void writeBeginClassGroup(FieldGroup group) {
+        val name = group.getName();
+        String capName = Tools.capitalize(name);
+        printf("%s %s();%n", capName, name);
+        if (ga.doc)
+            javadocGroupDef(group);
+        printf("interface %s {%n", capName);
+    }
+
+    private void javadocGroupDef(FieldGroup group) {
+        println("/**");
+        proxyDoc(group);
+        println(" */");
+    }
+
+    private void createMethodsGroupProxy(FieldGroupProxy fld) {
+        val clsName = fld.getTypeDef().getName();
+        if (ga.doc) docProxyGetter(fld);
+        printf("%s %s();%n", clsName, fld.getName());
+    }
+
+    private void docProxyGetter(FieldGroupProxy fld) {
+        val clsName = fld.getTypeDef().getName();
+        printf(JAVADOC_OPEN);
+        printf(" * {@link %s}(%d)%n", clsName, fld.getLength());
+        printf(" * @return %s value%n", clsName);
+        printf(JAVADOC_CLOSE);
     }
 
     private void writeBeginProxy(@NotNull ClassDefine proxy) {
@@ -90,30 +144,30 @@ public class InterfaceFactory extends CodeFactory{
 
     private void useLong(FieldNum fld, String wrkName) {
         if (ga.doc) docNumGetter(fld, "long");
-        printf("public long long%s();%n", wrkName);
+        printf("long long%s();%n", wrkName);
         if (ga.doc) docNumSetter(fld, "n long");
-        printf("public void set%s(long n);%n", wrkName);
+        printf("void set%s(long n);%n", wrkName);
     }
 
     private void useInt(FieldNum fld, String wrkName) {
         if (ga.doc) docNumGetter(fld, "integer");
-        printf("public int int%s();%n", wrkName);
+        printf("int int%s();%n", wrkName);
         if (ga.doc) docNumSetter(fld, "n integer");
-        printf("public void set%s(int n);%n", wrkName);
+        printf("void set%s(int n);%n", wrkName);
     }
 
     private void useShort(FieldNum fld, String wrkName) {
         if (ga.doc) docNumGetter(fld, "short");
-        printf("public short short%s();%n", wrkName);
+        printf("short short%s();%n", wrkName);
         if (ga.doc) docNumSetter(fld, "n short");
-        printf("public void set%s(short n);%n", wrkName);
+        printf("void set%s(short n);%n", wrkName);
     }
 
     private void useByte(FieldNum fld, String wrkName) {
         if (ga.doc) docNumGetter(fld, "byte");
-        printf("public byte byte%s();%n", wrkName);
+        printf("byte byte%s();%n", wrkName);
         if (ga.doc) docNumSetter(fld, "n byte");
-        printf("public void set%s(byte n);%n", wrkName);
+        printf("void set%s(byte n);%n", wrkName);
     }
 
     private void docNumGetter(FieldNum fld, String dsType) {

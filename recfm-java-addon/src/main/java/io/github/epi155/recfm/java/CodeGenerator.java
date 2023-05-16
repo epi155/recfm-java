@@ -14,11 +14,12 @@ public class CodeGenerator implements CodeProvider {
     private static final String DOT_JAVA = ".java";
 
     @Override
-    public void createInterface(File srcMainJava, String wrtPackage, ClassDefine proxy, GenerateArgs ga) {
-        File pkgFolder = new File(srcMainJava, wrtPackage.replace('.', File.separatorChar));
+    public void createInterface(String namespace, ClassDefine proxy, GenerateArgs ga) {
+        File srcMainJava = ga.sourceDirectory;
+        File pkgFolder = new File(srcMainJava, namespace.replace('.', File.separatorChar));
         File clsFile = new File(pkgFolder, proxy.getName()+DOT_JAVA);
         try (PrintWriter pw = new PrintWriter(clsFile)) {
-            InterfaceFactory factory = InterfaceFactory.newInstance(pw, wrtPackage, ga);
+            InterfaceFactory factory = InterfaceFactory.newInstance(pw, namespace, ga);
             factory.writePackage();
             factory.generateInterfaceCode(proxy);
         } catch (IOException e) {
@@ -27,11 +28,12 @@ public class CodeGenerator implements CodeProvider {
     }
 
     @Override
-    public void createClass(File srcMainJava, String wrtPackage, ClassDefine clazz, GenerateArgs ga, Defaults defaults) {
-        File pkgFolder = new File(srcMainJava, wrtPackage.replace('.', File.separatorChar));
+    public void createClass(String namespace, ClassDefine clazz, GenerateArgs ga, Defaults defaults) {
+        File srcMainJava = ga.sourceDirectory;
+        File pkgFolder = new File(srcMainJava, namespace.replace('.', File.separatorChar));
         File clsFile = new File(pkgFolder, clazz.getName()+DOT_JAVA);
         try (PrintWriter pw = new PrintWriter(clsFile)) {
-            ClassFactory factory = ClassFactory.newInstance(pw, wrtPackage, ga, defaults);
+            ClassFactory factory = ClassFactory.newInstance(pw, namespace, ga, defaults);
             factory.writePackage();
             factory.writeImport();
             factory.generateClassCode(clazz);

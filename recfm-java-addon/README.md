@@ -7,16 +7,23 @@
 * [3. Plugin parameters details](#3)
 * [4. Configuration YAML details](#4)
     * [4.1. Package level](#41)
+        * [4.1.1. Package default for alphanumeric](#411)<br/>
+        * [4.1.2. Package default for numeric](#412)<br/>
+        * [4.1.3. Package default for filler](#413)<br/>
+        * [4.1.4. Package default for custom](#414)<br/>
     * [4.2. Class level](#42)
     * [4.3. Field level](#43)
-        * [4.3.1. Alphanumeric](#431)
-        * [4.3.2. Numeric](#432)
-        * [4.3.3. Custom](#433)
-        * [4.3.4. Domain](#434)
-        * [4.3.5. Filler](#435)
-        * [4.3.6. Constant](#436)
-        * [4.3.7. Group](#437)
-        * [4.3.8. Occurs](#438)
+        * [4.3.1. `Abc` Alphanumeric](#431)
+        * [4.3.2. `Num` Numeric](#432)
+        * [4.3.3. `Cus` Custom](#433)
+        * [4.3.4. `Dom` Domain](#434)
+        * [4.3.5. `Fil` Filler](#435)
+        * [4.3.6. `Val` Constant](#436)
+        * [4.3.7. `Grp` Group](#437)
+        * [4.3.8. `Occ` Occurs](#438)
+        * [4.3.9. `GRP` Group](#439) (interface)
+        * [4.3.10. `OCC` Occurs](#43a) (interface)
+        * [4.3.11. `Emb` Embedded Group](#43b) (interface)
 * [5. Special methods](#5)
     * [5.1. Deserialize `static T decode(String s)`](#51)
     * [5.2. Serialize `String encode()`](#52)
@@ -64,7 +71,7 @@ Configuration plugin example:
 <plugin>
     <groupId>io.github.epi155</groupId>
     <artifactId>recfm-maven-plugin</artifactId>
-    <version>0.6.0</version>
+    <version>0.7.0</version>
     <executions>
         <execution>
             <goals>
@@ -81,7 +88,7 @@ Configuration plugin example:
         <dependency>
             <groupId>io.github.epi155</groupId>
             <artifactId>recfm-java-addon</artifactId>
-            <version>0.6.0</version>
+            <version>0.7.0</version>
         </dependency>
     </dependencies>
 </plugin>
@@ -167,7 +174,7 @@ is `${project.build.resources[0].directory}`, ie **`src/main/resources`**
 : List of configuration files (required).
 
 `doc` or property `maven.recfm.doc`
-: Indicates whether or not to generate the javadoc documentation on setters and getters, default is **`false`**.
+: Indicates whether to generate the documentation on setters and getters, default is **`true`**.
 
 `align` or property `maven.recfm.align`
 : Indicates the minimum alignment of numeric fields when numeric representation is required. The Default value is **4**,
@@ -206,6 +213,13 @@ are defined at the package level
 defaults:
   abc:
     check: Ascii
+    onOverflow: Trunc
+    onUnderflow: Pad
+    normalize: None
+  num:
+    onOverflow: Trunc
+    onUnderflow: Pad
+    normalize: None
   fil:
     check: None
     fill: 0
@@ -214,13 +228,41 @@ defaults:
     check: Ascii
     init: ' '
     pad: ' '
+    onOverflow: Trunc
+    onUnderflow: Pad
+    normalize: None
 ~~~
 
+#### <a name="411">4.1.1. Package default for alphanumeric</a>
+
 `defaults.abc.check` indicates which checks to perform on alphanumeric fields, the default value is **Ascii**.
+
+`defaults.abc.onOverflow` indicates how to behave on setter if the length of the supplied string is
+  greater than that expected, default value is **Trunc** (ie characters exceeding to the right are ignored).
+
+`defaults.abc.onUnderflow` indicates how to behave on setter if the length of the supplied string is
+  less than the expected one, default value is **Pad** (ie the value is completed with spaces).
+
+`defaults.abc.normalize` indicates how to behave on the getter, the padding spaces on the right can be removed,
+the default value is **None** (i.e. no spaces to the right are removed)
+
+#### <a name="412">4.1.2. Package default for numeric</a>
+
+`defaults.num.onOverflow` indicates how to behave on setter if the length of the supplied string is
+  greater than that expected, default value is **Trunc** (ie characters exceeding to the left are ignored).
+
+`defaults.num.onUnderflow` indicates how to behave on setter if the length of the supplied string is
+  less than the expected one, default value is **Pad** (ie the value is completed with zeroes).
+
+`defaults.num.normalize`
+
+#### <a name="413">4.1.3. Package default for filler</a>
 
 `defaults.fil.check` indicates which checks to perform on Filler fields, the default value is **None**.
 
 `defaults.fil.fill` is the fill character to use for fields of type *Filler*, the default value is **0** (ie **\u0000**)
+
+#### <a name="414">4.1.4. Package default for custom</a>
 
 `defaults.cus.align` indicates which the align rule on *Custom* fields, the default value is **LFT** (ie **left**).
 
@@ -229,6 +271,14 @@ defaults:
 `defaults.cus.init` is the initializer character to use for fields of type *Custom*, the default value is **' '** (ie **SPACE**)
 
 `defaults.cus.pad` is the pad character to use for fields of type *Custom*, the default value is **' '** (ie **SPACE**)
+
+`defaults.cus.onOverflow`
+
+`defaults.cus.onUnderflow`
+
+`defaults.cus.normalize`
+
+
 
 After that we can define the single classes
 
@@ -272,17 +322,17 @@ should be defined as a filler.
 
 Tag for alphanumeric field is `Abc`, the possible attributes are:
 
-|attribute  |alt| type  | note                               |
-|-----------|---| :---: |------------------------------------|
-|[offset](#fld.offset)   |at | int   | **required**                       |
-|[length](#fld.length)   |len| int   | **required**                       |
-|[name](#fld.name)       |   |String | **required**                       |
-|[redefines](#fld.redef) |red|boolean| default `false`                    |
-|[audit](#fld.audit)     |   |boolean| default `false`                    |
-|[onOverflow](#fld.ovfl) |   |[^1]   | default `Trunc`                    |
-|[onUnderflow](#fld.unfl)|   |[^2]   | default `Pad`                      |
-|[padChar](#fld.pchr)    |pad|char   | default value `' '`                |
-|[check](#fld.chk)       |chk|[^3]   | default value `defaults.abc.check` |
+| attribute                | alt |  type   | note                               |
+|--------------------------|-----|:-------:|------------------------------------|
+| [offset](#fld.offset)    | at  |   int   | **required**                       |
+| [length](#fld.length)    | len |   int   | **required**                       |
+| [name](#fld.name)        |     | String  | **required**                       |
+| [redefines](#fld.redef)  | red | boolean | default `false`                    |
+| [audit](#fld.audit)      |     | boolean | default `false`                    |
+| [onOverflow](#fld.ovfl)  | ovf |  [^1]   | default `Trunc`                    |
+| [onUnderflow](#fld.unfl) | unf |  [^2]   | default `Pad`                      |
+| [padChar](#fld.pchr)     | pad |  char   | default value `' '`                |
+| [check](#fld.chk)        | chk |  [^3]   | default value `defaults.abc.check` |
 
 [^1]: Overflow domain: Trunc, Error
 [^2]: Underflow domain: Pad, Error
@@ -361,16 +411,19 @@ are available:
 Tag for numeric field is `Num`, many attributes have the same meaning as in the alphanumeric case, the padding character
 is necessarily 0, the control is necessarily that the characters are numeric, the possible attributes are:
 
-|attribute  |alt|type   | note                  |
-|-----------|---| :---: |-----------------------|
-|[offset](#fld.offset)   |at | int   | **required**          |
-|[length](#fld.length)   |len| int   | **required**          |
-|[name](#fld.name)       |   |String | **required**          |
-|[redefines](#fld.redef) |red|boolean| default `false`       |
-|[audit](#fld.audit)     |   |boolean| default `false`       |
-|[onOverflow](#fld.ovfl) |   |[^1]   | default `Trunc`       |
-|[onUnderflow](#fld.unfl)|   |[^2]   | default `Pad`         |
-|[numericAccess](#fld.num)|num|boolean| default value `false` |
+| attribute                 | alt |  type   | note                               |
+|---------------------------|-----|:-------:|------------------------------------|
+| [offset](#fld.offset)     | at  |   int   | **required**                       |
+| [length](#fld.length)     | len |   int   | **required**                       |
+| [name](#fld.name)         |     | String  | **required**                       |
+| [redefines](#fld.redef)   | red | boolean | default `false`                    |
+| [audit](#fld.audit)       |     | boolean | default `false`                    |
+| [onOverflow](#fld.ovfl)   | ovf |  [^1]   | default `defaults.num.onOverflow`  |
+| [onUnderflow](#fld.unfl)  | unf |  [^2]   | default `defaults.num.onUnderflow` |
+| [normalize](#fld.norm)    |     |  [^5]   | default `defaults.num.normalize`   |
+| [numericAccess](#fld.num) | num | boolean | default value `false`              |
+
+[^5]: NormalizeN domain: None, Trim
 
 <a name='fld.num'>numericAccess</a> indicates whether to generate the numeric setters and getters for the field, in
 addition to the alphanumeric ones. Numeric getters are prefixed with the return type.
@@ -398,23 +451,24 @@ addition to the alphanumeric ones. Numeric getters are prefixed with the return 
 #### <a name="433">4.3.3. Custom </a>
 Tag for custom field is `Cus`, a custom field is an extension of an alphanumeric field, with some additional parameters
 
-|attribute  |alt| type  | note                         |
-|-----------|---| :---: |------------------------------|
-|[offset](#fld.offset)   |at | int   | **required**                 |
-|[length](#fld.length)   |len| int   | **required**                 |
-|[name](#fld.name)       |   |String | **required**                 |
-|[redefines](#fld.redef) |red|boolean| default `false`              |
-|[audit](#fld.audit)     |   |boolean| default `false`              |
-|[onOverflow](#fld.ovfl) |   |[^1]   | default `Trunc`              |
-|[onUnderflow](#fld.unfl)|   |[^2]   | default `Pad`                |
-|[padChar](#fld.pchr)    |pad|char   | default `defaults.cus.pad`   |
-|[initChar](#fld.ichr)   |ini|char   | default `defaults.cus.init`  |
-|[check](#fld.ichk)      |chk|[^4]   | default `defaults.cus.check` |
-|[regex](#fld.regx)      |   |String | default *null*               |
-|[align](#fld.ialign)    |   |[^5]   | default `defaults.cus.align` |
+| attribute                | alt |  type   | note                               |
+|--------------------------|-----|:-------:|------------------------------------|
+| [offset](#fld.offset)    | at  |   int   | **required**                       |
+| [length](#fld.length)    | len |   int   | **required**                       |
+| [name](#fld.name)        |     | String  | **required**                       |
+| [redefines](#fld.redef)  | red | boolean | default `false`                    |
+| [audit](#fld.audit)      |     | boolean | default `false`                    |
+| [onOverflow](#fld.ovfl)  | ovf |  [^1]   | default `defaults.cus.onOverflow`  |
+| [onUnderflow](#fld.unfl) | unf |  [^2]   | default `defaults.cus.onUnderflow` |
+| [normalize](#fld.norm)   |     |  [^3]   | default `defaults.cus.normalize`   |
+| [padChar](#fld.pchr)     | pad |  char   | default `defaults.cus.pad`         |
+| [initChar](#fld.ichr)    | ini |  char   | default `defaults.cus.init`        |
+| [check](#fld.ichk)       | chk |  [^6]   | default `defaults.cus.check`       |
+| [regex](#fld.regx)       |     | String  | default *null*                     |
+| [align](#fld.ialign)     |     |  [^7]   | default `defaults.cus.align`       |
 
-[^4]: CheckC domain: None, Ascii, Latin1, Valid, Digit, DigitOrBlank
-[^5]: AlignC domain: LFT, RGT
+[^6]: CheckC domain: None, Ascii, Latin1, Valid, Digit, DigitOrBlank
+[^7]: AlignC domain: LFT, RGT
 
 <a name='fld.ichr'>initChar</a> indicates the character to use to initialize the field when the empty constructor is
 used.
@@ -441,14 +495,14 @@ the available one.
 
 Tag for domain field is `Dom`, a domain field can only take a limited number of values, the possible attributes are:
 
-|attribute  |alt| type  | note                           |
-|-----------|---| :---: |--------------------------------|
-|[offset](#fld.offset)   |at | int    | **required**                   |
-|[length](#fld.length)   |len| int    | **required**                   |
-|[name](#fld.name)       |   |String  | **required**                   |
-|[redefines](#fld.redef) |red|boolean | default `false`                |
-|[audit](#fld.audit)     |   |boolean | default `false`                |
-|[items](#fld.items)     |   |String[]| **required**                   |
+| attribute               | alt |   type   | note            |
+|-------------------------|-----|:--------:|-----------------|
+| [offset](#fld.offset)   | at  |   int    | **required**    |
+| [length](#fld.length)   | len |   int    | **required**    |
+| [name](#fld.name)       |     |  String  | **required**    |
+| [redefines](#fld.redef) | red | boolean  | default `false` |
+| [audit](#fld.audit)     |     | boolean  | default `false` |
+| [items](#fld.items)     |     | String[] | **required**    |
 
 <a name='fld.items'>items</a> indicates the list of possible values that the field can assume. All values supplied must have the expected length for the field. The first value supplied will be used to initialize the field.
 
@@ -468,12 +522,12 @@ Tag for domain field is `Dom`, a domain field can only take a limited number of 
 Tag for filler field is `Fil`, a filler is an area we are not interested in, neither getters nor setters are generated
 for it, the possible attributes are:
 
-|attribute  |alt|type   | note                               |
-|-----------|---| :---: |------------------------------------|
-|[offset](#fld.offset)  |at | int   | **required**                       |
-|[length](#fld.length)  |len| int   | **required**                       |
-|[fillChar](#fld.fill)  |   |char   | default value `defaults.fil.fill`  |
-|[check](#fld.chk)      |   |[^3]   | default value `defaults.fil.check` |
+| attribute             | alt | type | note                               |
+|-----------------------|-----|:----:|------------------------------------|
+| [offset](#fld.offset) | at  | int  | **required**                       |
+| [length](#fld.length) | len | int  | **required**                       |
+| [fillChar](#fld.fill) | chr | char | default value `defaults.fil.fill`  |
+| [check](#fld.chk)     | chk | [^4] | default value `defaults.fil.check` |
 
 <a name='fld.fill'>fillChar</a> indicates the character to use to initialize the area
 
@@ -482,12 +536,12 @@ for it, the possible attributes are:
 Tag for constant field is `Val`, even for a constant field the setters and getters are not generated, the controls
 verify that the present value coincides with the set one, the possible attributes are:
 
-|attribute  |alt|type   |note                            |
-|-----------|---| :---: |--------------------------------|
-|[offset](#fld.offset)  |at | int   | **required**                   |
-|[length](#fld.length)  |len| int   | **required**                   |
-|[value](#fld.val)      |val|String | **required**                   |
-|[audit](#fld.audit)    |   |boolean| default `false`                |
+| attribute             | alt |  type   | note            |
+|-----------------------|-----|:-------:|-----------------|
+| [offset](#fld.offset) | at  |   int   | **required**    |
+| [length](#fld.length) | len |   int   | **required**    |
+| [value](#fld.val)     | val | String  | **required**    |
+| [audit](#fld.audit)   |     | boolean | default `false` |
 
 <a name='fld.val'>value</a> indicates the value with which to initialize the area
 
@@ -496,13 +550,13 @@ verify that the present value coincides with the set one, the possible attribute
 Tag for group field is `Grp`, a group allows you to group multiple fields in order to structure the area, the possible
 attributes are:
 
-|attribute  |alt|type   |note                            |
-|-----------|---| :---: |--------------------------------|
-|[offset](#grp.offset)   |at | int   | **required**                   |
-|[length](#grp.length)   |len| int   | **required**                   |
-|[name](#grp.name)       |   |String | **required**                   |
-|[redefines](#grp.redef) |red|boolean| default `false`                |
-|[fields](#grp.flds)     |   |array  | **required** child fields      |
+| attribute               | alt |  type   | note                      |
+|-------------------------|-----|:-------:|---------------------------|
+| [offset](#grp.offset)   | at  |   int   | **required**              |
+| [length](#grp.length)   | len |   int   | **required**              |
+| [name](#grp.name)       |     | String  | **required**              |
+| [redefines](#grp.redef) | red | boolean | default `false`           |
+| [fields](#grp.flds)     |     |  array  | **required** child fields |
 
 The <a name='grp.offset'>offset</a> attribute indicates the starting position of the group (starting from 1).
 The <a name='grp.length'>length</a> attribute indicates the length of the group.
@@ -578,14 +632,14 @@ A definition like this generates the java class successfully, but fails to gener
 Tag for occurs field is `Occ`, an occurs is basically a repeated group, it is defined with the group data of the first
 occurrence and the number of occurrences, the possible attributes are:
 
-|attribute  |alt|type   |note                            |
-|-----------|---| :---: |--------------------------------|
-|[offset](#occ.offset)   |at | int   | **required**                   |
-|[length](#occ.length)   |len| int   | **required**                   |
-|[name](#occ.name)       |   |String | **required**                   |
-|[redefines](#occ.redef) |red|boolean| default `false`                |
-|[fields](#occ.flds)     |   |array  | **required** child fields      |
-|[times](#occ.times)     |x  | int   | **required** occurrences       |
+| attribute               | alt |  type   | note                      |
+|-------------------------|-----|:-------:|---------------------------|
+| [offset](#occ.offset)   | at  |   int   | **required**              |
+| [length](#occ.length)   | len |   int   | **required**              |
+| [name](#occ.name)       |     | String  | **required**              |
+| [redefines](#occ.redef) | red | boolean | default `false`           |
+| [fields](#occ.flds)     |     |  array  | **required** child fields |
+| [times](#occ.times)     | x   |   int   | **required** occurrences  |
 
 The <a name='occ.offset'>offset</a> attribute indicates the starting position of the first group (starting from 1).
 The <a name='occ.length'>length</a> attribute indicates the length of a single group.
@@ -625,6 +679,128 @@ Occurs definition example:
     resp.errItem(2).setErrorCodeSource("38000");
 ~~~
 
+#### <a name="439">4.3.9. Group with interface </a>
+
+The `GRP` tag allows you to define a group of fields by referencing an [interface](#44), the possible attributes are:
+
+| attribute               | alt |  type   | note                             |
+|-------------------------|-----|:-------:|----------------------------------|
+| [offset](#GRP.offset)   | at  |   int   | **required**                     |
+| [length](#GRP.length)   | len |   int   | **required**                     |
+| [name](#GRP.name)       |     | String  | **required**                     |
+| [redefines](#GRP.redef) | red | boolean | default `false`                  |
+| [typeDef](#GRP.defs)    | as  | TypDef  | **required** interface reference |
+
+The <a name='GRP.offset'>offset</a> attribute indicates the starting position of the group (starting from 1).
+The <a name='GRP.length'>length</a> attribute indicates the length of the group.
+The <a name='GRP.name'>name</a> attribute indicates the name of the group.
+The <a name='GRP.redef'>redefines</a> attribute indicates that the group is a redefinition of an area, this group will
+not be considered in the overlay checks
+The <a name='GRP.defs'>typeDef</a> attribute indicates the interface to be used as a model to define the fields of the group
+
+Group (with interface) definition example:
+
+~~~yml
+classes:
+  - name: B280v2xReq
+    length: 19324
+    fields:
+      - !GRP { name: transactionArea, at:   1, len:  12, as: *TransactionArea }
+      - ...
+~~~
+
+#### <a name="43a">4.3.10. Occurs with interface </a>
+
+The `OCC` tag allows you to define an occurs group of fields by referencing an [interface](#44), the possible attributes are:
+
+| attribute               | alt |  type   | note                             |
+|-------------------------|-----|:-------:|----------------------------------|
+| [offset](#OCC.offset)   | at  |   int   | **required**                     |
+| [length](#OCC.length)   | len |   int   | **required**                     |
+| [name](#OCC.name)       |     | String  | **required**                     |
+| [redefines](#OCC.redef) | red | boolean | default `false`                  |
+| [typeDef](#OCC.defs)    | as  | TypDef  | **required** interface reference |
+| [times](#OCC.times)     | x   |   int   | **required** occurrences         |
+
+The <a name='OCC.offset'>offset</a> attribute indicates the starting position of the first group (starting from 1).
+The <a name='OCC.length'>length</a> attribute indicates the length of a single group.
+The <a name='OCC.name'>name</a> attribute indicates the name of the group.
+The <a name='OCC.redef'>redefines</a> attribute indicates that the group is a redefinition of an area, this group will
+not be considered in the overlay checks
+The <a name='OCC.defs'>typeDef</a> attribute indicates the interface to be used as a model to define the fields of the group
+The <a name='OCC.times'>times</a> attribute indicates the number of times the group is repeated
+
+Occurs (with interface) definition example:
+
+~~~yml
+classes:
+  - name: B320v2xRes
+    length: 19324
+    fields:
+      - !GRP { name: transactionArea, at:   1, len:  12, as: *TransactionArea }
+      - !GRP { name: messageArea    , at:  13, len: 100, as: *MessageArea }
+      - !GRP { name: segmentArea    , at: 113, len:  11, as: *SegmentArea }
+      - !Grp { name: rs1            , at: 124, len: 253, fields: [ ... ] }
+      - !OCC { name: rs             , at: 377, len: 146, x: 129, as: *B320v2xItem }
+      - !Fil {                      at: 19211, len: 114 }
+~~~
+
+#### <a name="43b">4.3.11. Embedded group with interface </a>
+
+The `Emb` tag allows you to insert the fields defined in an [interface](#44) into the current structure, the possible attributes are:
+
+| attribute               | alt |  type   | note                             |
+|-------------------------|-----|:-------:|----------------------------------|
+| [source](#emb.defs)     | src | TypDef  | **required** interface reference |
+| [offset](#emb.offset)   | at  |   int   | **required**                     |
+| [length](#emb.length)   | len |   int   | **required**                     |
+
+The <a name='emb.defs'>typeDef</a> attribute indicates the interface to be used as a model to insert the fields
+The <a name='emb.offset'>offset</a> attribute indicates the starting position of the first group (starting from 1).
+The <a name='emb.length'>length</a> attribute indicates the length of a single group.
+
+Embedded group definition example:
+
+~~~yml
+classes:
+  - name: B280v2xReq
+    length: 19324
+    fields:
+      - !Emb { src: *TransactionArea, at:   1, len:  12 }
+      - ...
+~~~
+
+
+### <a name="44">4.4. Interface level</a>
+
+Sometimes there may be structures that have a common partial definition.
+In these cases it is useful to be able to manage these areas in the same way, as if they were the same sub-structure.
+This can be done by defining an interface that defines the common sub-structure
+
+~~~yml
+interfaces:
+  - &TransactionArea
+    name: ITransactionArea
+    length: 12
+    fields:
+      - !Abc { name: transId   , at:  1, len: 9 }
+      - !Num { name: esitoAgg  , at: 10, len: 1 }
+      - !Num { name: esitoCompl, at: 11, len: 1 }
+      - !Val { val: "\n"       , at: 12, len: 1 }
+~~~
+
+and then we can define the common substructure in the class by referencing the interface.
+
+~~~yml
+classes:
+  - name: B280v2xReq
+    length: 19324
+    fields:
+      - !GRP { name: transactionArea, at:   1, len:  12, as: *TransactionArea }
+      - ...
+~~~
+
+For the definition of the interface fields the same rules apply as for the classes.
 ## <a name="5">5. Special methods</a>
 
 In addition to the setters and getters, the deserialization, serialization and dump methods of the class are defined

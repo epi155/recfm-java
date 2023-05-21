@@ -4,6 +4,7 @@ import io.github.epi155.recfm.api.CodeProvider;
 import io.github.epi155.recfm.type.ClassDefine;
 import io.github.epi155.recfm.type.ClassDefineException;
 import io.github.epi155.recfm.type.Defaults;
+import io.github.epi155.recfm.type.TraitDefine;
 import io.github.epi155.recfm.util.GenerateArgs;
 
 import java.io.File;
@@ -14,7 +15,7 @@ public class CodeGenerator implements CodeProvider {
     private static final String DOT_JAVA = ".java";
 
     @Override
-    public void createInterface(String namespace, ClassDefine proxy, GenerateArgs ga) {
+    public void createInterface(String namespace, TraitDefine proxy, GenerateArgs ga) {
         File srcMainJava = ga.sourceDirectory;
         File pkgFolder = new File(srcMainJava, namespace.replace('.', File.separatorChar));
         File clsFile = new File(pkgFolder, proxy.getName()+DOT_JAVA);

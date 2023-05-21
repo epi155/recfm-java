@@ -30,14 +30,14 @@ public class ValidateFactory {
 
     protected void validateGrp(@NotNull FieldGroup fld, int w, int bias, AtomicBoolean firstField) {
         if (fld.isRedefines()) return;
-        fld.getFields().forEach(it -> validate(it, w, bias, firstField));
+        fld.forEachField(it -> validate(it, w, bias, firstField));
     }
 
     protected void validateOcc(FieldOccurs fld, int w, int bias, AtomicBoolean firstField) {
         if (fld.isRedefines()) return;
         for (int k = 0, shift = 0; k < fld.getTimes(); k++, shift += fld.getLength()) {
             int backShift = shift;
-            fld.getFields().forEach(it -> validate(it, w, bias - backShift, firstField));
+            fld.forEachField(it -> validate(it, w, bias - backShift, firstField));
         }
     }
 

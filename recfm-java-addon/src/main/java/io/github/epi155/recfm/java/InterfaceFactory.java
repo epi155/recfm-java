@@ -26,20 +26,20 @@ public class InterfaceFactory extends CodeFactory{
         return new InterfaceFactory(pw, wrtPackage, ga);
     }
 
-    public void generateInterfaceCode(ClassDefine proxy) {
+    public void generateInterfaceCode(TraitDefine trait) {
         if (ga.doc) {
             println("/**");
-            proxyDoc(proxy);
+            traitDoc(trait);
             println(" */");
         }
-        writeBeginProxy(proxy);
+        writeBeginProxy(trait);
         println();
         pushIndent(4);
-        proxy.getFields().forEach(it -> {
+        trait.forEachField(it -> {
             if (it instanceof FieldGroup) generateGroupCode((FieldGroup) it);
-            if (it instanceof FieldGroupProxy) createMethodsGroupProxy((FieldGroupProxy) it);
+            if (it instanceof FieldGroupTrait) createMethodsGroupProxy((FieldGroupTrait) it);
         });
-        proxy.getFields().forEach(it -> {
+        trait.forEachField(it -> {
             if (it instanceof SettableField) createMethods((SettableField) it);
         });
         popIndent();
@@ -53,10 +53,10 @@ public class InterfaceFactory extends CodeFactory{
             writeBeginClassGroup(fld);
         }
         pushPlusIndent(4);
-        fld.getFields().forEach(it -> {
+        fld.forEachField(it -> {
             if (it instanceof FieldGroup) generateGroupCode((FieldGroup) it);
         });
-        fld.getFields().forEach(it -> {
+        fld.forEachField(it -> {
             if (it instanceof FloatingField) createMethods((FloatingField) it);
         });
         popIndent();
@@ -82,17 +82,17 @@ public class InterfaceFactory extends CodeFactory{
 
     private void javadocGroupDef(FieldGroup group) {
         println("/**");
-        proxyDoc(group);
+        traitDoc(group);
         println(" */");
     }
 
-    private void createMethodsGroupProxy(FieldGroupProxy fld) {
+    private void createMethodsGroupProxy(FieldGroupTrait fld) {
         val clsName = fld.getTypeDef().getName();
         if (ga.doc) docProxyGetter(fld);
         printf("%s %s();%n", clsName, fld.getName());
     }
 
-    private void docProxyGetter(FieldGroupProxy fld) {
+    private void docProxyGetter(FieldGroupTrait fld) {
         val clsName = fld.getTypeDef().getName();
         printf(JAVADOC_OPEN);
         printf(" * {@link %s}(%d)%n", clsName, fld.getLength());
@@ -100,7 +100,7 @@ public class InterfaceFactory extends CodeFactory{
         printf(JAVADOC_CLOSE);
     }
 
-    private void writeBeginProxy(@NotNull ClassDefine proxy) {
+    private void writeBeginProxy(@NotNull TraitDefine proxy) {
         printf("public interface %s {%n", proxy.getName());
     }
 

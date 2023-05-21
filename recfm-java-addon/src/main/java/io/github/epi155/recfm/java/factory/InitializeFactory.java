@@ -29,7 +29,14 @@ public class InitializeFactory {
         if (fld.isRedefines()) return;
         for (int k = 0, shift = 0; k < fld.getTimes(); k++, shift += fld.getLength()) {
             int backShift = shift;
-            fld.getFields().forEach(it -> initialize(it, bias - backShift));
+            fld.forEachField(it -> initialize(it, bias - backShift));
+        }
+    }
+    protected void initializeOccTrt(FieldOccursTrait fld, int bias) {
+        if (fld.isRedefines()) return;
+        for (int k = 0, shift = 0; k < fld.getTimes(); k++, shift += fld.getLength()) {
+            int backShift = shift;
+            fld.forEachField(it -> initialize(it, bias - backShift));
         }
     }
 
@@ -45,11 +52,11 @@ public class InitializeFactory {
 
     protected void initializeGrp(FieldGroup fld, int bias) {
         if (fld.isRedefines()) return;
-        fld.getFields().forEach(it -> initialize(it, bias));
+        fld.forEachField(it -> initialize(it, bias));
     }
-    protected void initializeGrpPxy(FieldGroupProxy fld, int bias) {
+    protected void initializeGrpTrt(FieldGroupTrait fld, int bias) {
         if (fld.isRedefines()) return;
-        fld.getFields().forEach(it -> initialize(it, bias));
+        fld.forEachField(it -> initialize(it, bias));
     }
 
     protected void initializeFil(FieldFiller fld, int bias) {
@@ -87,8 +94,10 @@ public class InitializeFactory {
             initializeOcc((FieldOccurs) fld, bias);
         } else if (fld instanceof FieldGroup) {
             initializeGrp((FieldGroup) fld, bias);
-        } else if (fld instanceof FieldGroupProxy) {
-            initializeGrpPxy((FieldGroupProxy) fld, bias);
+        } else if (fld instanceof FieldOccursTrait) {
+            initializeOccTrt((FieldOccursTrait) fld, bias);
+        } else if (fld instanceof FieldGroupTrait) {
+            initializeGrpTrt((FieldGroupTrait) fld, bias);
         } else {
             throw new IllegalStateException("Unknown field type " + fld.getClass().getSimpleName());
         }

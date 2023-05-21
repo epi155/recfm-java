@@ -36,18 +36,25 @@ public class PrepareFactory {
 
     private void prepareGrp(@NotNull FieldGroup fld, int bias) {
         if (fld.isRedefines()) return;
-        fld.getFields().forEach(it -> prepare(it, bias));
+        fld.forEachField(it -> prepare(it, bias));
     }
-    private void prepareGrpPxy(@NotNull FieldGroupProxy fld, int bias) {
+    private void prepareGrpTrt(@NotNull FieldGroupTrait fld, int bias) {
         if (fld.isRedefines()) return;
-        fld.getFields().forEach(it -> prepare(it, bias));
+        fld.forEachField(it -> prepare(it, bias));
     }
 
     private void prepareOcc(@NotNull FieldOccurs fld, int bias) {
         if (fld.isRedefines()) return;
         for (int k = 0, shift = 0; k < fld.getTimes(); k++, shift += fld.getLength()) {
             int backShift = shift;
-            fld.getFields().forEach(it -> prepare(it, bias - backShift));
+            fld.forEachField(it -> prepare(it, bias - backShift));
+        }
+    }
+    private void prepareOccTrt(@NotNull FieldOccursTrait fld, int bias) {
+        if (fld.isRedefines()) return;
+        for (int k = 0, shift = 0; k < fld.getTimes(); k++, shift += fld.getLength()) {
+            int backShift = shift;
+            fld.forEachField(it -> prepare(it, bias - backShift));
         }
     }
 
@@ -69,8 +76,10 @@ public class PrepareFactory {
             prepareOcc((FieldOccurs) fld, bias);
         } else if (fld instanceof FieldGroup) {
             prepareGrp((FieldGroup) fld, bias);
-        } else if (fld instanceof FieldGroupProxy) {
-            prepareGrpPxy((FieldGroupProxy) fld, bias);
+        } else if (fld instanceof FieldOccursTrait) {
+            prepareOccTrt((FieldOccursTrait) fld, bias);
+        } else if (fld instanceof FieldGroupTrait) {
+            prepareGrpTrt((FieldGroupTrait) fld, bias);
         } else {
             throw new IllegalStateException("Unknown field type " + fld.getClass().getSimpleName());
         }

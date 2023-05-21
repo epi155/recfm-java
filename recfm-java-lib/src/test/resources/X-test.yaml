@@ -42,18 +42,19 @@ interfaces:
     length: 10
     fields:
       - !Num { name: anno       , at: 23, len: 4 }
-      - !Fil {                    at: 27, len: 1 }
+      - !Fil { chr: '-'         , at: 27, len: 1 }
       - !Num { name: mese       , at: 28, len: 2 }
-      - !Fil {                    at: 30, len: 1 }
+      - !Fil { chr: '-'         , at: 30, len: 1 }
       - !Num { name: giorno     , at: 31, len: 2 }
 
   - &Area51
     name: IArea51
     length: 32
     fields:
-      - !Abc { name: cdSegmento , at:   1, len: 8 }
-      - !Num { name: esitoAgg   , at:   9, len: 2 }
-      - !GRP { name: areaTra    , at:  11, len: 12, as: *TransactionArea }
+      - !Abc { name: cdSegmento1 , at:   1, len: 8 }
+      - !Num { name: esitoAgg1   , at:   9, len: 2 }
+      - !Emb { src: *TransactionArea, at:  11, len: 12  }
+#      - !GRP { name: areaTra    , at:  11, len: 12, as: *TransactionArea }
       - !Grp { name: data       , at:  23, len: 10, fields: [
         !Num { name: anno       , at: 23, len: 4 },
         !Fil {                    at: 27, len: 1 },
@@ -74,20 +75,34 @@ interfaces:
         !Num { name: giorno     , at: 31, len: 2 },
       ] }
 
+
 classes:
+  - name: KDate
+    length: 10
+    fields:
+      - !Emb { src: *Date, at:   1, len:  10 }
+
   - name: B280v2xReq
     length: 19324
     fields:
 #      - !GRP { name: messageArea    , at:   1, len: 100, proxy: *MessageArea }
-      - !GRP { name: transactionArea, at:   1, len:  12, as: *TransactionArea }
-      - !GRP { name: messageArea    , at:  13, len: 100, as: *MessageArea }
-      - !GRP { name: SegmentArea    , at: 113, len:  11, as: *SegmentArea }
-      - !Fil {                        at: 124, len: 19201 }
+#      - !GRP { name: transactionArea, at:   1, len:  12, as: *TransactionArea }
+      - !Emb { src: *TransactionArea, at:   1, len:  12 }
+      - !Emb { src: *MessageArea    , at:  13, len: 100 }
+      - !Fil {                        at: 113, len:   1 }
+#      - !GRP { name: messageArea    , at:  14, len: 100, as: *MessageArea }
+      - !GRP { name: SegmentArea    , at: 114, len:  11, as: *SegmentArea }
+      - !Fil {                        at: 125, len: 19200 }
 
   - name: Nevada
-    length: 100
+    length: 150
     fields:
       - !GRP { name: area51, at: 1, len: 32, as: *Area51 }
       - !OCC { name: lastThree, at: 33, len: 10, x: 3, as: *Date }
       - !GRP { name: area52, at: 63, len: 30, as: *Area52 }
-      - !Fil { at: 93, len: 8 }
+      - !Grp { name: documento   , at:  93, len: 40, fields: [
+        !Abc { name: numero      , at: 93, len: 16 },
+        !Emb { src: *Date        , at: 109, len: 10 },
+        !Fil {                    at: 119, len: 14 }
+      ] }
+      - !Fil { at: 133, len: 18 }

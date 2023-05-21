@@ -18,9 +18,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntFunction;
+import java.util.stream.Collectors;
 
 public class ClassFactory extends CodeFactory {
     private static final IntFunction<String> BASE_ONE = n -> String.format("%d", n - 1);
+    private static final String PUBLIC_CLASS_X_IMPLMENTS_Y = "public class %s implements %s {%n";
     private final Defaults defaults;
     private final Deque<String> trace = new LinkedList<>();
 
@@ -50,31 +52,40 @@ public class ClassFactory extends CodeFactory {
         writeConstant(clazz);
         println();
         pushIndent(4);
-        clazz.getFields().forEach(it -> {
+        clazz.forEachField(it -> {
             if (it instanceof SelfCheck) ((SelfCheck) it).selfCheck();
             if (it instanceof FieldGroup) generateGroupCode((FieldGroup) it, BASE_ONE);
-            if (it instanceof FieldGroupProxy) generateGroupCode((FieldGroupProxy) it, BASE_ONE);
+            if (it instanceof FieldGroupTrait) generateGroupTraitCode((FieldGroupTrait) it, BASE_ONE);
         });
         val access = AccessFactory.getInstance(this, defaults, BASE_ONE);
         writeCtorVoid(clazz.getName());
         writeCtorParm(clazz);
         writeInitializer(clazz);
         writeValidator(clazz);
-        clazz.getFields().forEach(it -> {
+        clazz.forEachField(it -> {
             if (it instanceof SettableField) access.createMethods((SettableField) it, ga);
         });
-        writeDump(clazz.getFields());
+        writeDump(clazz);
         popIndent();
         writeEndClass();
     }
 
     private void writeBeginClass(@NotNull ClassDefine struct) {
-        printf("public class %s extends FixRecord {%n", struct.getName());
+        List<String> traits = struct.getFields()
+                .stream()
+                .filter(FieldEmbedGroup.class::isInstance)
+                .map(it -> ((FieldEmbedGroup) it).getSource().getName())
+                .collect(Collectors.toList());
+        if (traits.isEmpty()) {
+            printf("public class %s extends FixRecord {%n", struct.getName());
+        } else {
+            printf("public class %s extends FixRecord implements %s {%n", struct.getName(), String.join(", ", traits));
+        }
     }
     private void writeConstant(@NotNull ParentFields struct) {
         printf("    public static final int LRECL = %d;%n", struct.getLength());
         val preparer = PrepareFactory.getInstance(this);
-        struct.getFields().forEach(it -> preparer.prepare(it, 1));
+        struct.forEachField(it -> preparer.prepare(it, 1));
 
     }
     private void generateGroupCode(FieldGroup fld, IntFunction<String> pos) {
@@ -87,41 +98,43 @@ public class ClassFactory extends CodeFactory {
             access = AccessFactory.getInstance(this, defaults, pos);
         }
         pushPlusIndent(4);
-        fld.getFields().forEach(it -> {
+        fld.forEachField(it -> {
             if (it instanceof SelfCheck) ((SelfCheck) it).selfCheck();
             if (it instanceof FieldGroup) generateGroupCode((FieldGroup) it, pos);
         });
-        fld.getFields().forEach(it -> {
+        fld.forEachField(it -> {
             if (it instanceof FloatingField) access.createMethods((FloatingField) it, ga);
         });
         popIndent();
         writeEndClass();
     }
-    private void generateGroupCode(FieldGroupProxy pxy, IntFunction<String> pos) {
+    private void generateGroupTraitCode(FieldGroupTrait trait, IntFunction<String> pos) {
         AccessFactory access;
-        if (pxy instanceof FieldOccursProxy) {
-            writeBeginClassOccursProxy((FieldOccursProxy) pxy, pxy.getTypeDef().getName());
+        if (trait instanceof FieldOccursTrait) {
+            writeBeginClassOccursTrait((FieldOccursTrait) trait);
             access = AccessFactory.getInstance(this, defaults, n -> String.format("%d+shift", n - 1));
         } else {
-            writeBeginClassGroupProxy(pxy, pxy.getTypeDef().getName());
+            writeBeginClassGroupTrait(trait);
             access = AccessFactory.getInstance(this, defaults, pos);
         }
         pushPlusIndent(4);
-        trace.addLast(pxy.getTypeDef().getName());
-        pxy.getFields().forEach(it -> {
-            if (it instanceof SelfCheck) ((SelfCheck) it).selfCheck();
-            if (it instanceof FieldGroup) generateGroupCode((FieldGroup) it, pos);
-            if (it instanceof FieldGroupProxy) generateGroupCode((FieldGroupProxy) it, pos);
+        trace.addLast(trait.getTypeDef().getName());
+
+        trait.forEachField(fld -> {
+            if (fld instanceof SelfCheck) ((SelfCheck) fld).selfCheck();
+            if (fld instanceof FieldGroup) generateGroupCode((FieldGroup) fld, pos);
+            if (fld instanceof FieldGroupTrait) generateGroupTraitCode((FieldGroupTrait) fld, pos);
         });
-        pxy.getFields().forEach(it -> {
+        trait.forEachField(it -> {
             if (it instanceof FloatingField) access.createMethods((FloatingField) it, ga);
         });
         trace.removeLast();
         popIndent();
         writeEndClass();
     }
-    private void writeBeginClassOccursProxy(FieldOccursProxy occurs, String proxyName) {
+    private void writeBeginClassOccursTrait(FieldOccursTrait occurs) {
         String capName = Tools.capitalize(occurs.getName());
+        String traitName = occurs.getTypeDef().getName();
         printf("private final %s[] %s = new %1$s[] {%n", capName, occurs.getName());
         for (int k = 0, shift = 0; k < occurs.getTimes(); k++, shift += occurs.getLength()) {
             printf("    this.new %s(%d),%n", capName, shift);
@@ -130,10 +143,27 @@ public class ClassFactory extends CodeFactory {
         printf("public %s %s(int k) { return this.%2$s[k-1]; }%n", capName, occurs.getName());
         if (ga.doc)
             javadocGroupDef(occurs);
-        if (capName.equals(proxyName)) {
-            printf("public class %s implements %s.%s {%n", capName, wrtPackage, proxyName);
+
+        List<String> embs = occurs.getTypeDef().getFields()
+                .stream()
+                .filter(FieldEmbedGroup.class::isInstance)
+                .map(it -> ((FieldEmbedGroup) it).getSource().getName())
+                .map(it -> capName.equals(it) ? wrtPackage+"."+it : it)
+                .collect(Collectors.toList());
+
+        if (embs.isEmpty()) {
+            if (capName.equals(traitName)) {
+                printf("public class %s implements %s.%s {%n", capName, wrtPackage, traitName);
+            } else {
+                printf(PUBLIC_CLASS_X_IMPLMENTS_Y, capName, traitName);
+            }
         } else {
-            printf("public class %s implements %s {%n", capName, proxyName);
+            val traitList = String.join(", ", embs);
+            if (capName.equals(traitName)) {
+                printf("public class %s implements %s.%s, %s {%n", capName, wrtPackage, traitName, traitList);
+            } else {
+                printf("public class %s implements %s, %s {%n", capName, traitName, traitList);
+            }
         }
 
         printf("    private final int shift;%n");
@@ -151,12 +181,30 @@ public class ClassFactory extends CodeFactory {
         printf("public %s %s(int k) { return this.%2$s[k-1]; }%n", capName, occurs.getName());
         if (ga.doc)
             javadocGroupDef(occurs);
-        if (trace.isEmpty()) {
-            printf("public class %s {%n", capName);
+
+        List<String> embs = occurs.getFields()
+                .stream()
+                .filter(FieldEmbedGroup.class::isInstance)
+                .map(it -> ((FieldEmbedGroup) it).getSource().getName())
+                .map(it -> capName.equals(it) ? wrtPackage+"."+it : it)
+                .collect(Collectors.toList());
+        if (embs.isEmpty()) {
+            if (trace.isEmpty()) {
+                printf("public class %s {%n", capName);
+            } else {
+                String trait = String.join(".", trace);
+                printf("public class %1$s implements %2$s.%1$s {%n", capName, trait);
+            }
         } else {
-            String trait = String.join(".", trace);
-            printf("public class %1$s implements %2$s.%1$s {%n", capName, trait);
+            String traitList = String.join(", ", embs);
+            if (trace.isEmpty()) {
+                printf(PUBLIC_CLASS_X_IMPLMENTS_Y, capName, traitList);
+            } else {
+                String trait = String.join(".", trace);
+                printf("public class %1$s implements %2$s.%1$s, %3$s {%n", capName, trait, traitList);
+            }
         }
+
 
         printf("    private final int shift;%n");
         printf("    private %s(int shift) { this.shift = shift; }%n", capName);
@@ -175,16 +223,34 @@ public class ClassFactory extends CodeFactory {
 
         if (ga.doc)
             javadocGroupDef(group);
-        if (trace.isEmpty()) {
-            printf("public class %s {%n", capName);
+
+        List<String> embs = group.getFields()
+                .stream()
+                .filter(FieldEmbedGroup.class::isInstance)
+                .map(it -> ((FieldEmbedGroup) it).getSource().getName())
+                .map(it -> capName.equals(it) ? wrtPackage+"."+it : it)
+                .collect(Collectors.toList());
+        if (embs.isEmpty()) {
+            if (trace.isEmpty()) {
+                printf("public class %s {%n", capName);
+            } else {
+                String trait = String.join(".", trace);
+                printf("public class %1$s implements %2$s.%1$s {%n", capName, trait);
+            }
         } else {
-            String trait = String.join(".", trace);
-            printf("public class %1$s implements %2$s.%1$s {%n", capName, trait);
+            String traitList = String.join(", ", embs);
+            if (trace.isEmpty()) {
+                printf(PUBLIC_CLASS_X_IMPLMENTS_Y, capName, traitList);
+            } else {
+                String trait = String.join(".", trace);
+                printf("public class %1$s implements %2$s.%1$s, %3$s {%n", capName, trait, traitList);
+            }
         }
     }
 
-    private void writeBeginClassGroupProxy(FieldGroupProxy group, String proxyName) {
+    private void writeBeginClassGroupTrait(FieldGroupTrait group) {
         val name = group.getName();
+        val traitName = group.getTypeDef().getName();
         String capName = Tools.capitalize(name);
         printf("private final %s %s = this.new %1$s();%n", capName, name);
         printf("public %s %s() { return this.%2$s; }%n", capName, name);
@@ -192,10 +258,27 @@ public class ClassFactory extends CodeFactory {
 
         if (ga.doc)
             javadocGroupDef(group);
-        if (capName.equals(proxyName)) {
-            printf("public class %s implements %s.%s {%n", capName, wrtPackage, proxyName);
+
+        List<String> embs = group.getTypeDef().getFields()
+                .stream()
+                .filter(FieldEmbedGroup.class::isInstance)
+                .map(it -> ((FieldEmbedGroup) it).getSource().getName())
+                .map(it -> capName.equals(it) ? wrtPackage+"."+it : it)
+                .collect(Collectors.toList());
+
+        if (embs.isEmpty()) {
+            if (capName.equals(traitName)) {
+                printf("public class %s implements %s.%s {%n", capName, wrtPackage, traitName);
+            } else {
+                printf(PUBLIC_CLASS_X_IMPLMENTS_Y, capName, traitName);
+            }
         } else {
-            printf("public class %s implements %s {%n", capName, proxyName);
+            String traitList = String.join(", ", embs);
+            if (capName.equals(traitName)) {
+                printf("public class %s implements %s.%s,  {%n", capName, wrtPackage, traitName, traitList);
+            } else {
+                printf("public class %s implements %s, %s {%n", capName, traitName, traitList);
+            }
         }
     }
     private void writeCtorVoid(String name) {
@@ -236,7 +319,7 @@ public class ClassFactory extends CodeFactory {
     private void writeInitializer(ClassDefine struct) {
         printf("protected void initialize() {%n");
         val initializer = InitializeFactory.getInstance(this, defaults);
-        struct.getFields().forEach(it -> initializer.initialize(it, 1));
+        struct.forEachField(it -> initializer.initialize(it, 1));
         closeBrace();
     }
     private void writeValidator(@NotNull ClassDefine struct) {
@@ -245,9 +328,7 @@ public class ClassFactory extends CodeFactory {
         printf(OVERRIDE_METHOD);
         printf("public boolean validateFails(FieldValidateHandler handler) {%n");
         AtomicBoolean firstCheck = new AtomicBoolean(true);
-        for (NakedField fld : struct.getFields()) {
-            validator.validate(fld, padWidth, 1, firstCheck);
-        }
+        struct.forEachField(fld -> validator.validate(fld, padWidth, 1, firstCheck));
         if (firstCheck.get()) {
             printf("    return false;%n");
         } else {
@@ -258,11 +339,11 @@ public class ClassFactory extends CodeFactory {
         printf(OVERRIDE_METHOD);
         printf("public boolean auditFails(FieldValidateHandler handler) {%n");
         AtomicBoolean firstAudit = new AtomicBoolean(true);
-        for (NakedField fld : struct.getFields()) {
+        struct.forEachField(fld -> {
             if (fld instanceof CheckAware && ((CheckAware) fld).isAudit()) {
                 validator.validate(fld, padWidth, 1, firstAudit);
             }
-        }
+        });
         if (firstAudit.get()) {
             printf("    return false;%n");
         } else {
@@ -270,8 +351,8 @@ public class ClassFactory extends CodeFactory {
         }
         closeBrace();
     }
-    private void writeDump(List<NakedField> fields) {
-        List<DumpInfo> l3 = DumpFactory.getInstance(fields);
+    private void writeDump(ParentFields parent) {
+        List<DumpInfo> l3 = DumpFactory.getInstance(parent);
         if (! l3.isEmpty()) {
             printf(OVERRIDE_METHOD);
             printf("public String toString() {%n");

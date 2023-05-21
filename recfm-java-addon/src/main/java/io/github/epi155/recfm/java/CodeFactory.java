@@ -106,27 +106,27 @@ public abstract class CodeFactory implements CodeWriter {
     protected void writeEndClass() {
         println("}");
     }
-    protected void tableDoc(ParentFields fields) {
-        val topName = fields.getName();
-        val topWidth = widthOf(fields);
+    protected void tableDoc(ParentFields parent) {
+        val topName = parent.getName();
+        val topWidth = widthOf(parent);
         printf(" * <table class='striped'>%n");
         printf(" * <caption>%s component %s</caption>%n", topName, topWidth);
         printf(" * <tr><th>Field Name</th><th>Type</th><th>Start</th><th>Length</th></tr>%n");
-        for (NakedField field: fields.getFields()) {
+        parent.forEachField(field -> {
             if (field instanceof NamedField) {
                 val named = (NamedField) field;
                 val capit = Tools.capitalize(named.getName());
                 if (named.isRedefines())
-                    continue;
+                    return;
                 if (field instanceof FieldOccurs) {
                     int times = ((FieldOccurs) field).getTimes();
                     printf(" * <tr><td>{@link %1$s %2$s}</td><td style='text-align: center'>{@code %3$s}</td><td style='text-align: right'>{@code %4$d}</td><td style='text-align: right'>{@code %5$d}</td><td style='text-align: right'>x{@code %6$d}</td></tr>%n",
                             capit, named.getName(), typeOf(named), named.getOffset(), named.getLength(), times);
-                } else if (field instanceof FieldOccursProxy) {
-                    int times = ((FieldOccursProxy) field).getTimes();
+                } else if (field instanceof FieldOccursTrait) {
+                    int times = ((FieldOccursTrait) field).getTimes();
                     printf(" * <tr><td>{@link %1$s %2$s}</td><td style='text-align: center'>{@code %3$s}</td><td style='text-align: right'>{@code %4$d}</td><td style='text-align: right'>{@code %5$d}</td><td style='text-align: right'>x{@code %6$d}</td></tr>%n",
                             capit, named.getName(), typeOf(named), named.getOffset(), named.getLength(), times);
-                } else if (field instanceof FieldGroup || field instanceof FieldGroupProxy) {
+                } else if (field instanceof FieldGroup || field instanceof FieldGroupTrait) {
                     printf(" * <tr><td>{@link %1$s %2$s}</td><td style='text-align: center'>{@code %3$s}</td><td style='text-align: right'>{@code %4$d}</td><td style='text-align: right'>{@code %5$d}</td></tr>%n",
                             capit, named.getName(), typeOf(named), named.getOffset(), named.getLength());
                 } else {
@@ -135,43 +135,43 @@ public abstract class CodeFactory implements CodeWriter {
             } else {
                 printf(" * <tr><td></td><td style='text-align: center'>{@code %s}</td><td style='text-align: right'>{@code %d}</td><td style='text-align: right'>{@code %d}</td></tr>%n", typeOf(field), field.getOffset(), field.getLength());
             }
-        }
+        });
         printf(" * </table>%n");
     }
-    protected void proxyDoc(ParentFields fields) {
-        val topName = fields.getName();
-        val topWidth = widthOf(fields);
-        int backShift = fields.getFields().isEmpty() ? 0 : fields.getFields().get(0).getOffset();
+    protected void traitDoc(ParentFields parent) {
+        val topName = parent.getName();
+        val topWidth = widthOf(parent);
+        int backShift = parent.getFields().isEmpty() ? 0 : parent.getFields().get(0).getOffset();
         printf(" * <table class='striped'>%n");
         printf(" * <caption>%s component %s</caption>%n", topName, topWidth);
         printf(" * <tr><th>Field Name</th><th>Type</th><th>Offset</th><th>Length</th></tr>%n");
-        for (NakedField field: fields.getFields()) {
+        parent.forEachField(field -> {
             if (field instanceof NamedField) {
                 val named = (NamedField) field;
                 val capit = Tools.capitalize(named.getName());
                 if (named.isRedefines())
-                    continue;
+                    return;
                 if (field instanceof FieldOccurs) {
                     int times = ((FieldOccurs) field).getTimes();
                     printf(" * <tr><td>{@link %1$s %2$s}</td><td style='text-align: center'>{@code %3$s}</td><td style='text-align: right'>{@code %4$d+}</td><td style='text-align: right'>{@code %5$d}</td><td style='text-align: right'>x{@code %6$d}</td></tr>%n",
                             capit, named.getName(), typeOf(named), named.getOffset()-backShift, named.getLength(), times);
-                } else if (field instanceof FieldOccursProxy) {
-                    int times = ((FieldOccursProxy) field).getTimes();
+                } else if (field instanceof FieldOccursTrait) {
+                    int times = ((FieldOccursTrait) field).getTimes();
                     printf(" * <tr><td>{@link %1$s %2$s}</td><td style='text-align: center'>{@code %3$s}</td><td style='text-align: right'>{@code %4$d+}</td><td style='text-align: right'>{@code %5$d}</td><td style='text-align: right'>x{@code %6$d}</td></tr>%n",
-                            ((FieldOccursProxy) field).getTypeDef().getName(), named.getName(), typeOf(named), named.getOffset()-backShift, named.getLength(), times);
+                            ((FieldOccursTrait) field).getTypeDef().getName(), named.getName(), typeOf(named), named.getOffset()-backShift, named.getLength(), times);
                 } else if (field instanceof FieldGroup) {
                     printf(" * <tr><td>{@link %1$s %2$s}</td><td style='text-align: center'>{@code %3$s}</td><td style='text-align: right'>{@code %4$d+}</td><td style='text-align: right'>{@code %5$d}</td></tr>%n",
                             capit, named.getName(), typeOf(named), named.getOffset()-backShift, named.getLength());
-                } else if (field instanceof FieldGroupProxy) {
+                } else if (field instanceof FieldGroupTrait) {
                     printf(" * <tr><td>{@link %1$s %2$s}</td><td style='text-align: center'>{@code %3$s}</td><td style='text-align: right'>{@code %4$d+}</td><td style='text-align: right'>{@code %5$d}</td></tr>%n",
-                            ((FieldGroupProxy) field).getTypeDef().getName(), named.getName(), typeOf(named), named.getOffset()-backShift, named.getLength());
+                            ((FieldGroupTrait) field).getTypeDef().getName(), named.getName(), typeOf(named), named.getOffset()-backShift, named.getLength());
                 } else {
                     printf(" * <tr><td>{@code %s}</td><td style='text-align: center'>{@code %s}</td><td style='text-align: right'>{@code %d+}</td><td style='text-align: right'>{@code %d}</td></tr>%n", named.getName(), typeOf(named), named.getOffset()-backShift, named.getLength());
                 }
             } else {
                 printf(" * <tr><td></td><td style='text-align: center'>{@code %s}</td><td style='text-align: right'>{@code %d+}</td><td style='text-align: right'>{@code %d}</td></tr>%n", typeOf(field), field.getOffset()-backShift, field.getLength());
             }
-        }
+        });
         printf(" * </table>%n");
     }
 
@@ -194,8 +194,8 @@ public abstract class CodeFactory implements CodeWriter {
         if (field instanceof FieldDomain) return "Dom";
         if (field instanceof FieldFiller) return "Fil";
         if (field instanceof FieldConstant) return "Val";
-        if (field instanceof FieldOccursProxy) return "OCC";
-        if (field instanceof FieldGroupProxy) return "GRP";
+        if (field instanceof FieldOccursTrait) return "OCC";
+        if (field instanceof FieldGroupTrait) return "GRP";
         return "???";
     }
 }

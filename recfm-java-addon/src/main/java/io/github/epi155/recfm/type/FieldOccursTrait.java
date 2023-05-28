@@ -38,7 +38,6 @@ public class FieldOccursTrait extends FieldGroupTrait implements OccTraitModel {
         res.setTypedef(getTypedef());
         res.setName(getName());
         res.setRedefines(isRedefines());
-        res.setAudit(isAudit());
         res.setLength(getLength());
         res.setOffset(getOffset() + plus);
         return res;

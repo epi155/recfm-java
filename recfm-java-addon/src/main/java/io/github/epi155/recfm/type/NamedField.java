@@ -10,10 +10,9 @@ import java.util.Set;
 @Data
 @Slf4j
 @EqualsAndHashCode(callSuper = true)
-public abstract class NamedField extends NakedField implements CheckAware {
+public abstract class NamedField extends NakedField {
     private String name;
     private boolean redefines;
-    private boolean audit;
 
     @Override
     protected void checkBounds(int k, int up, int bias) {

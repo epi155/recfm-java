@@ -9,6 +9,7 @@ import io.github.epi155.recfm.type.*;
 public class InitializeFactory {
     private final InitializeField<FieldAbc> delegateAbc;
     private final InitializeField<FieldNum> delegateNum;
+    private final InitializeField<FieldNux> delegateNux;
     private final InitializeField<FieldCustom> delegateCus;
     private final InitializeField<FieldDomain> delegateDom;
     private final InitializeField<FieldFiller> delegateFil;
@@ -17,6 +18,7 @@ public class InitializeFactory {
     private InitializeFactory(CodeWriter pw, FieldDefault defaults) {
         this.delegateAbc = new Abc(pw, defaults.getAbc());
         this.delegateNum = new Num(pw, defaults.getNum());
+        this.delegateNux = new Nux(pw, defaults.getNux());
         this.delegateCus = new Custom(pw, defaults.getCus());
         this.delegateDom = new Domain(pw);
         this.delegateFil = new Filler(pw, defaults.getFil());
@@ -73,6 +75,10 @@ public class InitializeFactory {
         if (fld.isRedefines()) return;
         delegateNum.initialize(fld, bias);
     }
+    protected void initializeNux(FieldNux fld, int bias) {
+        if (fld.isRedefines()) return;
+        delegateNux.initialize(fld, bias);
+    }
 
     protected void initializeAbc(FieldAbc fld, int bias) {
         if (fld.isRedefines()) return;
@@ -82,6 +88,8 @@ public class InitializeFactory {
     public void initialize(FieldModel fld, int bias) {
         if (fld instanceof FieldAbc) {
             initializeAbc((FieldAbc) fld, bias);
+        } else if (fld instanceof FieldNux) {
+            initializeNux((FieldNux) fld, bias);
         } else if (fld instanceof FieldNum) {
             initializeNum((FieldNum) fld, bias);
         } else if (fld instanceof FieldCustom) {

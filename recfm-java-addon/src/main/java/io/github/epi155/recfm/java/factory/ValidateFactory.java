@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ValidateFactory {
     private final ValidateField<FieldAbc> delegateAbc;
     private final ValidateField<FieldNum> delegateNum;
+    private final ValidateField<FieldNux> delegateNux;
     private final ValidateField<FieldCustom> delegateCus;
     private final ValidateField<FieldFiller> delegateFil;
     private final ValidateField<FieldConstant> delegateVal;
@@ -20,6 +21,7 @@ public class ValidateFactory {
     private ValidateFactory(CodeWriter pw, FieldDefault defaults) {
         this.delegateAbc = new Abc(pw, defaults.getAbc());
         this.delegateNum = new Num(pw, defaults.getNum());
+        this.delegateNux = new Nux(pw, defaults.getNux());
         this.delegateCus = new Custom(pw, defaults.getCus());
         this.delegateDom = new Domain(pw);
         this.delegateFil = new Filler(pw, defaults.getFil());
@@ -55,6 +57,10 @@ public class ValidateFactory {
         if (fld.isRedefines()) return;
         delegateNum.validate(fld, w, bias, isFirst);
     }
+    protected void validateNux(FieldNux fld, int w, int bias, AtomicBoolean isFirst) {
+        if (fld.isRedefines()) return;
+        delegateNux.validate(fld, w, bias, isFirst);
+    }
 
     protected void validateAbc(FieldAbc fld, int w, int bias, AtomicBoolean isFirst) {
         if (fld.isRedefines()) return;
@@ -74,6 +80,8 @@ public class ValidateFactory {
     public void validate(FieldModel fld, int padWidth, int bias, AtomicBoolean firstStatement) {
         if (fld instanceof FieldAbc) {
             validateAbc((FieldAbc) fld, padWidth, bias, firstStatement);
+        } else if (fld instanceof FieldNux) {
+            validateNux((FieldNux) fld, padWidth, bias, firstStatement);
         } else if (fld instanceof FieldNum) {
             validateNum((FieldNum) fld, padWidth, bias, firstStatement);
         } else if (fld instanceof FieldCustom) {

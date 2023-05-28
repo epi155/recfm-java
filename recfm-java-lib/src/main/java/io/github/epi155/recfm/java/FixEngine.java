@@ -278,6 +278,19 @@ abstract class FixEngine {
     protected String getAbc(int offset, int length) {
         return new String(rawData, offset, length);
     }
+    protected String getAbcNull(int offset, int length) {
+        if (isAllSpaces(offset, length)) return null;
+        return getAbc(offset, length);
+    }
+
+    private boolean isAllSpaces(int offset, int length) {
+        for (int u = offset + 1, v = 1; v < length; u++, v++) {
+            char c = rawData[u];
+            if (c != ' ')
+                return false;
+        }
+        return true;
+    }
 
     /**
      * Alphanumeric getter
@@ -298,6 +311,10 @@ abstract class FixEngine {
             default:
                 throw new IllegalStateException();  // dead branch
         }
+    }
+    protected String getAbcNull(int offset, int length, int flg, char pad) {
+        if (isAllSpaces(offset, length)) return null;
+        return getAbc(offset, length, flg, pad);
     }
 
     private String lftTrim(int offset, int length, char pad) {
@@ -896,6 +913,13 @@ abstract class FixEngine {
             case Action.F_OVF_ERR:
             default:
                 throw new FieldOverFlowException(xxflowMessage(offset, length, s.length()));
+        }
+    }
+    protected void setNumNull(String s, int offset, int length, int flg) {
+        if (s == null) {
+            fill(offset, length, ' ');
+        } else {
+            setNum(s, offset, length, flg);
         }
     }
 

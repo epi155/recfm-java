@@ -39,7 +39,6 @@ public class FieldOccurs extends FieldGroup implements OccModel {
         res.setFields(getFields().stream().map(fld -> ((NakedField)fld).shiftCopy(plus)).collect(Collectors.toList()));
         res.setName(getName());
         res.setRedefines(isRedefines());
-        res.setAudit(isAudit());
         res.setLength(getLength());
         res.setOffset(getOffset() + plus);
         return res;

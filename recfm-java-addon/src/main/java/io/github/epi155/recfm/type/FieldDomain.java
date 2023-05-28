@@ -9,8 +9,9 @@ import lombok.val;
 @Data
 @Slf4j
 @EqualsAndHashCode(callSuper = true)
-public class FieldDomain extends SettableField implements SelfCheck, DomModel {
+public class FieldDomain extends SettableField implements SelfCheck, CheckAware, DomModel {
     private String[] items;
+    private boolean audit;
 
     @Override
     public String picture() {

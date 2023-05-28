@@ -14,6 +14,8 @@ public class FieldAbc extends FloatingField implements AbcModel {
     private char padChar = ' ';
     private CheckChar check;
     private NormalizeAbcMode normalize;
+    private Boolean checkSetter;
+    private Boolean checkGetter;
 
     @Override
     public AlignMode getAlign() {
@@ -31,6 +33,8 @@ public class FieldAbc extends FloatingField implements AbcModel {
         res.check = this.check;
         res.padChar = this.padChar;
         res.normalize = this.normalize;
+        res.checkGetter = this.checkGetter;
+        res.checkSetter = this.checkSetter;
         res.setOnOverflow(getOnOverflow());
         res.setOnUnderflow(getOnUnderflow());
         res.setName(getName());

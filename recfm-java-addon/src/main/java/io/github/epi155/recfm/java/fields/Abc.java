@@ -63,7 +63,8 @@ public class Abc extends DelegateWriter implements MutableField<FieldAbc>, JavaD
     private void buildSetter(FieldAbc fld, String wrkName, GenerateArgs ga) {
         if (ga.doc) docSetter(fld);
         printf("public void set%s(String s) {%n", wrkName);
-        if (ga.setCheck) chkSetter(fld);
+        boolean chkSet = notNullOf(fld.getCheckSetter(), ga.checkSetter);
+        if (chkSet) chkSetter(fld);
         val align = fld.getAlign();
         val ovfl = notNullOf(fld.getOnOverflow(), defaults.getOnOverflow());
         val unfl = notNullOf(fld.getOnUnderflow(), defaults.getOnUnderflow());
@@ -76,7 +77,8 @@ public class Abc extends DelegateWriter implements MutableField<FieldAbc>, JavaD
     private void buildGetter(FieldAbc fld, String wrkName, GenerateArgs ga) {
         if (ga.doc) docGetter(fld);
         printf("public String get%s() {%n", wrkName);
-        if (ga.getCheck) chkGetter(fld);
+        boolean chkGet = notNullOf(fld.getCheckGetter(), ga.checkGetter);
+        if (chkGet) chkGetter(fld);
         val norm = notNullOf(fld.getNormalize(), defaults.getNormalize());
         if (norm == NormalizeAbcMode.None) {
             printf("    return getAbc(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());

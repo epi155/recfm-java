@@ -27,6 +27,11 @@ public class CodeFactoryImpl implements CodeFactory {
     }
 
     @Override
+    public NuxModel newNuxModel() {
+        return new FieldNux();
+    }
+
+    @Override
     public CusModel newCusModel() {
         return new FieldCustom();
     }

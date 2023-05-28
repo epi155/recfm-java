@@ -38,9 +38,11 @@ class SetterException extends RuntimeException {
         List<StackTraceElement> stack = new ArrayList<StackTraceElement>(Arrays.asList(getStackTrace()));
         StackTraceElement ste;
         String method;
+        String systemPackage = this.getClass().getPackage().getName();
         do {
             ste = stack.remove(0);
             method = ste.getMethodName();
+            if (!ste.getClassName().startsWith(systemPackage)) break;
         } while ((!method.startsWith("get")) && (!method.startsWith("set")));
         setStackTrace(stack.toArray(new StackTraceElement[0]));
         return new Info(ste.getClassName(), method);

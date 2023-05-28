@@ -190,6 +190,7 @@ public abstract class CodeHelper implements CodeWriter {
         if (field instanceof FieldOccurs) return "Occ";
         if (field instanceof FieldGroup) return "Grp";
         if (field instanceof FieldAbc) return "Abc";
+        if (field instanceof FieldNux) return "Nux";
         if (field instanceof FieldNum) return "Num";
         if (field instanceof FieldCustom) return "Cus";
         if (field instanceof FieldDomain) return "Dom";

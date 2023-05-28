@@ -22,6 +22,8 @@ public class FieldCustom extends FloatingField implements SelfCheck, CusModel {
     private AlignMode align;
     private NormalizeAbcMode normalize;
     private String regex;
+    private Boolean checkSetter;
+    private Boolean checkGetter;
 
     @Override
     public String picture() {
@@ -52,6 +54,8 @@ public class FieldCustom extends FloatingField implements SelfCheck, CusModel {
         res.align = this.align;
         res.normalize = this.normalize;
         res.regex = this.regex;
+        res.checkGetter = this.checkGetter;
+        res.checkSetter = this.checkSetter;
         res.setOnOverflow(getOnOverflow());
         res.setOnUnderflow(getOnUnderflow());
         res.setName(getName());

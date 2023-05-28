@@ -8,8 +8,9 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public abstract class FloatingField extends SettableField {
+public abstract class FloatingField extends SettableField implements CheckAware {
     private OverflowAction onOverflow;
     private UnderflowAction onUnderflow;
+    private boolean audit;
     public abstract AlignMode getAlign();
 }

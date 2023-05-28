@@ -42,7 +42,6 @@ public class FieldGroupTrait extends NamedField implements ParentFields, GrpTrai
         res.typedef = this.typedef;
         res.setName(getName());
         res.setRedefines(isRedefines());
-        res.setAudit(isAudit());
         res.setLength(getLength());
         res.setOffset(getOffset() + plus);
         return res;

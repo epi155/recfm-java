@@ -1,5 +1,6 @@
 package io.github.epi155.recfm.java.factory;
 
+import io.github.epi155.recfm.api.FieldModel;
 import io.github.epi155.recfm.java.fields.PreConstant;
 import io.github.epi155.recfm.java.fields.PreCustom;
 import io.github.epi155.recfm.java.fields.PreDomain;
@@ -59,7 +60,7 @@ public class PrepareFactory {
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
-    public void prepare(NakedField fld, int bias) {
+    public void prepare(FieldModel fld, int bias) {
         if (fld instanceof FieldAbc) {
             // nop
         } else if (fld instanceof FieldNum) {

@@ -1,11 +1,11 @@
 package io.github.epi155.recfm.java.fields;
 
+import io.github.epi155.recfm.api.GenerateArgs;
 import io.github.epi155.recfm.java.JavaDoc;
 import io.github.epi155.recfm.java.factory.CodeWriter;
 import io.github.epi155.recfm.java.factory.DelegateWriter;
 import io.github.epi155.recfm.java.rule.MutableField;
 import io.github.epi155.recfm.type.FieldDomain;
-import io.github.epi155.recfm.util.GenerateArgs;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicBoolean;

@@ -1,14 +1,14 @@
 package io.github.epi155.recfm.java;
 
+import io.github.epi155.recfm.api.GenerateArgs;
 import io.github.epi155.recfm.type.*;
-import io.github.epi155.recfm.util.GenerateArgs;
 import io.github.epi155.recfm.util.Tools;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintWriter;
 
-public class InterfaceFactory extends CodeFactory{
+public class InterfaceFactory extends CodeHelper {
     private static final String TAG_DOM = "Dom";
     private static final String TAG_CUS = "Cus";
     private static final String TAG_ABC = "Abc";
@@ -87,13 +87,13 @@ public class InterfaceFactory extends CodeFactory{
     }
 
     private void createMethodsGroupProxy(FieldGroupTrait fld) {
-        val clsName = fld.getTypeDef().getName();
+        val clsName = fld.getTypedef().getName();
         if (ga.doc) docProxyGetter(fld);
         printf("%s %s();%n", clsName, fld.getName());
     }
 
     private void docProxyGetter(FieldGroupTrait fld) {
-        val clsName = fld.getTypeDef().getName();
+        val clsName = fld.getTypedef().getName();
         printf(JAVADOC_OPEN);
         printf(" * {@link %s}(%d)%n", clsName, fld.getLength());
         printf(" * @return %s value%n", clsName);

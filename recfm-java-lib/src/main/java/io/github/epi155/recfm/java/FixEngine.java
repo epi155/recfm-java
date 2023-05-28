@@ -209,7 +209,7 @@ abstract class FixEngine {
                     return lpad(s, length, pad);
                 case Action.F_UNF_ERR:
                 default:
-                    throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
+                    throw new FieldUnderFlowException(xxflowMessage(offset, length, s.length()));
             }
         } else /* s.length() > length */switch (flgOvf) {
             case Action.F_OVF_TRR:
@@ -218,9 +218,14 @@ abstract class FixEngine {
                 return ltrunc(s, length);
             case Action.F_OVF_ERR:
             default:
-                throw new FieldOverFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
+                throw new FieldOverFlowException(xxflowMessage(offset, length, s.length()));
         }
     }
+
+    private static String xxflowMessage(int offset, int length, int length1) {
+        return FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + length1;
+    }
+
 
     private static String fill(int t, char pad) {
         return CharBuffer.allocate(t).toString().replace('\0', pad);
@@ -750,9 +755,9 @@ abstract class FixEngine {
             setAsIs(s, offset);
         else // dead branch
             if (s.length() < length) {  // buffer underflow protection
-                throw new FieldUnderFlowException(FIELD_AT + (offset + RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
+                throw new FieldUnderFlowException(xxflowMessage(offset, length, s.length()));
             } else {                    // buffer overflow protection
-                throw new FieldOverFlowException(FIELD_AT + (offset + RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
+                throw new FieldOverFlowException(xxflowMessage(offset, length, s.length()));
             }
     }
 
@@ -837,7 +842,7 @@ abstract class FixEngine {
                     break;
                 case Action.F_UNF_ERR:
                 default:
-                    throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
+                    throw new FieldUnderFlowException(xxflowMessage(offset, length, s.length()));
             }
         } else switch (flgOvf) {
             case Action.F_OVF_TRR:
@@ -848,7 +853,7 @@ abstract class FixEngine {
                 break;
             case Action.F_OVF_ERR:
             default:
-                throw new FieldOverFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
+                throw new FieldOverFlowException(xxflowMessage(offset, length, s.length()));
         }
     }
 
@@ -879,7 +884,7 @@ abstract class FixEngine {
                     break;
                 case Action.F_UNF_ERR:
                 default:
-                    throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
+                    throw new FieldUnderFlowException(xxflowMessage(offset, length, s.length()));
             }
         } else switch (flgOvf) {
             case Action.F_OVF_TRL:
@@ -890,7 +895,7 @@ abstract class FixEngine {
                 break;
             case Action.F_OVF_ERR:
             default:
-                throw new FieldOverFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
+                throw new FieldOverFlowException(xxflowMessage(offset, length, s.length()));
         }
     }
 

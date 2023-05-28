@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.CharBuffer;
 
-public class TestBar {
+class TestBar {
     @Test
     void testAlpha() {
         BarAlpha alpha = new BarAlpha();
@@ -43,10 +43,10 @@ public class TestBar {
         }
 
         BarAlpha a = BarAlpha.decode(CharBuffer.allocate(10).toString());
-        Assertions.assertDoesNotThrow(() -> a.getStrict(), "test ASCII");
-        Assertions.assertDoesNotThrow(() -> a.getWeak(), "test Latin1");
-        Assertions.assertDoesNotThrow(() -> a.getUtf8(), "test UTF-8");
-        Assertions.assertDoesNotThrow(() -> a.getAll(), "test no check");
+        Assertions.assertDoesNotThrow(a::getStrict, "test ASCII");
+        Assertions.assertDoesNotThrow(a::getWeak, "test Latin1");
+        Assertions.assertDoesNotThrow(a::getUtf8, "test UTF-8");
+        Assertions.assertDoesNotThrow(a::getAll, "test no check");
 
         if (!a.validateFails(it ->
             System.out.printf("Error field %s@%d+%d: %s%n",
@@ -74,7 +74,6 @@ public class TestBar {
         Assertions.assertDoesNotThrow(() -> digit.setWeak("12345"), "test Num overflow/trunc");
 
         Assertions.assertDoesNotThrow(() -> digit.setRex("Hi"), "test Num invalid");
-        ;
 
         BarAlpha alpha = BarAlpha.of(digit);    // cast
         BarDigit numer = digit.copy();      // clone / deep-copy
@@ -91,8 +90,8 @@ public class TestBar {
                 it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
-        Assertions.assertThrows(NotDigitException.class, () -> n.getStrict(), "test Num get");
-        Assertions.assertDoesNotThrow(() -> n.getRex(), "test Num get");
+        Assertions.assertThrows(NotDigitException.class, n::getStrict, "test Num get");
+        Assertions.assertDoesNotThrow(n::getRex, "test Num get");
 
         n.setRex("11");
         System.out.println(n.getRex());
@@ -160,7 +159,7 @@ public class TestBar {
                 it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
-        Assertions.assertDoesNotThrow(() -> cu2.getDig(), "testCus invalid");
+        Assertions.assertDoesNotThrow(cu2::getDig, "testCus invalid");
 
         BarCustom cu3 = BarCustom.decode("12345678x0");
         if (!cu3.validateFails(it ->
@@ -168,7 +167,7 @@ public class TestBar {
                 it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
-        Assertions.assertDoesNotThrow(() -> cu3.getDig(), "testCus invalid");
+        Assertions.assertDoesNotThrow(cu3::getDig, "testCus invalid");
 
         BarCustom cu4 = BarCustom.decode("1234567 x0");
         if (!cu4.validateFails(it ->
@@ -176,7 +175,7 @@ public class TestBar {
                 it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
-        Assertions.assertDoesNotThrow(() -> cu4.getDig(), "testCus invalid");
+        Assertions.assertDoesNotThrow(cu4::getDig, "testCus invalid");
 
         try {
             cu4.getDig();
@@ -209,7 +208,7 @@ public class TestBar {
                         it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
-        Assertions.assertThrows(NotDomainException.class, () -> d1.getCur(), "test Dom invalid");
+        Assertions.assertThrows(NotDomainException.class, d1::getCur, "test Dom invalid");
 
     }
 }

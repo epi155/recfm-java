@@ -1,12 +1,13 @@
 package io.github.epi155.recfm.java.factory;
 
+import io.github.epi155.recfm.api.FieldDefault;
+import io.github.epi155.recfm.api.GenerateArgs;
 import io.github.epi155.recfm.java.fields.Abc;
 import io.github.epi155.recfm.java.fields.Custom;
 import io.github.epi155.recfm.java.fields.Domain;
 import io.github.epi155.recfm.java.fields.Num;
 import io.github.epi155.recfm.java.rule.AccessField;
 import io.github.epi155.recfm.type.*;
-import io.github.epi155.recfm.util.GenerateArgs;
 import io.github.epi155.recfm.util.Tools;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
@@ -28,14 +29,14 @@ public class AccessFactory {
      * @param pw  print writer
      * @param pos offset field to string form
      */
-    private AccessFactory(CodeWriter pw, Defaults defaults, IntFunction<String> pos) {
+    private AccessFactory(CodeWriter pw, FieldDefault defaults, IntFunction<String> pos) {
         this.delegateAbc = new Abc(pw, defaults.getAbc(), pos);
         this.delegateNum = new Num(pw, pos, defaults.getNum());
         this.delegateCus = new Custom(pw, defaults.getCus(), pos);
         this.delegateDom = new Domain(pw, pos);
     }
 
-    public static AccessFactory getInstance(CodeWriter pw, Defaults defaults, IntFunction<String> pos) {
+    public static AccessFactory getInstance(CodeWriter pw, FieldDefault defaults, IntFunction<String> pos) {
         return new AccessFactory(pw, defaults, pos);
     }
 

@@ -5,7 +5,6 @@ import io.github.epi155.recfm.java.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 
 import java.nio.CharBuffer;
 
@@ -26,10 +25,7 @@ class TestFields {
         foo.setAlpha01("precipitevolissimevolmente");
         Assertions.assertEquals("precipitev", foo.getAlpha01(), "test align/truncate");
 
-        Assertions.assertThrows(NotAsciiException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable { foo.setAlpha01("Niña"); }
-        }, "test not ascii (default)");
+        Assertions.assertThrows(NotAsciiException.class, () -> foo.setAlpha01("Niña"), "test not ascii (default)");
         Assertions.assertThrows(NotAsciiException.class, () -> foo.setAlpha02("Niña"), "test not ascii");
 
         Assertions.assertThrows(NotLatinException.class, () -> foo.setAlpha03("10 €"), "test not latin1");
@@ -189,10 +185,10 @@ class TestFields {
         }
 
         FooAlpha a = FooAlpha.decode(CharBuffer.allocate(10).toString());
-        Assertions.assertThrows(NotAsciiException.class, () -> a.getStrict(), "test ASCII");
-        Assertions.assertThrows(NotLatinException.class, () -> a.getWeak(), "test Latin1");
-        Assertions.assertThrows(NotValidException.class, () -> a.getUtf8(), "test UTF-8");
-        Assertions.assertDoesNotThrow(() -> a.getAll(), "test no check");
+        Assertions.assertThrows(NotAsciiException.class, a::getStrict, "test ASCII");
+        Assertions.assertThrows(NotLatinException.class, a::getWeak, "test Latin1");
+        Assertions.assertThrows(NotValidException.class, a::getUtf8, "test UTF-8");
+        Assertions.assertDoesNotThrow(a::getAll, "test no check");
 
         if (!a.validateFails(it ->
                 System.out.printf("Error field %s@%d+%d: %s%n",
@@ -232,8 +228,8 @@ class TestFields {
                         it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
-        Assertions.assertThrows(NotDigitException.class, () -> n.getStrict(), "test Num get");
-        Assertions.assertThrows(NotMatchesException.class, () -> n.getRex(), "test Num get");
+        Assertions.assertThrows(NotDigitException.class, n::getStrict, "test Num get");
+        Assertions.assertThrows(NotMatchesException.class, n::getRex, "test Num get");
 
         n.setRex("11");
         System.out.println(n.getRex());
@@ -296,7 +292,7 @@ class TestFields {
                         it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
-        Assertions.assertThrows(NotDigitBlankException.class, () -> cu2.getDig(), "testCus invalid");
+        Assertions.assertThrows(NotDigitBlankException.class, cu2::getDig, "testCus invalid");
 
         FooCustom cu3 = FooCustom.decode("12345678x0");
         if (!cu3.validateFails(it ->
@@ -304,7 +300,7 @@ class TestFields {
                         it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
-        Assertions.assertThrows(NotDigitException.class, () -> cu3.getDig(), "testCus invalid");
+        Assertions.assertThrows(NotDigitException.class, cu3::getDig, "testCus invalid");
 
         FooCustom cu4 = FooCustom.decode("1234567 x0");
         if (!cu4.validateFails(it ->
@@ -312,7 +308,7 @@ class TestFields {
                         it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
-        Assertions.assertThrows(NotBlankException.class, () -> cu4.getDig(), "testCus invalid");
+        Assertions.assertThrows(NotBlankException.class, cu4::getDig, "testCus invalid");
 
         try {
             cu4.getDig();
@@ -340,7 +336,7 @@ class TestFields {
                         it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
-        Assertions.assertThrows(NotDomainException.class, () -> d1.getCur(), "test Dom invalid");
+        Assertions.assertThrows(NotDomainException.class, d1::getCur, "test Dom invalid");
 
     }
 }

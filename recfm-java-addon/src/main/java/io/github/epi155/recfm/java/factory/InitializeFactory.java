@@ -1,5 +1,7 @@
 package io.github.epi155.recfm.java.factory;
 
+import io.github.epi155.recfm.api.FieldDefault;
+import io.github.epi155.recfm.api.FieldModel;
 import io.github.epi155.recfm.java.fields.*;
 import io.github.epi155.recfm.java.rule.InitializeField;
 import io.github.epi155.recfm.type.*;
@@ -12,7 +14,7 @@ public class InitializeFactory {
     private final InitializeField<FieldFiller> delegateFil;
     private final InitializeField<FieldConstant> delegateVal;
 
-    private InitializeFactory(CodeWriter pw, Defaults defaults) {
+    private InitializeFactory(CodeWriter pw, FieldDefault defaults) {
         this.delegateAbc = new Abc(pw, defaults.getAbc());
         this.delegateNum = new Num(pw, defaults.getNum());
         this.delegateCus = new Custom(pw, defaults.getCus());
@@ -21,7 +23,7 @@ public class InitializeFactory {
         this.delegateVal = new Constant(pw);
     }
 
-    public static InitializeFactory getInstance(CodeWriter pw, Defaults defaults) {
+    public static InitializeFactory getInstance(CodeWriter pw, FieldDefault defaults) {
         return new InitializeFactory(pw, defaults);
     }
 
@@ -77,7 +79,7 @@ public class InitializeFactory {
         delegateAbc.initialize(fld, bias);
     }
 
-    public void initialize(NakedField fld, int bias) {
+    public void initialize(FieldModel fld, int bias) {
         if (fld instanceof FieldAbc) {
             initializeAbc((FieldAbc) fld, bias);
         } else if (fld instanceof FieldNum) {

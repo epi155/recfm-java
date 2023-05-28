@@ -1,13 +1,13 @@
 package io.github.epi155.recfm.java.fields;
 
+import io.github.epi155.recfm.api.FieldDefault;
+import io.github.epi155.recfm.api.GenerateArgs;
+import io.github.epi155.recfm.api.NormalizeNumMode;
 import io.github.epi155.recfm.java.factory.CodeWriter;
 import io.github.epi155.recfm.java.factory.DelegateWriter;
 import io.github.epi155.recfm.java.rule.Action;
 import io.github.epi155.recfm.java.rule.MutableField;
-import io.github.epi155.recfm.type.Defaults;
 import io.github.epi155.recfm.type.FieldNum;
-import io.github.epi155.recfm.type.NormalizeNumMode;
-import io.github.epi155.recfm.util.GenerateArgs;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,13 +19,13 @@ import static io.github.epi155.recfm.util.Tools.notNullOf;
 
 public class Num extends DelegateWriter implements MutableField<FieldNum> {
     private static final String TEST_DIGIT_CHECK = "    testDigit(%s, %d);%n";
-    private final Defaults.NumDefault defaults;
-    public Num(CodeWriter pw, IntFunction<String> pos, Defaults.NumDefault defaults) {
+    private final FieldDefault.NumDefault defaults;
+    public Num(CodeWriter pw, IntFunction<String> pos, FieldDefault.NumDefault defaults) {
         super(pw, pos);
         this.defaults = defaults;
     }
 
-    public Num(CodeWriter pw, Defaults.NumDefault defaults) {
+    public Num(CodeWriter pw, FieldDefault.NumDefault defaults) {
         super(pw);
         this.defaults = defaults;
     }

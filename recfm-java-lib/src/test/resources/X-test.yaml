@@ -99,6 +99,7 @@ classes:
     fields:
       - !GRP { name: area51, at: 1, len: 32, as: *Area51 }
       - !OCC { name: lastThree, at: 33, len: 10, x: 3, as: *Date }
+#      - !Fil {                 at: 33, len: 30 }
       - !GRP { name: area52, at: 63, len: 30, as: *Area52 }
       - !Grp { name: documento   , at:  93, len: 40, fields: [
         !Abc { name: numero      , at: 93, len: 16 },

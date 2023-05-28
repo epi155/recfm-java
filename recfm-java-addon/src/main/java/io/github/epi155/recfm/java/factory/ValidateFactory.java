@@ -1,5 +1,7 @@
 package io.github.epi155.recfm.java.factory;
 
+import io.github.epi155.recfm.api.FieldDefault;
+import io.github.epi155.recfm.api.FieldModel;
 import io.github.epi155.recfm.java.fields.*;
 import io.github.epi155.recfm.java.rule.ValidateField;
 import io.github.epi155.recfm.type.*;
@@ -15,7 +17,7 @@ public class ValidateFactory {
     private final ValidateField<FieldConstant> delegateVal;
     private final ValidateField<FieldDomain> delegateDom;
 
-    private ValidateFactory(CodeWriter pw, Defaults defaults) {
+    private ValidateFactory(CodeWriter pw, FieldDefault defaults) {
         this.delegateAbc = new Abc(pw, defaults.getAbc());
         this.delegateNum = new Num(pw, defaults.getNum());
         this.delegateCus = new Custom(pw, defaults.getCus());
@@ -24,7 +26,7 @@ public class ValidateFactory {
         this.delegateVal = new Constant(pw);
     }
 
-    public static ValidateFactory getInstance(CodeWriter pw, Defaults defaults) {
+    public static ValidateFactory getInstance(CodeWriter pw, FieldDefault defaults) {
         return new ValidateFactory(pw, defaults);
     }
 
@@ -69,7 +71,7 @@ public class ValidateFactory {
         delegateCus.validate(fld, w, bias, isFirst);
     }
 
-    public void validate(NakedField fld, int padWidth, int bias, AtomicBoolean firstStatement) {
+    public void validate(FieldModel fld, int padWidth, int bias, AtomicBoolean firstStatement) {
         if (fld instanceof FieldAbc) {
             validateAbc((FieldAbc) fld, padWidth, bias, firstStatement);
         } else if (fld instanceof FieldNum) {

@@ -1,5 +1,9 @@
 package io.github.epi155.recfm.java;
 
+import io.github.epi155.recfm.api.FieldDefault;
+import io.github.epi155.recfm.api.GenerateArgs;
+import io.github.epi155.recfm.api.LoadOverflowAction;
+import io.github.epi155.recfm.api.LoadUnderflowAction;
 import io.github.epi155.recfm.java.factory.AccessFactory;
 import io.github.epi155.recfm.java.factory.InitializeFactory;
 import io.github.epi155.recfm.java.factory.PrepareFactory;
@@ -7,7 +11,6 @@ import io.github.epi155.recfm.java.factory.ValidateFactory;
 import io.github.epi155.recfm.type.*;
 import io.github.epi155.recfm.util.DumpFactory;
 import io.github.epi155.recfm.util.DumpInfo;
-import io.github.epi155.recfm.util.GenerateArgs;
 import io.github.epi155.recfm.util.Tools;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
@@ -20,18 +23,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 
-public class ClassFactory extends CodeFactory {
+public class ClassFactory extends CodeHelper {
     private static final IntFunction<String> BASE_ONE = n -> String.format("%d", n - 1);
     private static final String PUBLIC_CLASS_X_IMPLMENTS_Y = "public class %s implements %s {%n";
-    private final Defaults defaults;
+    private final FieldDefault defaults;
     private final Deque<String> trace = new LinkedList<>();
 
-    private ClassFactory(PrintWriter pw, String wrtPackage, GenerateArgs ga, Defaults defaults) {
+    private ClassFactory(PrintWriter pw, String wrtPackage, GenerateArgs ga, FieldDefault defaults) {
         super(pw, wrtPackage, ga);
         this.defaults = defaults;
     }
 
-    public static ClassFactory newInstance(PrintWriter pw, String wrtPackage, GenerateArgs ga, Defaults defaults) {
+    public static ClassFactory newInstance(PrintWriter pw, String wrtPackage, GenerateArgs ga, FieldDefault defaults) {
         return new ClassFactory(pw, wrtPackage, ga, defaults);
     }
 
@@ -118,7 +121,7 @@ public class ClassFactory extends CodeFactory {
             access = AccessFactory.getInstance(this, defaults, pos);
         }
         pushPlusIndent(4);
-        trace.addLast(trait.getTypeDef().getName());
+        trace.addLast(trait.getTypedef().getName());
 
         trait.forEachField(fld -> {
             if (fld instanceof SelfCheck) ((SelfCheck) fld).selfCheck();
@@ -134,7 +137,7 @@ public class ClassFactory extends CodeFactory {
     }
     private void writeBeginClassOccursTrait(FieldOccursTrait occurs) {
         String capName = Tools.capitalize(occurs.getName());
-        String traitName = occurs.getTypeDef().getName();
+        String traitName = occurs.getTypedef().getName();
         printf("private final %s[] %s = new %1$s[] {%n", capName, occurs.getName());
         for (int k = 0, shift = 0; k < occurs.getTimes(); k++, shift += occurs.getLength()) {
             printf("    this.new %s(%d),%n", capName, shift);
@@ -144,7 +147,7 @@ public class ClassFactory extends CodeFactory {
         if (ga.doc)
             javadocGroupDef(occurs);
 
-        List<String> embs = occurs.getTypeDef().getFields()
+        List<String> embs = occurs.getTypedef().getFields()
                 .stream()
                 .filter(FieldEmbedGroup.class::isInstance)
                 .map(it -> ((FieldEmbedGroup) it).getSource().getName())
@@ -250,7 +253,7 @@ public class ClassFactory extends CodeFactory {
 
     private void writeBeginClassGroupTrait(FieldGroupTrait group) {
         val name = group.getName();
-        val traitName = group.getTypeDef().getName();
+        val traitName = group.getTypedef().getName();
         String capName = Tools.capitalize(name);
         printf("private final %s %s = this.new %1$s();%n", capName, name);
         printf("public %s %s() { return this.%2$s; }%n", capName, name);
@@ -259,7 +262,7 @@ public class ClassFactory extends CodeFactory {
         if (ga.doc)
             javadocGroupDef(group);
 
-        List<String> embs = group.getTypeDef().getFields()
+        List<String> embs = group.getTypedef().getFields()
                 .stream()
                 .filter(FieldEmbedGroup.class::isInstance)
                 .map(it -> ((FieldEmbedGroup) it).getSource().getName())
@@ -291,19 +294,20 @@ public class ClassFactory extends CodeFactory {
         printf("}%n");
     }
     private void writeCtorParm(@NotNull ClassDefine struct) {
-        struct.onOverflowDefault(LoadOverflowAction.Trunc);
-        struct.onUnderflowDefault(LoadUnderflowAction.Pad);
         printf("private %s(String s) {%n", struct.getName());
         printf("    super(s, LRECL, %b, %b);%n",
-                struct.onOverflowThrowError(), struct.onUnderflowThrowError());
+                struct.getOnOverflow()== LoadOverflowAction.Error,
+                struct.getOnUnderflow()== LoadUnderflowAction.Error);
         closeBrace();
         printf("private %s(FixRecord r) {%n", struct.getName());
         printf("    super(r, LRECL, %b, %b);%n",
-                struct.onOverflowThrowError(), struct.onUnderflowThrowError());
+                struct.getOnOverflow()== LoadOverflowAction.Error,
+                struct.getOnUnderflow()== LoadUnderflowAction.Error);
         closeBrace();
         printf("private %s(char[] c) {%n", struct.getName());
         printf("    super(c, LRECL, %b, %b);%n",
-                struct.onOverflowThrowError(), struct.onUnderflowThrowError());
+                struct.getOnOverflow()== LoadOverflowAction.Error,
+                struct.getOnUnderflow()== LoadUnderflowAction.Error);
         closeBrace();
 
         printf("public static %s of(FixRecord r) {%n", struct.getName());

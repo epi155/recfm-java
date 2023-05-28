@@ -1,8 +1,9 @@
 package io.github.epi155.recfm.java;
 
+import io.github.epi155.recfm.api.FieldModel;
+import io.github.epi155.recfm.api.GenerateArgs;
 import io.github.epi155.recfm.java.factory.CodeWriter;
 import io.github.epi155.recfm.type.*;
-import io.github.epi155.recfm.util.GenerateArgs;
 import io.github.epi155.recfm.util.Tools;
 import lombok.val;
 
@@ -21,7 +22,7 @@ import java.util.LinkedList;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 
-public abstract class CodeFactory implements CodeWriter {
+public abstract class CodeHelper implements CodeWriter {
     protected static final String SYSTEM_PACKAGE = "io.github.epi155.recfm.java";
     protected static final String OVERRIDE_METHOD = "@Override%n";
     protected static final String ADDON_GROUP = "io.github.epi155";
@@ -32,7 +33,7 @@ public abstract class CodeFactory implements CodeWriter {
     protected final String wrtPackage;
     protected final GenerateArgs ga;
 
-    protected CodeFactory(PrintWriter pw, String wrtPackage, GenerateArgs ga) {
+    protected CodeHelper(PrintWriter pw, String wrtPackage, GenerateArgs ga) {
         this.pw = pw;
         this.wrtPackage = wrtPackage;
         this.ga = ga;
@@ -158,13 +159,13 @@ public abstract class CodeFactory implements CodeWriter {
                 } else if (field instanceof FieldOccursTrait) {
                     int times = ((FieldOccursTrait) field).getTimes();
                     printf(" * <tr><td>{@link %1$s %2$s}</td><td style='text-align: center'>{@code %3$s}</td><td style='text-align: right'>{@code %4$d+}</td><td style='text-align: right'>{@code %5$d}</td><td style='text-align: right'>x{@code %6$d}</td></tr>%n",
-                            ((FieldOccursTrait) field).getTypeDef().getName(), named.getName(), typeOf(named), named.getOffset()-backShift, named.getLength(), times);
+                            ((FieldOccursTrait) field).getTypedef().getName(), named.getName(), typeOf(named), named.getOffset()-backShift, named.getLength(), times);
                 } else if (field instanceof FieldGroup) {
                     printf(" * <tr><td>{@link %1$s %2$s}</td><td style='text-align: center'>{@code %3$s}</td><td style='text-align: right'>{@code %4$d+}</td><td style='text-align: right'>{@code %5$d}</td></tr>%n",
                             capit, named.getName(), typeOf(named), named.getOffset()-backShift, named.getLength());
                 } else if (field instanceof FieldGroupTrait) {
                     printf(" * <tr><td>{@link %1$s %2$s}</td><td style='text-align: center'>{@code %3$s}</td><td style='text-align: right'>{@code %4$d+}</td><td style='text-align: right'>{@code %5$d}</td></tr>%n",
-                            ((FieldGroupTrait) field).getTypeDef().getName(), named.getName(), typeOf(named), named.getOffset()-backShift, named.getLength());
+                            ((FieldGroupTrait) field).getTypedef().getName(), named.getName(), typeOf(named), named.getOffset()-backShift, named.getLength());
                 } else {
                     printf(" * <tr><td>{@code %s}</td><td style='text-align: center'>{@code %s}</td><td style='text-align: right'>{@code %d+}</td><td style='text-align: right'>{@code %d}</td></tr>%n", named.getName(), typeOf(named), named.getOffset()-backShift, named.getLength());
                 }
@@ -185,7 +186,7 @@ public abstract class CodeFactory implements CodeWriter {
         return String.format("[%d]", len);
     }
 
-    private String typeOf(NakedField field) {
+    private String typeOf(FieldModel field) {
         if (field instanceof FieldOccurs) return "Occ";
         if (field instanceof FieldGroup) return "Grp";
         if (field instanceof FieldAbc) return "Abc";

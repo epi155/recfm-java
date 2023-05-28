@@ -1,9 +1,10 @@
 package io.github.epi155.recfm.java.rule;
 
-import io.github.epi155.recfm.type.AlignMode;
-import io.github.epi155.recfm.type.NormalizeAbcMode;
-import io.github.epi155.recfm.type.OverflowAction;
-import io.github.epi155.recfm.type.UnderflowAction;
+
+import io.github.epi155.recfm.api.AlignMode;
+import io.github.epi155.recfm.api.NormalizeAbcMode;
+import io.github.epi155.recfm.api.OverflowAction;
+import io.github.epi155.recfm.api.UnderflowAction;
 
 /**
  * Actions on the value of a field

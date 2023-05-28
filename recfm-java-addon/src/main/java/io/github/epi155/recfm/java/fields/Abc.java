@@ -1,14 +1,14 @@
 package io.github.epi155.recfm.java.fields;
 
+import io.github.epi155.recfm.api.FieldDefault;
+import io.github.epi155.recfm.api.GenerateArgs;
+import io.github.epi155.recfm.api.NormalizeAbcMode;
 import io.github.epi155.recfm.java.JavaDoc;
 import io.github.epi155.recfm.java.factory.CodeWriter;
 import io.github.epi155.recfm.java.factory.DelegateWriter;
 import io.github.epi155.recfm.java.rule.Action;
 import io.github.epi155.recfm.java.rule.MutableField;
-import io.github.epi155.recfm.type.Defaults;
 import io.github.epi155.recfm.type.FieldAbc;
-import io.github.epi155.recfm.type.NormalizeAbcMode;
-import io.github.epi155.recfm.util.GenerateArgs;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,14 +19,14 @@ import static io.github.epi155.recfm.java.JavaTools.prefixOf;
 import static io.github.epi155.recfm.util.Tools.notNullOf;
 
 public class Abc extends DelegateWriter implements MutableField<FieldAbc>, JavaDoc {
-    private final Defaults.AbcDefault defaults;
+    private final FieldDefault.AbcDefault defaults;
 
-    public Abc(CodeWriter pw, Defaults.AbcDefault defaults) {
+    public Abc(CodeWriter pw, FieldDefault.AbcDefault defaults) {
         super(pw);
         this.defaults = defaults;
     }
 
-    public Abc(CodeWriter pw, Defaults.AbcDefault defaults, IntFunction<String> pos) {
+    public Abc(CodeWriter pw, FieldDefault.AbcDefault defaults, IntFunction<String> pos) {
         super(pw, pos);
         this.defaults = defaults;
     }

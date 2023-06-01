@@ -23,6 +23,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 
+import static io.github.epi155.recfm.util.Tools.notNullOf;
+
 public class ClassFactory extends CodeHelper {
     private static final IntFunction<String> BASE_ONE = n -> String.format("%d", n - 1);
     private static final String PUBLIC_CLASS_X_IMPLMENTS_Y = "public class %s implements %s {%n";
@@ -294,20 +296,18 @@ public class ClassFactory extends CodeHelper {
         printf("}%n");
     }
     private void writeCtorParm(@NotNull ClassDefine struct) {
+        val ovf = notNullOf(struct.getOnOverflow(), defaults.getCls().getOnOverflow());
+        val unf = notNullOf(struct.getOnUnderflow(), defaults.getCls().getOnUnderflow());
+        val isOvfErr = ovf == LoadOverflowAction.Error;
+        val isUnfErr = unf == LoadUnderflowAction.Error;
         printf("private %s(String s) {%n", struct.getName());
-        printf("    super(s, LRECL, %b, %b);%n",
-                struct.getOnOverflow()== LoadOverflowAction.Error,
-                struct.getOnUnderflow()== LoadUnderflowAction.Error);
+        printf("    super(s, LRECL, %b, %b);%n", isOvfErr, isUnfErr);
         closeBrace();
         printf("private %s(FixRecord r) {%n", struct.getName());
-        printf("    super(r, LRECL, %b, %b);%n",
-                struct.getOnOverflow()== LoadOverflowAction.Error,
-                struct.getOnUnderflow()== LoadUnderflowAction.Error);
+        printf("    super(r, LRECL, %b, %b);%n", isOvfErr, isUnfErr);
         closeBrace();
         printf("private %s(char[] c) {%n", struct.getName());
-        printf("    super(c, LRECL, %b, %b);%n",
-                struct.getOnOverflow()== LoadOverflowAction.Error,
-                struct.getOnUnderflow()== LoadUnderflowAction.Error);
+        printf("    super(c, LRECL, %b, %b);%n", isOvfErr, isUnfErr);
         closeBrace();
 
         printf("public static %s of(FixRecord r) {%n", struct.getName());

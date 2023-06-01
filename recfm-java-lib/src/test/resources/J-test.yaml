@@ -1,93 +1,94 @@
-packageName: com.example.sysj.test
-classes:
-  - name: FooTest
-    length: 600
-    fields:
-      - !Abc { name: alpha01   , at:  1, len: 10 }
-      - !Abc { name: alpha02   , at: 11, len: 10, check: Ascii  }
-      - !Abc { name: alpha03   , at: 21, len: 10, check: Latin1 }
-      - !Abc { name: alpha04   , at: 31, len: 10, check: Valid }
-      - !Abc { name: alpha05   , at: 41, len: 10, check: None }
-
-      - !Num { name: digit01   , at: 51, len: 5, num: true }
-      - !Fil {                   at: 56, len: 5 }
-      - !Val { val: "12345"    , at: 61, len: 5 }
-
-      - !Cus { name: custom01  , at: 66, len: 5, align: RGT, ini: ' ', pad: '0', check: DigitOrBlank }
-      - !Cus { name: custom02  , at: 71, len: 5, align: RGT, ini: '0', pad: '0', check: Digit }
-      - !Cus { name: custom03  , at: 76, len: 5, align: LFT, ini: ' ', pad: ' ', check: Ascii }
-      - !Cus { name: custom04  , at: 81, len: 5, align: LFT, ini: ' ', pad: ' ', check: Latin1 }
-      - !Cus { name: custom05  , at: 86, len: 5, align: LFT, ini: ' ', pad: ' ', check: Valid }
-      - !Cus { name: custom06  , at: 91, len: 5, align: LFT, ini: ' ', pad: ' ', check: None }
-      - !Cus { name: custom07  , at: 96, len: 5, align: LFT, ini: ' ', pad: ' ', regex: "[0-9a-f]{1,5}\\s*" }
-
-      - !Dom { name: domain01 ,  at: 101, len: 3, items: [ EUR, USD, CHF, GBP, JPY, CNH, CNY, HKD, ARS, BRL, RUB ] }
-      - !Abc { name: hackDom1  , at: 101, len: 3, red: true }
-
-      - !Fil {                   at: 104, len: 17 }
-#      - !Grp { name: group01   , at: 120, len: 100, fields: []}
-      - !Grp
-        name: group01
-        at: 121
-        len: 30
+packages:
+  - name: com.example.sysj.test
+    classes:
+      - name: FooTest
+        length: 600
         fields:
-          - !Abc { name: alpha01   , at: 121, len: 10 }
-          - !Num { name: digit01   , at: 131, len: 5 }
-          - !Fil {                   at: 136, len: 5 }
-          - !Val { val: "12345"    , at: 141, len: 5 }
-          - !Cus { name: custom01  , at: 146, len: 5 }
-      - !Grp
-        name: errors
-        at: 151
-        len: 450
-        fields:
-          - !Num { name: count     , at: 151, len: 5, num: true }
-          - !Occ
-            name: item
-            at: 156
-            len: 88
-            times: 5
+          - !Abc { name: alpha01   , at:  1, len: 10 }
+          - !Abc { name: alpha02   , at: 11, len: 10, check: Ascii  }
+          - !Abc { name: alpha03   , at: 21, len: 10, check: Latin1 }
+          - !Abc { name: alpha04   , at: 31, len: 10, check: Valid }
+          - !Abc { name: alpha05   , at: 41, len: 10, check: None }
+
+          - !Num { name: digit01   , at: 51, len: 5, acc: All }
+          - !Fil {                   at: 56, len: 5 }
+          - !Val { val: "12345"    , at: 61, len: 5 }
+
+          - !Cus { name: custom01  , at: 66, len: 5, align: RGT, ini: ' ', pad: '0', check: DigitOrBlank }
+          - !Cus { name: custom02  , at: 71, len: 5, align: RGT, ini: '0', pad: '0', check: Digit }
+          - !Cus { name: custom03  , at: 76, len: 5, align: LFT, ini: ' ', pad: ' ', check: Ascii }
+          - !Cus { name: custom04  , at: 81, len: 5, align: LFT, ini: ' ', pad: ' ', check: Latin1 }
+          - !Cus { name: custom05  , at: 86, len: 5, align: LFT, ini: ' ', pad: ' ', check: Valid }
+          - !Cus { name: custom06  , at: 91, len: 5, align: LFT, ini: ' ', pad: ' ', check: None }
+          - !Cus { name: custom07  , at: 96, len: 5, align: LFT, ini: ' ', pad: ' ', regex: "[0-9a-f]{1,5}\\s*" }
+
+          - !Dom { name: domain01 ,  at: 101, len: 3, items: [ EUR, USD, CHF, GBP, JPY, CNH, CNY, HKD, ARS, BRL, RUB ] }
+          - !Abc { name: hackDom1  , at: 101, len: 3, ovr: true }
+
+          - !Fil {                   at: 104, len: 17 }
+    #      - !Grp { name: group01   , at: 120, len: 100, fields: []}
+          - !Grp
+            name: group01
+            at: 121
+            len: 30
             fields:
-              - !Abc { name: code   , at: 156, len:  8 }
-              - !Abc { name: message, at: 164, len: 80 }
-          - !Fil {                    at: 596, len:  5 }
+              - !Abc { name: alpha01   , at: 121, len: 10 }
+              - !Num { name: digit01   , at: 131, len: 5 }
+              - !Fil {                   at: 136, len: 5 }
+              - !Val { val: "12345"    , at: 141, len: 5 }
+              - !Cus { name: custom01  , at: 146, len: 5 }
+          - !Grp
+            name: errors
+            at: 151
+            len: 450
+            fields:
+              - !Num { name: count     , at: 151, len: 5, acc: All }
+              - !Occ
+                name: item
+                at: 156
+                len: 88
+                times: 5
+                fields:
+                  - !Abc { name: code   , at: 156, len:  8 }
+                  - !Abc { name: message, at: 164, len: 80 }
+              - !Fil {                    at: 596, len:  5 }
 
-  - name: FooDate
-    length: 10
-    fields:
-      - !Abc { name: date   , at: 1, len: 10 }
-      - !Grp { name: date   , at: 1, len: 10, red: true, fields: [
-          !Num { name: year , at: 1, len:  4, num: true },
-          !Fil {              at: 5, len:  1 },
-          !Num { name: month, at: 6, len:  2, num: true },
-          !Fil {              at: 8, len:  1 },
-          !Num { name: day  , at: 9, len:  2, num: true }
-      ]}
+      - name: FooDate
+        length: 10
+        fields:
+          - !Abc { name: date   , at: 1, len: 10 }
+          - !Grp { name: date   , at: 1, len: 10, ovr: true, fields: [
+              !Num { name: year , at: 1, len:  4, acc: Num, wid: 2 },
+              !Fil {              at: 5, len:  1 },
+              !Num { name: month, at: 6, len:  2, acc: Num, wid: 16-bit },
+              !Fil {              at: 8, len:  1 },
+              !Num { name: day  , at: 9, len:  2, acc: Num }
+          ]}
 
-  - name: FooAlpha
-    length: 10
-    onOverflow: Error
-    onUnderflow: Error
-    fields:
-      - !Abc { name: strict, at: 1, len: 4, onOverflow: Error, onUnderflow: Error, check: Ascii }
-      - !Abc { name: weak  , at: 5, len: 4, onOverflow: Trunc, onUnderflow: Pad  , check: Latin1  }
-      - !Abc { name: utf8, at: 9, len: 1, check: Valid }
-      - !Abc { name: all , at: 10, len: 1, check: None }
-  - name: FooDigit
-    length: 10
-    fields:
-      - !Num { name: strict, at: 1, len: 4, onOverflow: Error, onUnderflow: Error }
-      - !Num { name: weak  , at: 5, len: 4, onOverflow: Trunc, onUnderflow: Pad   }
-      - !Cus { name: rex   , at: 9, len: 2, regex: "[0-9]*" }
-  - name: FooCustom
-    length: 10
-    fields:
-      - !Cus { name: fix  , at: 1, len: 2, align: LFT, ini: '.', onOverflow: Error, onUnderflow: Error  }
-      - !Cus { name: rgt  , at: 3, len: 3, align: RGT, pad: '0', ini: '*' }
-      - !Cus { name: lft  , at: 6, len: 2, align: LFT, pad: '*', ini: '.' }
-      - !Cus { name: dig  , at: 8, len: 2, align: RGT, pad: '0', ini: ' ', chk: DigitOrBlank }
-      - !Val { value: "X", at: 10, len: 1 }
-  - name: FooDom
-    length: 3
-    fields:
-      - !Dom { name: cur  , at: 1, len: 3, items: [ EUR, USD, CHF, GBP, JPY, CNH, CNY, HKD, ARS, BRL, RUB ] }
+      - name: FooAlpha
+        length: 10
+        onOverflow: Error
+        onUnderflow: Error
+        fields:
+          - !Abc { name: strict, at: 1, len: 4, onOverflow: Error, onUnderflow: Error, check: Ascii }
+          - !Abc { name: weak  , at: 5, len: 4, onOverflow: Trunc, onUnderflow: Pad  , check: Latin1  }
+          - !Abc { name: utf8, at: 9, len: 1, check: Valid }
+          - !Abc { name: all , at: 10, len: 1, check: None }
+      - name: FooDigit
+        length: 10
+        fields:
+          - !Num { name: strict, at: 1, len: 4, onOverflow: Error, onUnderflow: Error }
+          - !Num { name: weak  , at: 5, len: 4, onOverflow: Trunc, onUnderflow: Pad   }
+          - !Cus { name: rex   , at: 9, len: 2, regex: "[0-9]*" }
+      - name: FooCustom
+        length: 10
+        fields:
+          - !Cus { name: fix  , at: 1, len: 2, align: LFT, ini: '.', onOverflow: Error, onUnderflow: Error  }
+          - !Cus { name: rgt  , at: 3, len: 3, align: RGT, pad: '0', ini: '*' }
+          - !Cus { name: lft  , at: 6, len: 2, align: LFT, pad: '*', ini: '.' }
+          - !Cus { name: dig  , at: 8, len: 2, align: RGT, pad: '0', ini: ' ', chk: DigitOrBlank }
+          - !Val { value: "X", at: 10, len: 1 }
+      - name: FooDom
+        length: 3
+        fields:
+          - !Dom { name: cur  , at: 1, len: 3, items: [ EUR, USD, CHF, GBP, JPY, CNH, CNY, HKD, ARS, BRL, RUB ] }

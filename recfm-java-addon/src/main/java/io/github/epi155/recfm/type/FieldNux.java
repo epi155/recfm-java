@@ -19,12 +19,13 @@ public class FieldNux extends FieldNum implements NuxModel {
     protected FieldNux shiftCopy(int plus) {
         val res = new FieldNux();
         res.initialize = this.initialize;
-        res.setNumericAccess(this.isNumericAccess());
+        res.setAccess(this.getAccess());
+        res.setWordWidth(this.getWordWidth());
         res.setNormalize(this.getNormalize());
         res.setOnOverflow(getOnOverflow());
         res.setOnUnderflow(getOnUnderflow());
         res.setName(getName());
-        res.setRedefines(isRedefines());
+        res.setOverride(isOverride());
         res.setAudit(isAudit());
         res.setLength(getLength());
         res.setOffset(getOffset() + plus);

@@ -107,7 +107,7 @@ public class Custom extends DelegateWriter implements MutableField<FieldCustom>,
         val ovfl = notNullOf(fld.getOnOverflow(), defaults.getOnOverflow());
         val unfl = notNullOf(fld.getOnUnderflow(), defaults.getOnUnderflow());
         val flag = Action.flagSetter(ovfl, unfl, align);
-        boolean chkSet = notNullOf(fld.getCheckSetter(), ga.checkSetter);
+        boolean chkSet = notNullOf(fld.getCheckSetter(), defaults.isCheckSetter());
         if (chkSet) {
             printf("    s = normalize(s, %d, '%c', '%c', %s, %d);%n",
                 flag, pad, init,
@@ -128,7 +128,7 @@ public class Custom extends DelegateWriter implements MutableField<FieldCustom>,
     private void buildGetter(FieldCustom fld, String wrkName, GenerateArgs ga) {
         if (ga.doc) docGetter(fld);
         printf("public String get%s() {%n", wrkName);
-        boolean chkGet = notNullOf(fld.getCheckGetter(), ga.checkGetter);
+        boolean chkGet = notNullOf(fld.getCheckGetter(), defaults.isCheckGetter());
         if (chkGet) chkGetter(fld);
         val pad = notNullOf(fld.getPadChar(), defaults.getPad());
         val norm = notNullOf(fld.getNormalize(), defaults.getNormalize());

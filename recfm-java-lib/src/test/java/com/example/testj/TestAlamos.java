@@ -35,16 +35,14 @@ class TestAlamos {
         Assertions.assertThrows(NotDigitBlankException.class, a::getBlu);
         Assertions.assertThrows(NotDigitBlankException.class, a::getYel);
         Assertions.assertThrows(NotDigitBlankException.class, a::getCya);
-        Assertions.assertThrows(NotDigitBlankException.class, a::intCya);
     }
     @Test
     void testSet1() {
         Alamos a = new Alamos();
         a.setRed(null);
         Assertions.assertEquals("    ", a.getXred());
-        a.setCya((Integer)null);
+        a.setCya(null);
         Assertions.assertEquals("    ", a.getXcya());
         Assertions.assertNull(a.getCya());
-        Assertions.assertNull(a.intCya());
     }
 }

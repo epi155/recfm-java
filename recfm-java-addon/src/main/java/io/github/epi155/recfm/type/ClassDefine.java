@@ -19,8 +19,8 @@ import static io.github.epi155.recfm.type.TraitDefine.DOT_JAVA;
 public class ClassDefine implements ParentFields, ClassModel {
     private String name;
     private int length;
-    private LoadOverflowAction onOverflow = LoadOverflowAction.Trunc;
-    private LoadUnderflowAction onUnderflow = LoadUnderflowAction.Pad;
+    private LoadOverflowAction onOverflow;
+    private LoadUnderflowAction onUnderflow;
     private List<FieldModel> fields = new ArrayList<>();
 
     @Override

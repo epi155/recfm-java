@@ -42,12 +42,12 @@ public class Tools {
     public static Level testCollision(NamedField fld, FieldGroup grp) {
         if (fld.getOffset()==grp.getOffset() && fld.getLength()==grp.getLength()) {
             // fld and grp full overlap
-            if (grp.isRedefines() && !fld.isRedefines()) {
-                log.info("  [#>...] Name '{}' group redefines field @{}+{} >>>", fld.getName(),
+            if (grp.isOverride() && !fld.isOverride()) {
+                log.info("  [#>...] Name '{}' group override field @{}+{} >>>", fld.getName(),
                     fld.getOffset(), fld.getLength());
                 return Level.INFO;
-            } else if (fld.isRedefines() && !grp.isRedefines()) {
-                log.info("  [#>...] Name '{}' field redefines group @{}+{} >>>", fld.getName(),
+            } else if (fld.isOverride() && !grp.isOverride()) {
+                log.info("  [#>...] Name '{}' field override group @{}+{} >>>", fld.getName(),
                     fld.getOffset(), fld.getLength());
                 return Level.INFO;
             } else {

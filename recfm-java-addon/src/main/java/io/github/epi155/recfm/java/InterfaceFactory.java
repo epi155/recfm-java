@@ -1,12 +1,17 @@
 package io.github.epi155.recfm.java;
 
+import io.github.epi155.recfm.api.AccesMode;
+import io.github.epi155.recfm.api.FieldDefault;
 import io.github.epi155.recfm.api.GenerateArgs;
+import io.github.epi155.recfm.api.WordWidth;
 import io.github.epi155.recfm.type.*;
 import io.github.epi155.recfm.util.Tools;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintWriter;
+
+import static io.github.epi155.recfm.util.Tools.notNullOf;
 
 public class InterfaceFactory extends CodeHelper {
     private static final String TAG_DOM = "Dom";
@@ -17,13 +22,15 @@ public class InterfaceFactory extends CodeHelper {
     private static final String STRING_GETTER = "String get%s();%n";
     private static final String JAVADOC_OPEN = "/**%n";
     private static final String JAVADOC_CLOSE = " */%n";
+    private final FieldDefault defaults;
 
-    public InterfaceFactory(PrintWriter pw, String wrtPackage, GenerateArgs ga) {
+    public InterfaceFactory(PrintWriter pw, String wrtPackage, GenerateArgs ga, FieldDefault defaults) {
         super(pw, wrtPackage, ga);
+        this.defaults = defaults;
     }
 
-    public static InterfaceFactory newInstance(PrintWriter pw, String wrtPackage, GenerateArgs ga) {
-        return new InterfaceFactory(pw, wrtPackage, ga);
+    public static InterfaceFactory newInstance(PrintWriter pw, String wrtPackage, GenerateArgs ga, FieldDefault fieldDefault) {
+        return new InterfaceFactory(pw, wrtPackage, ga, fieldDefault);
     }
 
     public void generateInterfaceCode(TraitDefine trait) {
@@ -128,44 +135,74 @@ public class InterfaceFactory extends CodeHelper {
 
     private void createMethodsNum(FieldNum fld) {
         val wrkName = Tools.getWrkName(fld.getName());
-        if (ga.doc) docGetter(fld, TAG_NUM);
-        printf(STRING_GETTER, wrkName);
-        if (ga.doc) docSetter(fld, TAG_NUM);
-        printf(STRING_SETTER, wrkName);
-        if (fld.isNumericAccess()) {
-            if (fld.getLength() > 19)
-                throw new IllegalStateException("Field "+fld.getName()+" too large "+fld.getLength()+"-digits for numeric access");
-            else if (fld.getLength() > 9) useLong(fld, wrkName);    // 10..19
-            else if (fld.getLength() > 4 || ga.align == 4) useInt(fld, wrkName);     // 5..9
-            else if (fld.getLength() > 2 || ga.align == 2) useShort(fld, wrkName);   // 3..4
-            else useByte(fld, wrkName);  // ..2
+        val access = notNullOf(fld.getAccess(), defaults.getNum().getAccess());
+        if (access != AccesMode.Number) {
+            if (ga.doc) docGetter(fld, TAG_NUM);
+            printf(STRING_GETTER, wrkName);
+            if (ga.doc) docSetter(fld, TAG_NUM);
+            printf(STRING_SETTER, wrkName);
+        }
+        if (access != AccesMode.String) {
+            val ww = notNullOf(fld.getWordWidth(), defaults.getNum().getWordWidth());
+            boolean isNumber = access == AccesMode.Number;
+            if (fld.getLength() > 19) useBigInt(fld, wrkName, isNumber);
+            else if (fld.getLength() > 9 || ww == WordWidth.W8) useLong(fld, wrkName, isNumber);    // 10..19
+            else if (fld.getLength() > 4 || ww == WordWidth.W4) useInt(fld, wrkName, isNumber);     // 5..9
+            else if (fld.getLength() > 2 || ww == WordWidth.W2) useShort(fld, wrkName, isNumber);   // 3..4
+            else useByte(fld, wrkName, isNumber);  // ..2
         }
     }
 
-    private void useLong(FieldNum fld, String wrkName) {
+    private void useBigInt(FieldNum fld, String wrkName, boolean isNumber) {
+        if (ga.doc) docNumGetter(fld, "BigInteger");
+        if (isNumber) {
+            printf("BigInteger get%s();%n", wrkName);
+        } else {
+            printf("BigInteger bigInteger%s();%n", wrkName);
+        }
+        if (ga.doc) docNumSetter(fld, "n BigInteger");
+        printf("void set%s(BigInteger n);%n", wrkName);
+    }
+    private void useLong(FieldNum fld, String wrkName, boolean isNumber) {
         if (ga.doc) docNumGetter(fld, "long");
-        printf("long long%s();%n", wrkName);
+        if (isNumber) {
+            printf("long get%s();%n", wrkName);
+        } else {
+            printf("long long%s();%n", wrkName);
+        }
         if (ga.doc) docNumSetter(fld, "n long");
         printf("void set%s(long n);%n", wrkName);
     }
 
-    private void useInt(FieldNum fld, String wrkName) {
+    private void useInt(FieldNum fld, String wrkName, boolean isNumber) {
         if (ga.doc) docNumGetter(fld, "integer");
-        printf("int int%s();%n", wrkName);
+        if (isNumber) {
+            printf("int get%s();%n", wrkName);
+        } else {
+            printf("int int%s();%n", wrkName);
+        }
         if (ga.doc) docNumSetter(fld, "n integer");
         printf("void set%s(int n);%n", wrkName);
     }
 
-    private void useShort(FieldNum fld, String wrkName) {
+    private void useShort(FieldNum fld, String wrkName, boolean isNumber) {
         if (ga.doc) docNumGetter(fld, "short");
-        printf("short short%s();%n", wrkName);
+        if (isNumber) {
+            printf("short get%s();%n", wrkName);
+        } else {
+            printf("short short%s();%n", wrkName);
+        }
         if (ga.doc) docNumSetter(fld, "n short");
         printf("void set%s(short n);%n", wrkName);
     }
 
-    private void useByte(FieldNum fld, String wrkName) {
+    private void useByte(FieldNum fld, String wrkName, boolean isNumber) {
         if (ga.doc) docNumGetter(fld, "byte");
-        printf("byte byte%s();%n", wrkName);
+        if (isNumber) {
+            printf("byte get%s();%n", wrkName);
+        } else {
+            printf("byte byte%s();%n", wrkName);
+        }
         if (ga.doc) docNumSetter(fld, "n byte");
         printf("void set%s(byte n);%n", wrkName);
     }

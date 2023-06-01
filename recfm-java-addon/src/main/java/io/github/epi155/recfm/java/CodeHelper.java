@@ -117,7 +117,7 @@ public abstract class CodeHelper implements CodeWriter {
             if (field instanceof NamedField) {
                 val named = (NamedField) field;
                 val capit = Tools.capitalize(named.getName());
-                if (named.isRedefines())
+                if (named.isOverride())
                     return;
                 if (field instanceof FieldOccurs) {
                     int times = ((FieldOccurs) field).getTimes();
@@ -150,7 +150,7 @@ public abstract class CodeHelper implements CodeWriter {
             if (field instanceof NamedField) {
                 val named = (NamedField) field;
                 val capit = Tools.capitalize(named.getName());
-                if (named.isRedefines())
+                if (named.isOverride())
                     return;
                 if (field instanceof FieldOccurs) {
                     int times = ((FieldOccurs) field).getTimes();

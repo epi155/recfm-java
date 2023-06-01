@@ -12,7 +12,7 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true)
 public abstract class NamedField extends NakedField {
     private String name;
-    private boolean redefines;
+    private boolean override;
 
     @Override
     protected void checkBounds(int k, int up, int bias) {
@@ -25,7 +25,7 @@ public abstract class NamedField extends NakedField {
     @SuppressWarnings("unchecked")
     @Override
     public void mark(@SuppressWarnings("rawtypes") Set[] b, int bias) {
-        if (redefines) return;
+        if (override) return;
         for (int k = getOffset() - bias, u = 0; u < getLength(); k++, u++) {
             checkBounds(k, b.length, bias);
             if (b[k] == null) {

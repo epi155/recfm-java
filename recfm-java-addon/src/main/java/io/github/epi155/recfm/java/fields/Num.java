@@ -1,8 +1,6 @@
 package io.github.epi155.recfm.java.fields;
 
-import io.github.epi155.recfm.api.FieldDefault;
-import io.github.epi155.recfm.api.GenerateArgs;
-import io.github.epi155.recfm.api.NormalizeNumMode;
+import io.github.epi155.recfm.api.*;
 import io.github.epi155.recfm.java.factory.CodeWriter;
 import io.github.epi155.recfm.java.factory.DelegateWriter;
 import io.github.epi155.recfm.java.rule.Action;
@@ -44,14 +42,18 @@ public class Num extends DelegateWriter implements MutableField<FieldNum> {
 
     @Override
     public void access(FieldNum fld, String wrkName, @NotNull GenerateArgs ga) {
-        numeric(fld, wrkName, ga.doc);
-        if (fld.isNumericAccess()) {
-            if (fld.getLength() > 19)
-                throw new IllegalStateException("Field "+fld.getName()+" too large "+fld.getLength()+"-digits for numeric access");
-            else if (fld.getLength() > 9) useLong(fld, wrkName, ga.doc);    // 10..19
-            else if (fld.getLength() > 4 || ga.align == 4) useInt(fld, wrkName, ga.doc);     // 5..9
-            else if (fld.getLength() > 2 || ga.align == 2) useShort(fld, wrkName, ga.doc);   // 3..4
-            else useByte(fld, wrkName, ga.doc);  // ..2
+        AccesMode access = notNullOf(fld.getAccess(), defaults.getAccess());
+        if (access != AccesMode.Number) {
+            numeric(fld, wrkName, ga.doc);
+        }
+        if (access != AccesMode.String) {
+            WordWidth ww = notNullOf(fld.getWordWidth(), defaults.getWordWidth());
+            boolean isNumeric = access == AccesMode.Number;
+            if (fld.getLength() > 19) useBigInt(fld, wrkName, ga.doc, isNumeric);
+            else if (fld.getLength() > 9 || ww ==WordWidth.W8) useLong(fld, wrkName, ga.doc, isNumeric);    // 10..19
+            else if (fld.getLength() > 4 || ww ==WordWidth.W4) useInt(fld, wrkName, ga.doc, isNumeric);     // 5..9
+            else if (fld.getLength() > 2 || ww ==WordWidth.W2) useShort(fld, wrkName, ga.doc, isNumeric);   // 3..4
+            else useByte(fld, wrkName, ga.doc, isNumeric);  // ..2
         }
     }
 
@@ -85,9 +87,13 @@ public class Num extends DelegateWriter implements MutableField<FieldNum> {
         printf("}%n");
     }
 
-    private void useByte(FieldNum fld, String wrkName, boolean doc) {
+    private void useByte(FieldNum fld, String wrkName, boolean doc, boolean isNumeric) {
         if (doc) docGetter(fld, "byte");
-        printf("public byte byte%s() {%n", wrkName);
+        if (isNumeric) {
+            printf("public byte get%s() {%n", wrkName);
+        } else {
+            printf("public byte byte%s() {%n", wrkName);
+        }
         printf(TEST_DIGIT_CHECK, pos.apply(fld.getOffset()), fld.getLength());
         printf("    return Byte.parseByte(getAbc(%s, %d), 10);%n", pos.apply(fld.getOffset()), fld.getLength());
         printf("}%n");
@@ -101,9 +107,13 @@ public class Num extends DelegateWriter implements MutableField<FieldNum> {
         setNum(fld, false);
     }
 
-    private void useShort(FieldNum fld, String wrkName, boolean doc) {
+    private void useShort(FieldNum fld, String wrkName, boolean doc, boolean isNumeric) {
         if (doc) docGetter(fld, "short");
-        printf("public short short%s() {%n", wrkName);
+        if (isNumeric) {
+            printf("public short get%s() {%n", wrkName);
+        } else {
+            printf("public short short%s() {%n", wrkName);
+        }
         printf(TEST_DIGIT_CHECK, pos.apply(fld.getOffset()), fld.getLength());
         printf("    return Short.parseShort(getAbc(%s, %d), 10);%n", pos.apply(fld.getOffset()), fld.getLength());
         printf("}%n");
@@ -112,9 +122,13 @@ public class Num extends DelegateWriter implements MutableField<FieldNum> {
         fmtNum(fld);
     }
 
-    private void useInt(FieldNum fld, String wrkName, boolean doc) {
+    private void useInt(FieldNum fld, String wrkName, boolean doc, boolean isNumeric) {
         if (doc) docGetter(fld, "integer");
-        printf("public int int%s() {%n", wrkName);
+        if (isNumeric) {
+            printf("public int get%s() {%n", wrkName);
+        } else {
+            printf("public int int%s() {%n", wrkName);
+        }
         printf(TEST_DIGIT_CHECK, pos.apply(fld.getOffset()), fld.getLength());
         printf("    return Integer.parseInt(getAbc(%s, %d), 10);%n", pos.apply(fld.getOffset()), fld.getLength());
         printf("}%n");
@@ -123,15 +137,34 @@ public class Num extends DelegateWriter implements MutableField<FieldNum> {
         fmtNum(fld);
     }
 
-    private void useLong(FieldNum fld, String wrkName, boolean doc) {
+    private void useLong(FieldNum fld, String wrkName, boolean doc, boolean isNumeric) {
         if (doc) docGetter(fld, "long");
-        printf("public long long%s() {%n", wrkName);
+        if (isNumeric) {
+            printf("public long get%s() {%n", wrkName);
+        } else {
+            printf("public long long%s() {%n", wrkName);
+        }
         printf(TEST_DIGIT_CHECK, pos.apply(fld.getOffset()), fld.getLength());
         printf("    return Long.parseLong(getAbc(%s, %d), 10);%n", pos.apply(fld.getOffset()), fld.getLength());
         printf("}%n");
         if (doc) docSetter(fld, "n long");
         printf("public void set%s(long n) {%n", wrkName);
         fmtNum(fld);
+    }
+    private void useBigInt(FieldNum fld, String wrkName, boolean doc, boolean isNumeric) {
+        if (doc) docGetter(fld, "BigInteger");
+        if (isNumeric) {
+            printf("public BigInteger get%s() {%n", wrkName);
+        } else {
+            printf("public BigInteger bigInteger%s() {%n", wrkName);
+        }
+        printf(TEST_DIGIT_CHECK, pos.apply(fld.getOffset()), fld.getLength());
+        printf("    return new BigInteger(getAbc(%s, %d));%n", pos.apply(fld.getOffset()), fld.getLength());
+        printf("}%n");
+        if (doc) docSetter(fld, "n BigInteger");
+        printf("public void set%s(BigInteger n) {%n", wrkName);
+        printf("    String s = lpad(n.toString(), %d, '0');%n", fld.getLength());
+        setNum(fld, false);
     }
 
     void docSetter(@NotNull FieldNum fld, String dsResult) {

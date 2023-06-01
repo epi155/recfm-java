@@ -37,7 +37,7 @@ public class DumpFactory {
                 lst.add(newPicture(CONSTANT, bias + field.getOffset(), field.getLength(), "V"));
             } else if (field instanceof NamedField) {
                 NamedField na = (NamedField) field;
-                if (na.isRedefines()) return;
+                if (na.isOverride()) return;
                 if (na instanceof SettableField) {
                     SettableField fs = (SettableField) na;
                     lst.add(newPicture(px + fs.getName(), bias + fs.getOffset(), fs.getLength(), fs.picture()));

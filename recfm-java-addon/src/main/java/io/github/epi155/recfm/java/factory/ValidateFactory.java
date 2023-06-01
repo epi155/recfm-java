@@ -33,12 +33,12 @@ public class ValidateFactory {
     }
 
     protected void validateGrp(@NotNull FieldGroup fld, int w, int bias, AtomicBoolean firstField) {
-        if (fld.isRedefines()) return;
+        if (fld.isOverride()) return;
         fld.forEachField(it -> validate(it, w, bias, firstField));
     }
 
     protected void validateOcc(FieldOccurs fld, int w, int bias, AtomicBoolean firstField) {
-        if (fld.isRedefines()) return;
+        if (fld.isOverride()) return;
         for (int k = 0, shift = 0; k < fld.getTimes(); k++, shift += fld.getLength()) {
             int backShift = shift;
             fld.forEachField(it -> validate(it, w, bias - backShift, firstField));
@@ -54,26 +54,26 @@ public class ValidateFactory {
     }
 
     protected void validateNum(FieldNum fld, int w, int bias, AtomicBoolean isFirst) {
-        if (fld.isRedefines()) return;
+        if (fld.isOverride()) return;
         delegateNum.validate(fld, w, bias, isFirst);
     }
     protected void validateNux(FieldNux fld, int w, int bias, AtomicBoolean isFirst) {
-        if (fld.isRedefines()) return;
+        if (fld.isOverride()) return;
         delegateNux.validate(fld, w, bias, isFirst);
     }
 
     protected void validateAbc(FieldAbc fld, int w, int bias, AtomicBoolean isFirst) {
-        if (fld.isRedefines()) return;
+        if (fld.isOverride()) return;
         delegateAbc.validate(fld, w, bias, isFirst);
     }
 
     protected void validateDom(FieldDomain fld, int w, int bias, AtomicBoolean isFirst) {
-        if (fld.isRedefines()) return;
+        if (fld.isOverride()) return;
         delegateDom.validate(fld, w, bias, isFirst);
     }
 
     protected void validateCus(FieldCustom fld, int w, int bias, AtomicBoolean isFirst) {
-        if (fld.isRedefines()) return;
+        if (fld.isOverride()) return;
         delegateCus.validate(fld, w, bias, isFirst);
     }
 

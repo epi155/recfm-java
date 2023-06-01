@@ -32,7 +32,7 @@ public class FieldGroup extends NamedField implements ParentFields, GrpModel {
         val res = new FieldGroup();
         res.fields = this.fields.stream().map(fld -> ((NakedField)fld).shiftCopy(plus)).collect(Collectors.toList());
         res.setName(getName());
-        res.setRedefines(isRedefines());
+        res.setOverride(isOverride());
         res.setLength(getLength());
         res.setOffset(getOffset() + plus);
         return res;

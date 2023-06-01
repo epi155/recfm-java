@@ -1,5 +1,6 @@
 package io.github.epi155.recfm.type;
 
+import io.github.epi155.recfm.api.FieldDefault;
 import io.github.epi155.recfm.api.FieldModel;
 import io.github.epi155.recfm.api.GenerateArgs;
 import io.github.epi155.recfm.api.TraitModel;
@@ -24,7 +25,7 @@ public class TraitDefine implements ParentFields, TraitModel {
 
     protected static final String DOT_JAVA = ".java";
     @Override
-    public void create(String namespace, GenerateArgs ga) {
+    public void create(String namespace, GenerateArgs ga, FieldDefault defaults) {
         if (getFields().isEmpty()) return;
         val base = getFields().get(0).getOffset();
 
@@ -42,7 +43,7 @@ public class TraitDefine implements ParentFields, TraitModel {
             File pkgFolder = new File(srcMainJava, namespace.replace('.', File.separatorChar));
             File clsFile = new File(pkgFolder, getName()+DOT_JAVA);
             try (PrintWriter pw = new PrintWriter(clsFile)) {
-                InterfaceFactory factory = InterfaceFactory.newInstance(pw, namespace, ga);
+                InterfaceFactory factory = InterfaceFactory.newInstance(pw, namespace, ga, defaults);
                 factory.writePackage();
                 factory.generateInterfaceCode(this);
             } catch (IOException e) {

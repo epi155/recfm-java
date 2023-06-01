@@ -24,7 +24,7 @@ public class FieldOccursTrait extends FieldGroupTrait implements OccTraitModel {
 
     @Override
     public void mark(@SuppressWarnings("rawtypes") Set[] b, int bias) {
-        if (isRedefines()) return;
+        if (isOverride()) return;
         for (int k = 0, shift = 0; k < times; k++, shift += getLength()) {
             int backShift = shift;
             forEachField(it -> ((NakedField)it).mark(b, bias - backShift));
@@ -37,7 +37,7 @@ public class FieldOccursTrait extends FieldGroupTrait implements OccTraitModel {
         res.times = this.times;
         res.setTypedef(getTypedef());
         res.setName(getName());
-        res.setRedefines(isRedefines());
+        res.setOverride(isOverride());
         res.setLength(getLength());
         res.setOffset(getOffset() + plus);
         return res;

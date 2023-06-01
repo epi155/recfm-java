@@ -51,7 +51,7 @@ public class FieldDomain extends SettableField implements SelfCheck, CheckAware,
         val res = new FieldDomain();
         res.items = this.items;
         res.setName(getName());
-        res.setRedefines(isRedefines());
+        res.setOverride(isOverride());
         res.setAudit(isAudit());
         res.setLength(getLength());
         res.setOffset(getOffset() + plus);

@@ -1,9 +1,6 @@
 package io.github.epi155.recfm.java.fields;
 
-import io.github.epi155.recfm.api.FieldDefault;
-import io.github.epi155.recfm.api.GenerateArgs;
-import io.github.epi155.recfm.api.InitializeNuxMode;
-import io.github.epi155.recfm.api.NormalizeNumMode;
+import io.github.epi155.recfm.api.*;
 import io.github.epi155.recfm.java.factory.CodeWriter;
 import io.github.epi155.recfm.java.factory.DelegateWriter;
 import io.github.epi155.recfm.java.rule.Action;
@@ -53,15 +50,36 @@ public class Nux extends DelegateWriter implements MutableField<FieldNux> {
 
     @Override
     public void access(FieldNux fld, String wrkName, @NotNull GenerateArgs ga) {
-        numeric(fld, wrkName, ga.doc);
-        if (fld.isNumericAccess()) {
-            if (fld.getLength() > 19)
-                throw new IllegalStateException("Field "+fld.getName()+" too large "+fld.getLength()+"-digits for numeric access");
-            else if (fld.getLength() > 9) useLong(fld, wrkName, ga.doc);    // 10..19
-            else if (fld.getLength() > 4 || ga.align == 4) useInt(fld, wrkName, ga.doc);     // 5..9
-            else if (fld.getLength() > 2 || ga.align == 2) useShort(fld, wrkName, ga.doc);   // 3..4
-            else useByte(fld, wrkName, ga.doc);  // ..2
+        AccesMode access = notNullOf(fld.getAccess(), defaults.getAccess());
+        if (access != AccesMode.Number) {
+            numeric(fld, wrkName, ga.doc);
         }
+        if (access != AccesMode.String) {
+            WordWidth ww = notNullOf(fld.getWordWidth(), defaults.getWordWidth());
+            boolean isNumeric = access == AccesMode.Number;
+            if (fld.getLength() > 19) useBigInt(fld, wrkName, ga.doc, isNumeric);
+            else if (fld.getLength() > 9 || ww ==WordWidth.W8) useLong(fld, wrkName, ga.doc, isNumeric);    // 10..19
+            else if (fld.getLength() > 4 || ww ==WordWidth.W4) useInt(fld, wrkName, ga.doc, isNumeric);     // 5..9
+            else if (fld.getLength() > 2 || ww ==WordWidth.W2) useShort(fld, wrkName, ga.doc, isNumeric);   // 3..4
+            else useByte(fld, wrkName, ga.doc, isNumeric);  // ..2
+        }
+    }
+
+    private void useBigInt(FieldNux fld, String wrkName, boolean doc, boolean isNumeric) {
+        if (doc) docGetter(fld, "BigInteger");
+        if (isNumeric) {
+            printf("public BigInteger get%s() {%n", wrkName);
+        } else {
+            printf("public BigInteger bigInteger%s() {%n", wrkName);
+        }
+        printf(TEST_DIGIT_CHECK, pos.apply(fld.getOffset()), fld.getLength());
+        printf(LET_S_ABC_NULL, pos.apply(fld.getOffset()), fld.getLength());
+        printf("    return s==null ? null : new BigInteger(s);%n");
+        printf("}%n");
+        if (doc) docSetter(fld, "n BigInteger");
+        printf("public void set%s(BigInteger n) {%n", wrkName);
+        printf("    String s = n==null ? null : lpad(n.toString(), %d, '0');%n", fld.getLength());
+        setNum(fld, false);
     }
 
     private void numeric(FieldNux fld, String wrkName, boolean doc) {
@@ -94,9 +112,13 @@ public class Nux extends DelegateWriter implements MutableField<FieldNux> {
         printf("}%n");
     }
 
-    private void useByte(FieldNux fld, String wrkName, boolean doc) {
+    private void useByte(FieldNux fld, String wrkName, boolean doc, boolean isNumeric) {
         if (doc) docGetter(fld, "Byte");
-        printf("public Byte byte%s() {%n", wrkName);
+        if (isNumeric) {
+            printf("public Byte get%s() {%n", wrkName);
+        } else {
+            printf("public Byte byte%s() {%n", wrkName);
+        }
         printf(TEST_DIGIT_CHECK, pos.apply(fld.getOffset()), fld.getLength());
         printf(LET_S_ABC_NULL, pos.apply(fld.getOffset()), fld.getLength());
         printf("    return s==null ? null : Byte.parseByte(s);%n");
@@ -111,9 +133,13 @@ public class Nux extends DelegateWriter implements MutableField<FieldNux> {
         setNum(fld, false);
     }
 
-    private void useShort(FieldNux fld, String wrkName, boolean doc) {
+    private void useShort(FieldNux fld, String wrkName, boolean doc, boolean isNumeric) {
         if (doc) docGetter(fld, "Short");
-        printf("public Short short%s() {%n", wrkName);
+        if (isNumeric) {
+            printf("public Short get%s() {%n", wrkName);
+        } else {
+            printf("public Short short%s() {%n", wrkName);
+        }
         printf(TEST_DIGIT_CHECK, pos.apply(fld.getOffset()), fld.getLength());
         printf(LET_S_ABC_NULL, pos.apply(fld.getOffset()), fld.getLength());
         printf("    return s==null ? null : Short.parseShort(s);%n");
@@ -123,9 +149,13 @@ public class Nux extends DelegateWriter implements MutableField<FieldNux> {
         fmtNum(fld);
     }
 
-    private void useInt(FieldNux fld, String wrkName, boolean doc) {
+    private void useInt(FieldNux fld, String wrkName, boolean doc, boolean isNumeric) {
         if (doc) docGetter(fld, "Integer");
-        printf("public Integer int%s() {%n", wrkName);
+        if (isNumeric) {
+            printf("public Integer get%s() {%n", wrkName);
+        } else {
+            printf("public Integer int%s() {%n", wrkName);
+        }
         printf(TEST_DIGIT_CHECK, pos.apply(fld.getOffset()), fld.getLength());
         printf(LET_S_ABC_NULL, pos.apply(fld.getOffset()), fld.getLength());
         printf("    return s==null ? null : Integer.parseInt(s);%n");
@@ -135,9 +165,13 @@ public class Nux extends DelegateWriter implements MutableField<FieldNux> {
         fmtNum(fld);
     }
 
-    private void useLong(FieldNux fld, String wrkName, boolean doc) {
+    private void useLong(FieldNux fld, String wrkName, boolean doc, boolean isNumeric) {
         if (doc) docGetter(fld, "Long");
-        printf("public Long long%s() {%n", wrkName);
+        if (isNumeric) {
+            printf("public Long get%s() {%n", wrkName);
+        } else {
+            printf("public Long long%s() {%n", wrkName);
+        }
         printf(TEST_DIGIT_CHECK, pos.apply(fld.getOffset()), fld.getLength());
         printf(LET_S_ABC_NULL, pos.apply(fld.getOffset()), fld.getLength());
         printf("    return s==null ? null : Long.parseLong(s);%n");

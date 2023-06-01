@@ -36,23 +36,23 @@ public class PrepareFactory {
     }
 
     private void prepareGrp(@NotNull FieldGroup fld, int bias) {
-        if (fld.isRedefines()) return;
+        if (fld.isOverride()) return;
         fld.forEachField(it -> prepare(it, bias));
     }
     private void prepareGrpTrt(@NotNull FieldGroupTrait fld, int bias) {
-        if (fld.isRedefines()) return;
+        if (fld.isOverride()) return;
         fld.forEachField(it -> prepare(it, bias));
     }
 
     private void prepareOcc(@NotNull FieldOccurs fld, int bias) {
-        if (fld.isRedefines()) return;
+        if (fld.isOverride()) return;
         for (int k = 0, shift = 0; k < fld.getTimes(); k++, shift += fld.getLength()) {
             int backShift = shift;
             fld.forEachField(it -> prepare(it, bias - backShift));
         }
     }
     private void prepareOccTrt(@NotNull FieldOccursTrait fld, int bias) {
-        if (fld.isRedefines()) return;
+        if (fld.isOverride()) return;
         for (int k = 0, shift = 0; k < fld.getTimes(); k++, shift += fld.getLength()) {
             int backShift = shift;
             fld.forEachField(it -> prepare(it, bias - backShift));

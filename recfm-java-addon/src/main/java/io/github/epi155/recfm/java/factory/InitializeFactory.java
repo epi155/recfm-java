@@ -30,14 +30,14 @@ public class InitializeFactory {
     }
 
     protected void initializeOcc(FieldOccurs fld, int bias) {
-        if (fld.isRedefines()) return;
+        if (fld.isOverride()) return;
         for (int k = 0, shift = 0; k < fld.getTimes(); k++, shift += fld.getLength()) {
             int backShift = shift;
             fld.forEachField(it -> initialize(it, bias - backShift));
         }
     }
     protected void initializeOccTrt(FieldOccursTrait fld, int bias) {
-        if (fld.isRedefines()) return;
+        if (fld.isOverride()) return;
         for (int k = 0, shift = 0; k < fld.getTimes(); k++, shift += fld.getLength()) {
             int backShift = shift;
             fld.forEachField(it -> initialize(it, bias - backShift));
@@ -45,21 +45,21 @@ public class InitializeFactory {
     }
 
     protected void initializeDom(FieldDomain fld, int bias) {
-        if (fld.isRedefines()) return;
+        if (fld.isOverride()) return;
         delegateDom.initialize(fld, bias);
     }
 
     protected void initializeCus(FieldCustom fld, int bias) {
-        if (fld.isRedefines()) return;
+        if (fld.isOverride()) return;
         delegateCus.initialize(fld, bias);
     }
 
     protected void initializeGrp(FieldGroup fld, int bias) {
-        if (fld.isRedefines()) return;
+        if (fld.isOverride()) return;
         fld.forEachField(it -> initialize(it, bias));
     }
     protected void initializeGrpTrt(FieldGroupTrait fld, int bias) {
-        if (fld.isRedefines()) return;
+        if (fld.isOverride()) return;
         fld.forEachField(it -> initialize(it, bias));
     }
 
@@ -72,16 +72,16 @@ public class InitializeFactory {
     }
 
     protected void initializeNum(FieldNum fld, int bias) {
-        if (fld.isRedefines()) return;
+        if (fld.isOverride()) return;
         delegateNum.initialize(fld, bias);
     }
     protected void initializeNux(FieldNux fld, int bias) {
-        if (fld.isRedefines()) return;
+        if (fld.isOverride()) return;
         delegateNux.initialize(fld, bias);
     }
 
     protected void initializeAbc(FieldAbc fld, int bias) {
-        if (fld.isRedefines()) return;
+        if (fld.isOverride()) return;
         delegateAbc.initialize(fld, bias);
     }
 

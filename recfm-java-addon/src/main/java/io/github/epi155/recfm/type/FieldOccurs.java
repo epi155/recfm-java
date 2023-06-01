@@ -25,7 +25,7 @@ public class FieldOccurs extends FieldGroup implements OccModel {
 
     @Override
     public void mark(@SuppressWarnings("rawtypes") Set[] b, int bias) {
-        if (isRedefines()) return;
+        if (isOverride()) return;
         for (int k = 0, shift = 0; k < times; k++, shift += getLength()) {
             int backShift = shift;
             forEachField(it -> ((NakedField)it).mark(b, bias - backShift));
@@ -38,7 +38,7 @@ public class FieldOccurs extends FieldGroup implements OccModel {
         res.times = this.times;
         res.setFields(getFields().stream().map(fld -> ((NakedField)fld).shiftCopy(plus)).collect(Collectors.toList()));
         res.setName(getName());
-        res.setRedefines(isRedefines());
+        res.setOverride(isOverride());
         res.setLength(getLength());
         res.setOffset(getOffset() + plus);
         return res;

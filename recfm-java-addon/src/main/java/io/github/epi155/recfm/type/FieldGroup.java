@@ -2,6 +2,7 @@ package io.github.epi155.recfm.type;
 
 import io.github.epi155.recfm.api.FieldModel;
 import io.github.epi155.recfm.api.GrpModel;
+import io.github.epi155.recfm.java.fields.GroupAware;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +15,7 @@ import java.util.stream.Collectors;
 @Data
 @Slf4j
 @EqualsAndHashCode(callSuper = true)
-public class FieldGroup extends NamedField implements ParentFields, GrpModel {
+public class FieldGroup extends NamedField implements ParentFields, GrpModel, GroupAware {
     private List<FieldModel> fields = new ArrayList<>();
 
     @Override

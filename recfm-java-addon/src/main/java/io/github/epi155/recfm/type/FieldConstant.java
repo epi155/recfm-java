@@ -9,15 +9,13 @@ import lombok.val;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Slf4j
-public class FieldConstant extends NakedField implements SelfCheck, CheckAware, ValModel {
+public class FieldConstant extends NakedField implements SelfCheck, ValModel {
     private String value;
-    private boolean audit;
 
     @Override
     protected FieldConstant shiftCopy(int plus) {
         val res = new FieldConstant();
         res.value = this.value;
-        res.audit = this.audit;
         res.setLength(getLength());
         res.setOffset(getOffset() + plus);
         return res;

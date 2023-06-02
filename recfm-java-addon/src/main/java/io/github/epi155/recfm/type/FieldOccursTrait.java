@@ -1,6 +1,7 @@
 package io.github.epi155.recfm.type;
 
 import io.github.epi155.recfm.api.OccTraitModel;
+import io.github.epi155.recfm.java.fields.OccursAware;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +12,7 @@ import java.util.Set;
 @Data
 @Slf4j
 @EqualsAndHashCode(callSuper = true)
-public class FieldOccursTrait extends FieldGroupTrait implements OccTraitModel {
+public class FieldOccursTrait extends FieldGroupTrait implements OccTraitModel, OccursAware {
     private int times;
 
     @Override

@@ -328,7 +328,6 @@ Tag for alphanumeric field is `Abc`, the possible attributes are:
 | [length](#fld.length)    | len |   int   | **required**                       |
 | [name](#fld.name)        |     | String  | **required**                       |
 | [redefines](#fld.redef)  | red | boolean | default `false`                    |
-| [audit](#fld.audit)      |     | boolean | default `false`                    |
 | [onOverflow](#fld.ovfl)  | ovf |  [^1]   | default `Trunc`                    |
 | [onUnderflow](#fld.unfl) | unf |  [^2]   | default `Pad`                      |
 | [padChar](#fld.pchr)     | pad |  char   | default value `' '`                |
@@ -379,8 +378,6 @@ not be considered in the overlay checks
       - !Num { name: day     , at: 9, len: 2, red: true }
 ~~~
 
-To introduce the <a name='fld.audit'>audit</a> attribute see section [5.4](#54).
-
 <a name='fld.ovfl'>onOverflow</a> indicates what to do if you try to set a value whose length is greater than the
 defined one. It is possible to set `Trunc` and `Error`, in the first two cases the value is truncated, respectively to
 the left or to the right, in the last case an exception is thrown.
@@ -391,7 +388,7 @@ the right, in the last case an exception is thrown.
 
 <a name='fld.pchr'>padchar</a> indicates the character to use for padding, in case of underflow.
 
-<a name='fld.chk'>check</a> indicates which checks to perform in the *validate* or *audit* phase. The following values
+<a name='fld.chk'>check</a> indicates which checks to perform in the *validate* phase. The following values
 are available:
 
 `None`
@@ -417,7 +414,6 @@ is necessarily 0, the control is necessarily that the characters are numeric, th
 | [length](#fld.length)     | len |   int   | **required**                       |
 | [name](#fld.name)         |     | String  | **required**                       |
 | [redefines](#fld.redef)   | red | boolean | default `false`                    |
-| [audit](#fld.audit)       |     | boolean | default `false`                    |
 | [onOverflow](#fld.ovfl)   | ovf |  [^1]   | default `defaults.num.onOverflow`  |
 | [onUnderflow](#fld.unfl)  | unf |  [^2]   | default `defaults.num.onUnderflow` |
 | [normalize](#fld.norm)    |     |  [^5]   | default `defaults.num.normalize`   |
@@ -457,7 +453,6 @@ Tag for custom field is `Cus`, a custom field is an extension of an alphanumeric
 | [length](#fld.length)    | len |   int   | **required**                       |
 | [name](#fld.name)        |     | String  | **required**                       |
 | [redefines](#fld.redef)  | red | boolean | default `false`                    |
-| [audit](#fld.audit)      |     | boolean | default `false`                    |
 | [onOverflow](#fld.ovfl)  | ovf |  [^1]   | default `defaults.cus.onOverflow`  |
 | [onUnderflow](#fld.unfl) | unf |  [^2]   | default `defaults.cus.onUnderflow` |
 | [normalize](#fld.norm)   |     |  [^3]   | default `defaults.cus.normalize`   |
@@ -473,7 +468,7 @@ Tag for custom field is `Cus`, a custom field is an extension of an alphanumeric
 <a name='fld.ichr'>initChar</a> indicates the character to use to initialize the field when the empty constructor is
 used.
 
-<a name='fld.ichk'>check</a> indicates which checks to perform in the *validate* or *audit* phase. The following values
+<a name='fld.ichk'>check</a> indicates which checks to perform in the *validate* phase. The following values
 are available:
 
 `None` .. `Valid`
@@ -501,7 +496,6 @@ Tag for domain field is `Dom`, a domain field can only take a limited number of 
 | [length](#fld.length)   | len |   int    | **required**    |
 | [name](#fld.name)       |     |  String  | **required**    |
 | [redefines](#fld.redef) | red | boolean  | default `false` |
-| [audit](#fld.audit)     |     | boolean  | default `false` |
 | [items](#fld.items)     |     | String[] | **required**    |
 
 <a name='fld.items'>items</a> indicates the list of possible values that the field can assume. All values supplied must have the expected length for the field. The first value supplied will be used to initialize the field.
@@ -541,7 +535,6 @@ verify that the present value coincides with the set one, the possible attribute
 | [offset](#fld.offset) | at  |   int   | **required**    |
 | [length](#fld.length) | len |   int   | **required**    |
 | [value](#fld.val)     | val | String  | **required**    |
-| [audit](#fld.audit)   |     | boolean | default `false` |
 
 <a name='fld.val'>value</a> indicates the value with which to initialize the area
 
@@ -826,11 +819,10 @@ Each generated class defines the validation methods
 
 ~~~java
     boolean validateFails(FieldValidateHandler handler);
-    boolean auditFails(FieldValidateHandler handler);
 ~~~
 
-The *validateFails* method performs checks on all fields, the *auditFails* method only on the fields marked with the `audit`
-attribute. If a field is redefined it is not considered in the validation checks.
+The *validateFails* method performs checks on all fields.
+If a field is redefined it is not considered in the validation checks.
 
 The `FieldValidateHandler` interface is simply
 

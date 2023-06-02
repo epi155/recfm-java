@@ -97,12 +97,12 @@ class TestFields {
         Assertions.assertDoesNotThrow(() -> foo.setHackDom1("AUD"), "test value falsified (redefines)");
         Assertions.assertThrows(NotDomainException.class, () -> foo.getDomain01(), "test get failure");
 
-        foo.validateFails(it -> {
-            System.out.printf("Error on field %s at offset %d, length %d, code %s%n",
-                it.name(), it.offset(), it.length(), it.code().name());
-            System.out.printf("Value: /%s/%n", it.value());
-            System.out.println(it.message());
-        });
+            foo.validateFails(it -> {
+                System.out.printf("Error on field %s at offset %d, length %d, code %s%n",
+                        it.name(), it.offset(), it.length(), it.code().name());
+                System.out.printf("Value: /%s/%n", it.value());
+                System.out.println(it.message());
+            });
 
         foo.setDomain01(null);
         System.out.println(foo.getDomain01());

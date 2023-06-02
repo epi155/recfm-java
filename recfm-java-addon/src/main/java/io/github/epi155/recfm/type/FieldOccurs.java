@@ -1,6 +1,7 @@
 package io.github.epi155.recfm.type;
 
 import io.github.epi155.recfm.api.OccModel;
+import io.github.epi155.recfm.java.fields.OccursAware;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,7 @@ import java.util.stream.Collectors;
 @Data
 @Slf4j
 @EqualsAndHashCode(callSuper = true)
-public class FieldOccurs extends FieldGroup implements OccModel {
+public class FieldOccurs extends FieldGroup implements OccModel, OccursAware {
     private int times;
 
     @Override

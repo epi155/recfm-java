@@ -38,12 +38,12 @@ public class Custom extends DelegateWriter implements MutableField<FieldCustom>,
     }
 
     @Override
-    public void validate(@NotNull FieldCustom fld, int w, int bias, AtomicBoolean isFirst) {
+    public void validate(@NotNull FieldCustom fld, int w, @NotNull IntFunction<String> bias, @NotNull AtomicBoolean isFirst) {
         String prefix = prefixOf(isFirst.get());
         if (fld.getRegex() != null) {
-            printf("%s checkRegex(\"%s\"%s, %5d, %4d, handler, PATTERN_AT%dPLUS%d);%n", prefix,
+            printf("%s checkRegex(\"%s\"%s, %-5s, %4d, handler, PATTERN_AT%dPLUS%d);%n", prefix,
                     fld.getName(), fld.pad(w),
-                    fld.getOffset() - bias, fld.getLength(),
+                    bias.apply(fld.getOffset()), fld.getLength(),
                     fld.getOffset(), fld.getLength()
             );
             isFirst.set(false);
@@ -53,23 +53,23 @@ public class Custom extends DelegateWriter implements MutableField<FieldCustom>,
             case None:
                 break;
             case Ascii:
-                printf("%s checkAscii(\"%s\"%s, %5d, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), fld.getOffset() - bias, fld.getLength());
+                printf("%s checkAscii(\"%s\"%s, %-5s, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), bias.apply(fld.getOffset()), fld.getLength());
                 isFirst.set(false);
                 break;
             case Latin1:
-                printf("%s checkLatin(\"%s\"%s, %5d, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), fld.getOffset() - bias, fld.getLength());
+                printf("%s checkLatin(\"%s\"%s, %-5s, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), bias.apply(fld.getOffset()), fld.getLength());
                 isFirst.set(false);
                 break;
             case Valid:
-                printf("%s checkValid(\"%s\"%s, %5d, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), fld.getOffset() - bias, fld.getLength());
+                printf("%s checkValid(\"%s\"%s, %-5s, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), bias.apply(fld.getOffset()), fld.getLength());
                 isFirst.set(false);
                 break;
             case Digit:
-                printf("%s checkDigit(\"%s\"%s, %5d, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), fld.getOffset() - bias, fld.getLength());
+                printf("%s checkDigit(\"%s\"%s, %-5s, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), bias.apply(fld.getOffset()), fld.getLength());
                 isFirst.set(false);
                 break;
             case DigitOrBlank:
-                printf("%s checkDigitBlank(\"%s\"%s, %5d, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), fld.getOffset() - bias, fld.getLength());
+                printf("%s checkDigitBlank(\"%s\"%s, %-5s, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), bias.apply(fld.getOffset()), fld.getLength());
                 isFirst.set(false);
                 break;
         }

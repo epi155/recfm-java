@@ -516,14 +516,6 @@ abstract class FixEngine {
     public abstract boolean validateFails(FieldValidateHandler handler);
 
     /**
-     * Validate fields marked with <i>audit</i>: <b>true</b>
-     *
-     * @param handler error handler
-     * @return <b>true</b> if there is an error, <b>false</b> if there are no errors
-     */
-    public abstract boolean auditFails(FieldValidateHandler handler);
-
-    /**
      * Check that the record field is of digits only
      *
      * @param name    field name

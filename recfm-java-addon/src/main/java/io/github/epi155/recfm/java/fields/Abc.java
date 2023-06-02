@@ -35,21 +35,21 @@ public class Abc extends DelegateWriter implements MutableField<FieldAbc>, JavaD
         printf("    fill(%5d, %4d, ' ');%n", fld.getOffset() - bias, fld.getLength());
     }
 
-    public void validate(@NotNull FieldAbc fld, int w, int bias, AtomicBoolean isFirst) {
+    public void validate(@NotNull FieldAbc fld, int w, @NotNull IntFunction<String> bias, @NotNull AtomicBoolean isFirst) {
         String prefix = prefixOf(isFirst.get());
         switch (notNullOf(fld.getCheck(), defaults.getCheck())) {
             case None:
                 break;
             case Ascii:
-                printf("%s checkAscii(\"%s\"%s, %5d, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), fld.getOffset() - bias, fld.getLength());
+                printf("%s checkAscii(\"%s\"%s, %-5s, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), bias.apply(fld.getOffset()), fld.getLength());
                 isFirst.set(false);
                 break;
             case Latin1:
-                printf("%s checkLatin(\"%s\"%s, %5d, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), fld.getOffset() - bias, fld.getLength());
+                printf("%s checkLatin(\"%s\"%s, %-5s, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), bias.apply(fld.getOffset()), fld.getLength());
                 isFirst.set(false);
                 break;
             case Valid:
-                printf("%s checkValid(\"%s\"%s, %5d, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), fld.getOffset() - bias, fld.getLength());
+                printf("%s checkValid(\"%s\"%s, %-5s, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), bias.apply(fld.getOffset()), fld.getLength());
                 isFirst.set(false);
                 break;
         }

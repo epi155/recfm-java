@@ -41,11 +41,11 @@ public class Domain extends DelegateWriter implements MutableField<FieldDomain>,
                 fld.getOffset() - bias, fld.getLength(), fld.getOffset(), fld.getLength());
     }
 
-    public void validate(@NotNull FieldDomain fld, int w, int bias, AtomicBoolean isFirst) {
+    public void validate(@NotNull FieldDomain fld, int w, @NotNull IntFunction<String> bias, @NotNull AtomicBoolean isFirst) {
         String prefix = prefixOf(isFirst.getAndSet(false));
-        printf("%s checkArray(\"%s\"%s, %5d, %4d, handler, DOMAIN_AT%dPLUS%d);%n", prefix,
+        printf("%s checkArray(\"%s\"%s, %-5s, %4d, handler, DOMAIN_AT%dPLUS%d);%n", prefix,
                 fld.getName(), fld.pad(w),
-                fld.getOffset() - bias, fld.getLength(),
+                bias.apply(fld.getOffset()), fld.getLength(),
                 fld.getOffset(), fld.getLength()
         );
     }

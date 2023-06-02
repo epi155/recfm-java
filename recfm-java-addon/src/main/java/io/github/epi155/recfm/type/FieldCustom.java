@@ -60,7 +60,6 @@ public class FieldCustom extends FloatingField implements SelfCheck, CusModel {
         res.setOnUnderflow(getOnUnderflow());
         res.setName(getName());
         res.setOverride(isOverride());
-        res.setAudit(isAudit());
         res.setLength(getLength());
         res.setOffset(getOffset() + plus);
         return res;

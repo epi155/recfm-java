@@ -27,7 +27,8 @@ import static io.github.epi155.recfm.util.Tools.notNullOf;
 
 public class ClassFactory extends CodeHelper {
     private static final IntFunction<String> BASE_ONE = n -> String.format("%d", n - 1);
-    private static final String PUBLIC_CLASS_X_IMPLMENTS_Y = "public class %s implements %s {%n";
+    private static final IntFunction<String> SHIFT_IT = n -> String.format("%d+shift", n - 1);
+    private static final String PUBLIC_CLASS_X_IMPLMENTS_Y = "public class %s implements Validable, %s {%n";
     private final FieldDefault defaults;
     private final Deque<String> trace = new LinkedList<>();
 
@@ -66,7 +67,7 @@ public class ClassFactory extends CodeHelper {
         writeCtorVoid(clazz.getName());
         writeCtorParm(clazz);
         writeInitializer(clazz);
-        writeValidator(clazz);
+        writeValidator(clazz, BASE_ONE);
         clazz.forEachField(it -> {
             if (it instanceof SettableField) access.createMethods((SettableField) it, ga);
         });
@@ -97,12 +98,15 @@ public class ClassFactory extends CodeHelper {
         AccessFactory access;
         if (fld instanceof FieldOccurs) {
             writeBeginClassOccurs((FieldOccurs) fld);
-            access = AccessFactory.getInstance(this, defaults, n -> String.format("%d+shift", n - 1));
+            pushPlusIndent(4);
+            writeValidator(fld, SHIFT_IT);
+            access = AccessFactory.getInstance(this, defaults, SHIFT_IT);
         } else {
             writeBeginClassGroup(fld);
+            pushPlusIndent(4);
+            writeValidator(fld, pos);
             access = AccessFactory.getInstance(this, defaults, pos);
         }
-        pushPlusIndent(4);
         fld.forEachField(it -> {
             if (it instanceof SelfCheck) ((SelfCheck) it).selfCheck();
             if (it instanceof FieldGroup) generateGroupCode((FieldGroup) it, pos);
@@ -117,12 +121,15 @@ public class ClassFactory extends CodeHelper {
         AccessFactory access;
         if (trait instanceof FieldOccursTrait) {
             writeBeginClassOccursTrait((FieldOccursTrait) trait);
-            access = AccessFactory.getInstance(this, defaults, n -> String.format("%d+shift", n - 1));
+            pushPlusIndent(4);
+            writeValidator(trait, SHIFT_IT);
+            access = AccessFactory.getInstance(this, defaults, SHIFT_IT);
         } else {
             writeBeginClassGroupTrait(trait);
+            pushPlusIndent(4);
+            writeValidator(trait, pos);
             access = AccessFactory.getInstance(this, defaults, pos);
         }
-        pushPlusIndent(4);
         trace.addLast(trait.getTypedef().getName());
 
         trait.forEachField(fld -> {
@@ -158,16 +165,16 @@ public class ClassFactory extends CodeHelper {
 
         if (embs.isEmpty()) {
             if (capName.equals(traitName)) {
-                printf("public class %s implements %s.%s {%n", capName, wrtPackage, traitName);
+                printf("public class %s implements Validable, %s.%s {%n", capName, wrtPackage, traitName);
             } else {
                 printf(PUBLIC_CLASS_X_IMPLMENTS_Y, capName, traitName);
             }
         } else {
             val traitList = String.join(", ", embs);
             if (capName.equals(traitName)) {
-                printf("public class %s implements %s.%s, %s {%n", capName, wrtPackage, traitName, traitList);
+                printf("public class %s implements Validable, %s.%s, %s {%n", capName, wrtPackage, traitName, traitList);
             } else {
-                printf("public class %s implements %s, %s {%n", capName, traitName, traitList);
+                printf("public class %s implements Validable, %s, %s {%n", capName, traitName, traitList);
             }
         }
 
@@ -195,10 +202,10 @@ public class ClassFactory extends CodeHelper {
                 .collect(Collectors.toList());
         if (embs.isEmpty()) {
             if (trace.isEmpty()) {
-                printf("public class %s {%n", capName);
+                printf("public class %s implements Validable {%n", capName);
             } else {
                 String trait = String.join(".", trace);
-                printf("public class %1$s implements %2$s.%1$s {%n", capName, trait);
+                printf("public class %1$s implements Validable, %2$s.%1$s {%n", capName, trait);
             }
         } else {
             String traitList = String.join(", ", embs);
@@ -206,7 +213,7 @@ public class ClassFactory extends CodeHelper {
                 printf(PUBLIC_CLASS_X_IMPLMENTS_Y, capName, traitList);
             } else {
                 String trait = String.join(".", trace);
-                printf("public class %1$s implements %2$s.%1$s, %3$s {%n", capName, trait, traitList);
+                printf("public class %1$s implements Validable, %2$s.%1$s, %3$s {%n", capName, trait, traitList);
             }
         }
 
@@ -237,10 +244,10 @@ public class ClassFactory extends CodeHelper {
                 .collect(Collectors.toList());
         if (embs.isEmpty()) {
             if (trace.isEmpty()) {
-                printf("public class %s {%n", capName);
+                printf("public class %s implements Validable {%n", capName);
             } else {
                 String trait = String.join(".", trace);
-                printf("public class %1$s implements %2$s.%1$s {%n", capName, trait);
+                printf("public class %1$s implements Validable, %2$s.%1$s {%n", capName, trait);
             }
         } else {
             String traitList = String.join(", ", embs);
@@ -248,7 +255,7 @@ public class ClassFactory extends CodeHelper {
                 printf(PUBLIC_CLASS_X_IMPLMENTS_Y, capName, traitList);
             } else {
                 String trait = String.join(".", trace);
-                printf("public class %1$s implements %2$s.%1$s, %3$s {%n", capName, trait, traitList);
+                printf("public class %1$s implements Validable, %2$s.%1$s, %3$s {%n", capName, trait, traitList);
             }
         }
     }
@@ -273,16 +280,16 @@ public class ClassFactory extends CodeHelper {
 
         if (embs.isEmpty()) {
             if (capName.equals(traitName)) {
-                printf("public class %s implements %s.%s {%n", capName, wrtPackage, traitName);
+                printf("public class %s implements Validable, %s.%s {%n", capName, wrtPackage, traitName);
             } else {
                 printf(PUBLIC_CLASS_X_IMPLMENTS_Y, capName, traitName);
             }
         } else {
             String traitList = String.join(", ", embs);
             if (capName.equals(traitName)) {
-                printf("public class %s implements %s.%s,  {%n", capName, wrtPackage, traitName, traitList);
+                printf("public class %s implements Validable, %s.%s,  {%n", capName, wrtPackage, traitName, traitList);
             } else {
-                printf("public class %s implements %s, %s {%n", capName, traitName, traitList);
+                printf("public class %s implements Validable, %s, %s {%n", capName, traitName, traitList);
             }
         }
     }
@@ -326,29 +333,14 @@ public class ClassFactory extends CodeHelper {
         struct.forEachField(it -> initializer.initialize(it, 1));
         closeBrace();
     }
-    private void writeValidator(@NotNull ClassDefine struct) {
+    private void writeValidator(@NotNull ParentFields struct, IntFunction<String> pos) {
         int padWidth = struct.evalPadWidth(6);
         val validator = ValidateFactory.getInstance(this, defaults);
         printf(OVERRIDE_METHOD);
         printf("public boolean validateFails(FieldValidateHandler handler) {%n");
         AtomicBoolean firstCheck = new AtomicBoolean(true);
-        struct.forEachField(fld -> validator.validate(fld, padWidth, 1, firstCheck));
+        struct.forEachField(fld -> validator.validate(fld, padWidth, pos, firstCheck));
         if (firstCheck.get()) {
-            printf("    return false;%n");
-        } else {
-            printf("    return error;%n");
-        }
-        closeBrace();
-
-        printf(OVERRIDE_METHOD);
-        printf("public boolean auditFails(FieldValidateHandler handler) {%n");
-        AtomicBoolean firstAudit = new AtomicBoolean(true);
-        struct.forEachField(fld -> {
-            if (fld instanceof CheckAware && ((CheckAware) fld).isAudit()) {
-                validator.validate(fld, padWidth, 1, firstAudit);
-            }
-        });
-        if (firstAudit.get()) {
             printf("    return false;%n");
         } else {
             printf("    return error;%n");

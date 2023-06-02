@@ -39,7 +39,6 @@ public class FieldAbc extends FloatingField implements AbcModel {
         res.setOnUnderflow(getOnUnderflow());
         res.setName(getName());
         res.setOverride(isOverride());
-        res.setAudit(isAudit());
         res.setLength(getLength());
         res.setOffset(getOffset() + plus);
         return res;

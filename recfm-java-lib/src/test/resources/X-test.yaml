@@ -123,3 +123,13 @@ packages:
           - !Abc { name: xblu, at:  9, len: 4, ovr: true }
           - !Abc { name: xyel, at: 13, len: 4, ovr: yes }
           - !Abc { name: xcya, at: 17, len: 4, ovr: true }
+
+      - name: Foo312
+        length: 50
+        doc: No
+        fields:
+          - !Abc { name: cognome    , at:   1, len:    25 }
+          - !Abc { name: nome       , at:  26, len:    20 }
+          - !Abc { name: stCivile   , at:  46, len:     1 }
+          - !Abc { name: nazionalita, at:  47, len:     3 }
+          - !Abc { name: sesso      , at:  50, len:     1 }

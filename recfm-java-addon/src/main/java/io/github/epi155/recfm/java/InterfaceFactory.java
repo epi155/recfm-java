@@ -23,6 +23,7 @@ public class InterfaceFactory extends CodeHelper {
     private static final String JAVADOC_OPEN = "/**%n";
     private static final String JAVADOC_CLOSE = " */%n";
     private final FieldDefault defaults;
+    private boolean doc;
 
     public InterfaceFactory(PrintWriter pw, String wrtPackage, GenerateArgs ga, FieldDefault defaults) {
         super(pw, wrtPackage, ga);
@@ -34,7 +35,8 @@ public class InterfaceFactory extends CodeHelper {
     }
 
     public void generateInterfaceCode(TraitDefine trait) {
-        if (ga.doc) {
+        this.doc = notNullOf(trait.getDoc(), defaults.getCls().isDoc());
+        if (doc) {
             println("/**");
             traitDoc(trait);
             println(" */");
@@ -73,8 +75,7 @@ public class InterfaceFactory extends CodeHelper {
     private void writeBeginClassOccurs(FieldOccurs occurs) {
         String capName = Tools.capitalize(occurs.getName());
         printf("%s %s(int k);%n", capName, occurs.getName());
-        if (ga.doc)
-            javadocGroupDef(occurs);
+        if (doc) javadocGroupDef(occurs);
         printf("interface %s {%n", capName);
     }
 
@@ -82,8 +83,7 @@ public class InterfaceFactory extends CodeHelper {
         val name = group.getName();
         String capName = Tools.capitalize(name);
         printf("%s %s();%n", capName, name);
-        if (ga.doc)
-            javadocGroupDef(group);
+        if (doc) javadocGroupDef(group);
         printf("interface %s {%n", capName);
     }
 
@@ -95,7 +95,7 @@ public class InterfaceFactory extends CodeHelper {
 
     private void createMethodsGroupProxy(FieldGroupTrait fld) {
         val clsName = fld.getTypedef().getName();
-        if (ga.doc) docProxyGetter(fld);
+        if (doc) docProxyGetter(fld);
         printf("%s %s();%n", clsName, fld.getName());
     }
 
@@ -127,9 +127,9 @@ public class InterfaceFactory extends CodeHelper {
 
     private void createMethodsAbc(FieldAbc fld) {
         val wrkName = Tools.getWrkName(fld.getName());
-        if (ga.doc) docGetter(fld, TAG_ABC);
+        if (doc) docGetter(fld, TAG_ABC);
         printf(STRING_GETTER, wrkName);
-        if (ga.doc) docSetter(fld, TAG_ABC);
+        if (doc) docSetter(fld, TAG_ABC);
         printf(STRING_SETTER, wrkName);
     }
 
@@ -137,9 +137,9 @@ public class InterfaceFactory extends CodeHelper {
         val wrkName = Tools.getWrkName(fld.getName());
         val access = notNullOf(fld.getAccess(), defaults.getNum().getAccess());
         if (access != AccesMode.Number) {
-            if (ga.doc) docGetter(fld, TAG_NUM);
+            if (doc) docGetter(fld, TAG_NUM);
             printf(STRING_GETTER, wrkName);
-            if (ga.doc) docSetter(fld, TAG_NUM);
+            if (doc) docSetter(fld, TAG_NUM);
             printf(STRING_SETTER, wrkName);
         }
         if (access != AccesMode.String) {
@@ -154,56 +154,56 @@ public class InterfaceFactory extends CodeHelper {
     }
 
     private void useBigInt(FieldNum fld, String wrkName, boolean isNumber) {
-        if (ga.doc) docNumGetter(fld, "BigInteger");
+        if (doc) docNumGetter(fld, "BigInteger");
         if (isNumber) {
             printf("BigInteger get%s();%n", wrkName);
         } else {
             printf("BigInteger bigInteger%s();%n", wrkName);
         }
-        if (ga.doc) docNumSetter(fld, "n BigInteger");
+        if (doc) docNumSetter(fld, "n BigInteger");
         printf("void set%s(BigInteger n);%n", wrkName);
     }
     private void useLong(FieldNum fld, String wrkName, boolean isNumber) {
-        if (ga.doc) docNumGetter(fld, "long");
+        if (doc) docNumGetter(fld, "long");
         if (isNumber) {
             printf("long get%s();%n", wrkName);
         } else {
             printf("long long%s();%n", wrkName);
         }
-        if (ga.doc) docNumSetter(fld, "n long");
+        if (doc) docNumSetter(fld, "n long");
         printf("void set%s(long n);%n", wrkName);
     }
 
     private void useInt(FieldNum fld, String wrkName, boolean isNumber) {
-        if (ga.doc) docNumGetter(fld, "integer");
+        if (doc) docNumGetter(fld, "integer");
         if (isNumber) {
             printf("int get%s();%n", wrkName);
         } else {
             printf("int int%s();%n", wrkName);
         }
-        if (ga.doc) docNumSetter(fld, "n integer");
+        if (doc) docNumSetter(fld, "n integer");
         printf("void set%s(int n);%n", wrkName);
     }
 
     private void useShort(FieldNum fld, String wrkName, boolean isNumber) {
-        if (ga.doc) docNumGetter(fld, "short");
+        if (doc) docNumGetter(fld, "short");
         if (isNumber) {
             printf("short get%s();%n", wrkName);
         } else {
             printf("short short%s();%n", wrkName);
         }
-        if (ga.doc) docNumSetter(fld, "n short");
+        if (doc) docNumSetter(fld, "n short");
         printf("void set%s(short n);%n", wrkName);
     }
 
     private void useByte(FieldNum fld, String wrkName, boolean isNumber) {
-        if (ga.doc) docNumGetter(fld, "byte");
+        if (doc) docNumGetter(fld, "byte");
         if (isNumber) {
             printf("byte get%s();%n", wrkName);
         } else {
             printf("byte byte%s();%n", wrkName);
         }
-        if (ga.doc) docNumSetter(fld, "n byte");
+        if (doc) docNumSetter(fld, "n byte");
         printf("void set%s(byte n);%n", wrkName);
     }
 
@@ -223,17 +223,17 @@ public class InterfaceFactory extends CodeHelper {
 
     private void createMethodsCustom(FieldCustom fld) {
         val wrkName = Tools.getWrkName(fld.getName());
-        if (ga.doc) docGetter(fld, TAG_CUS);
+        if (doc) docGetter(fld, TAG_CUS);
         printf(STRING_GETTER, wrkName);
-        if (ga.doc) docSetter(fld, TAG_CUS);
+        if (doc) docSetter(fld, TAG_CUS);
         printf(STRING_SETTER, wrkName);
     }
 
     private void createMethodsDomain(FieldDomain fld) {
         val wrkName = Tools.getWrkName(fld.getName());
-        if (ga.doc) docGetter(fld, TAG_DOM);
+        if (doc) docGetter(fld, TAG_DOM);
         printf(STRING_GETTER, wrkName);
-        if (ga.doc) docSetter(fld, TAG_DOM);
+        if (doc) docSetter(fld, TAG_DOM);
         printf(STRING_SETTER, wrkName);
     }
 

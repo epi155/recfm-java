@@ -21,6 +21,7 @@ public class ClassDefine implements ParentFields, ClassModel {
     private int length;
     private LoadOverflowAction onOverflow;
     private LoadUnderflowAction onUnderflow;
+    private Boolean doc;
     private List<FieldModel> fields = new ArrayList<>();
 
     @Override

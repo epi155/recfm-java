@@ -22,6 +22,7 @@ public class TraitDefine implements ParentFields, TraitModel {
     private String name;
     private int length;
     private List<FieldModel> fields = new ArrayList<>();
+    private Boolean doc;
 
     protected static final String DOT_JAVA = ".java";
     @Override

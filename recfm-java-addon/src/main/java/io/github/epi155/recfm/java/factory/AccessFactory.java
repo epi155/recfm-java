@@ -1,7 +1,6 @@
 package io.github.epi155.recfm.java.factory;
 
 import io.github.epi155.recfm.api.FieldDefault;
-import io.github.epi155.recfm.api.GenerateArgs;
 import io.github.epi155.recfm.java.fields.*;
 import io.github.epi155.recfm.java.rule.AccessField;
 import io.github.epi155.recfm.type.*;
@@ -39,48 +38,48 @@ public class AccessFactory {
         return new AccessFactory(pw, defaults, pos);
     }
 
-    private void createMethodsDomain(FieldDomain fld, GenerateArgs ga) {
+    private void createMethodsDomain(FieldDomain fld, boolean doc) {
         val wrkName = Tools.getWrkName(fld.getName());
-        delegateDom.access(fld, wrkName, ga);
+        delegateDom.access(fld, wrkName, doc);
     }
 
-    private void createMethodsNum(@NotNull FieldNum fld, @NotNull GenerateArgs ga) {
+    private void createMethodsNum(@NotNull FieldNum fld, boolean doc) {
         val wrkName = Tools.getWrkName(fld.getName());
-        delegateNum.access(fld, wrkName, ga);
+        delegateNum.access(fld, wrkName, doc);
     }
 
-    private void createMethodsNumNull(@NotNull FieldNux fld, @NotNull GenerateArgs ga) {
+    private void createMethodsNumNull(@NotNull FieldNux fld, boolean doc) {
         val wrkName = Tools.getWrkName(fld.getName());
-        delegateNux.access(fld, wrkName, ga);
+        delegateNux.access(fld, wrkName, doc);
     }
 
-    private void createMethodsAbc(@NotNull FieldAbc fld, GenerateArgs ga) {
+    private void createMethodsAbc(@NotNull FieldAbc fld, boolean doc) {
         val wrkName = Tools.getWrkName(fld.getName());
-        delegateAbc.access(fld, wrkName, ga);
+        delegateAbc.access(fld, wrkName, doc);
     }
 
-    private void createMethodsCustom(FieldCustom fld, GenerateArgs ga) {
+    private void createMethodsCustom(FieldCustom fld, boolean doc) {
         val wrkName = Tools.getWrkName(fld.getName());
-        delegateCus.access(fld, wrkName, ga);
+        delegateCus.access(fld, wrkName, doc);
     }
 
     /**
      * Method accessor creator
      *
      * @param fld    settable field
-     * @param ga     generator arguments
+     * @param doc     generator arguments
      */
-    public void createMethods(SettableField fld, GenerateArgs ga) {
+    public void createMethods(SettableField fld, boolean doc) {
         if (fld instanceof FieldAbc) {
-            createMethodsAbc((FieldAbc) fld, ga);
+            createMethodsAbc((FieldAbc) fld, doc);
         } else if (fld instanceof FieldNux) {
-            createMethodsNumNull((FieldNux) fld, ga);
+            createMethodsNumNull((FieldNux) fld, doc);
         } else if (fld instanceof FieldNum) {
-            createMethodsNum((FieldNum) fld, ga);
+            createMethodsNum((FieldNum) fld, doc);
         } else if (fld instanceof FieldCustom) {
-            createMethodsCustom((FieldCustom) fld, ga);
+            createMethodsCustom((FieldCustom) fld, doc);
         } else if (fld instanceof FieldDomain) {
-            createMethodsDomain((FieldDomain) fld, ga);
+            createMethodsDomain((FieldDomain) fld, doc);
         } else {
             throw new IllegalStateException("Unknown field type " + fld.getName() +": " + fld.getClass().getSimpleName());
         }

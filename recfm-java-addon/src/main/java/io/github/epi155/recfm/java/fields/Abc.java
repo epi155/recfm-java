@@ -1,7 +1,6 @@
 package io.github.epi155.recfm.java.fields;
 
 import io.github.epi155.recfm.api.FieldDefault;
-import io.github.epi155.recfm.api.GenerateArgs;
 import io.github.epi155.recfm.api.NormalizeAbcMode;
 import io.github.epi155.recfm.java.JavaDoc;
 import io.github.epi155.recfm.java.factory.CodeWriter;
@@ -55,13 +54,13 @@ public class Abc extends DelegateWriter implements MutableField<FieldAbc>, JavaD
         }
     }
 
-    public void access(FieldAbc fld, String wrkName, @NotNull GenerateArgs ga) {
-        buildGetter(fld, wrkName, ga);
-        buildSetter(fld, wrkName, ga);
+    public void access(FieldAbc fld, String wrkName, boolean doc) {
+        buildGetter(fld, wrkName, doc);
+        buildSetter(fld, wrkName, doc);
     }
 
-    private void buildSetter(FieldAbc fld, String wrkName, GenerateArgs ga) {
-        if (ga.doc) docSetter(fld);
+    private void buildSetter(FieldAbc fld, String wrkName, boolean doc) {
+        if (doc) docSetter(fld);
         printf("public void set%s(String s) {%n", wrkName);
         boolean chkSet = notNullOf(fld.getCheckSetter(), defaults.isCheckSetter());
         if (chkSet) chkSetter(fld);
@@ -74,8 +73,8 @@ public class Abc extends DelegateWriter implements MutableField<FieldAbc>, JavaD
         printf("}%n");
     }
 
-    private void buildGetter(FieldAbc fld, String wrkName, GenerateArgs ga) {
-        if (ga.doc) docGetter(fld);
+    private void buildGetter(FieldAbc fld, String wrkName, boolean doc) {
+        if (doc) docGetter(fld);
         printf("public String get%s() {%n", wrkName);
         boolean chkGet = notNullOf(fld.getCheckGetter(), defaults.isCheckGetter());
         if (chkGet) chkGetter(fld);

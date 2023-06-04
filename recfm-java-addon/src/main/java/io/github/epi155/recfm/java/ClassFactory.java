@@ -31,6 +31,7 @@ public class ClassFactory extends CodeHelper {
     private static final String PUBLIC_CLASS_X_IMPLMENTS_Y = "public class %s implements Validable, %s {%n";
     private final FieldDefault defaults;
     private final Deque<String> trace = new LinkedList<>();
+    private boolean doc;
 
     private ClassFactory(PrintWriter pw, String wrtPackage, GenerateArgs ga, FieldDefault defaults) {
         super(pw, wrtPackage, ga);
@@ -49,7 +50,8 @@ public class ClassFactory extends CodeHelper {
     }
 
     public void generateClassCode(ClassDefine clazz) {
-        if (ga.doc) {
+        this.doc = notNullOf(clazz.getDoc(), defaults.getCls().isDoc());
+        if (doc) {
             println("/**");
             tableDoc(clazz);
             println(" */");
@@ -69,7 +71,7 @@ public class ClassFactory extends CodeHelper {
         writeInitializer(clazz);
         writeValidator(clazz, BASE_ONE);
         clazz.forEachField(it -> {
-            if (it instanceof SettableField) access.createMethods((SettableField) it, ga);
+            if (it instanceof SettableField) access.createMethods((SettableField) it, doc);
         });
         writeDump(clazz);
         popIndent();
@@ -112,7 +114,7 @@ public class ClassFactory extends CodeHelper {
             if (it instanceof FieldGroup) generateGroupCode((FieldGroup) it, pos);
         });
         fld.forEachField(it -> {
-            if (it instanceof FloatingField) access.createMethods((FloatingField) it, ga);
+            if (it instanceof FloatingField) access.createMethods((FloatingField) it, doc);
         });
         popIndent();
         writeEndClass();
@@ -138,7 +140,7 @@ public class ClassFactory extends CodeHelper {
             if (fld instanceof FieldGroupTrait) generateGroupTraitCode((FieldGroupTrait) fld, pos);
         });
         trait.forEachField(it -> {
-            if (it instanceof FloatingField) access.createMethods((FloatingField) it, ga);
+            if (it instanceof FloatingField) access.createMethods((FloatingField) it, doc);
         });
         trace.removeLast();
         popIndent();
@@ -153,7 +155,7 @@ public class ClassFactory extends CodeHelper {
         }
         printf("};%n");
         printf("public %s %s(int k) { return this.%2$s[k-1]; }%n", capName, occurs.getName());
-        if (ga.doc)
+        if (doc)
             javadocGroupDef(occurs);
 
         List<String> embs = occurs.getTypedef().getFields()
@@ -191,7 +193,7 @@ public class ClassFactory extends CodeHelper {
         }
         printf("};%n");
         printf("public %s %s(int k) { return this.%2$s[k-1]; }%n", capName, occurs.getName());
-        if (ga.doc)
+        if (doc)
             javadocGroupDef(occurs);
 
         List<String> embs = occurs.getFields()
@@ -233,8 +235,7 @@ public class ClassFactory extends CodeHelper {
         printf("public %s %s() { return this.%2$s; }%n", capName, name);
         printf("public void with%1$s(WithAction<%1$s> action) { action.call(this.%2$s); }%n", capName, name);
 
-        if (ga.doc)
-            javadocGroupDef(group);
+        if (doc) javadocGroupDef(group);
 
         List<String> embs = group.getFields()
                 .stream()
@@ -268,8 +269,7 @@ public class ClassFactory extends CodeHelper {
         printf("public %s %s() { return this.%2$s; }%n", capName, name);
         printf("public void with%1$s(WithAction<%1$s> action) { action.call(this.%2$s); }%n", capName, name);
 
-        if (ga.doc)
-            javadocGroupDef(group);
+        if (doc) javadocGroupDef(group);
 
         List<String> embs = group.getTypedef().getFields()
                 .stream()

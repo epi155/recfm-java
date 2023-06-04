@@ -1,7 +1,6 @@
 package io.github.epi155.recfm.java.fields;
 
 import io.github.epi155.recfm.api.FieldDefault;
-import io.github.epi155.recfm.api.GenerateArgs;
 import io.github.epi155.recfm.api.NormalizeAbcMode;
 import io.github.epi155.recfm.java.JavaDoc;
 import io.github.epi155.recfm.java.factory.CodeWriter;
@@ -33,7 +32,7 @@ public class Custom extends DelegateWriter implements MutableField<FieldCustom>,
 
     @Override
     public void initialize(@NotNull FieldCustom fld, int bias) {
-        val init = notNullOf(fld.getInitChar(), defaults.getInit());
+        val init = notNullOf(fld.getInitChar(), defaults.getInitChar());
         printf("    fill(%5d, %4d, '%c');%n", fld.getOffset() - bias, fld.getLength(), init);
     }
 
@@ -76,34 +75,34 @@ public class Custom extends DelegateWriter implements MutableField<FieldCustom>,
     }
 
     @Override
-    public void access(FieldCustom fld, String wrkName, @NotNull GenerateArgs ga) {
-        buildGetter(fld, wrkName, ga);
-        buildSetter(fld, wrkName, ga);
-        buildInitialize(fld, wrkName, ga);
+    public void access(FieldCustom fld, String wrkName, boolean doc) {
+        buildGetter(fld, wrkName, doc);
+        buildSetter(fld, wrkName, doc);
+        buildInitialize(fld, wrkName, doc);
     }
 
-    private void buildInitialize(FieldCustom fld, String wrkName, GenerateArgs ga) {
-        if (ga.doc) docInitialize(fld);
+    private void buildInitialize(FieldCustom fld, String wrkName, boolean doc) {
+        if (doc) docInitialize(fld);
         printf("public void initialize%s() {%n", wrkName);
-        val init = notNullOf(fld.getInitChar(), defaults.getInit());
+        val init = notNullOf(fld.getInitChar(), defaults.getInitChar());
         printf("    fill(%s, %d, '%c');%n", pos.apply(fld.getOffset()), fld.getLength(), init);
         printf("}%n");
     }
 
     public void docInitialize(@NotNull FieldCustom fld) {
-        val init = notNullOf(fld.getInitChar(), defaults.getInit());
+        val init = notNullOf(fld.getInitChar(), defaults.getInitChar());
         printf("/**%n");
         printf(" * Initialize to %s%n", Character.getName(init));
         printf(" * %s @%d+%d%n", tag(), fld.getOffset(), fld.getLength());
         printf(" */%n");
     }
 
-    private void buildSetter(FieldCustom fld, String wrkName, GenerateArgs ga) {
-        if (ga.doc) docSetter(fld);
+    private void buildSetter(FieldCustom fld, String wrkName, boolean doc) {
+        if (doc) docSetter(fld);
         printf("public void set%s(String s) {%n", wrkName);
         val align = notNullOf(fld.getAlign(), defaults.getAlign());
-        val pad = notNullOf(fld.getPadChar(), defaults.getPad());
-        val init = notNullOf(fld.getInitChar(), defaults.getInit());
+        val pad = notNullOf(fld.getPadChar(), defaults.getPadChar());
+        val init = notNullOf(fld.getInitChar(), defaults.getInitChar());
         val ovfl = notNullOf(fld.getOnOverflow(), defaults.getOnOverflow());
         val unfl = notNullOf(fld.getOnUnderflow(), defaults.getOnUnderflow());
         val flag = Action.flagSetter(ovfl, unfl, align);
@@ -125,12 +124,12 @@ public class Custom extends DelegateWriter implements MutableField<FieldCustom>,
     }
 
 
-    private void buildGetter(FieldCustom fld, String wrkName, GenerateArgs ga) {
-        if (ga.doc) docGetter(fld);
+    private void buildGetter(FieldCustom fld, String wrkName, boolean doc) {
+        if (doc) docGetter(fld);
         printf("public String get%s() {%n", wrkName);
         boolean chkGet = notNullOf(fld.getCheckGetter(), defaults.isCheckGetter());
         if (chkGet) chkGetter(fld);
-        val pad = notNullOf(fld.getPadChar(), defaults.getPad());
+        val pad = notNullOf(fld.getPadChar(), defaults.getPadChar());
         val norm = notNullOf(fld.getNormalize(), defaults.getNormalize());
         if (norm == NormalizeAbcMode.None) {
             printf("    return getAbc(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());

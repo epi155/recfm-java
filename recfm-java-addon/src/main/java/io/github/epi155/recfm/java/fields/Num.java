@@ -1,6 +1,9 @@
 package io.github.epi155.recfm.java.fields;
 
-import io.github.epi155.recfm.api.*;
+import io.github.epi155.recfm.api.AccesMode;
+import io.github.epi155.recfm.api.FieldDefault;
+import io.github.epi155.recfm.api.NormalizeNumMode;
+import io.github.epi155.recfm.api.WordWidth;
 import io.github.epi155.recfm.java.factory.CodeWriter;
 import io.github.epi155.recfm.java.factory.DelegateWriter;
 import io.github.epi155.recfm.java.rule.Action;
@@ -42,19 +45,19 @@ public class Num extends DelegateWriter implements MutableField<FieldNum> {
     }
 
     @Override
-    public void access(FieldNum fld, String wrkName, @NotNull GenerateArgs ga) {
+    public void access(FieldNum fld, String wrkName,  boolean doc) {
         AccesMode access = notNullOf(fld.getAccess(), defaults.getAccess());
         if (access != AccesMode.Number) {
-            numeric(fld, wrkName, ga.doc);
+            numeric(fld, wrkName, doc);
         }
         if (access != AccesMode.String) {
             WordWidth ww = notNullOf(fld.getWordWidth(), defaults.getWordWidth());
             boolean isNumeric = access == AccesMode.Number;
-            if (fld.getLength() > 19) useBigInt(fld, wrkName, ga.doc, isNumeric);
-            else if (fld.getLength() > 9 || ww ==WordWidth.W8) useLong(fld, wrkName, ga.doc, isNumeric);    // 10..19
-            else if (fld.getLength() > 4 || ww ==WordWidth.W4) useInt(fld, wrkName, ga.doc, isNumeric);     // 5..9
-            else if (fld.getLength() > 2 || ww ==WordWidth.W2) useShort(fld, wrkName, ga.doc, isNumeric);   // 3..4
-            else useByte(fld, wrkName, ga.doc, isNumeric);  // ..2
+            if (fld.getLength() > 19) useBigInt(fld, wrkName, doc, isNumeric);
+            else if (fld.getLength() > 9 || ww ==WordWidth.W8) useLong(fld, wrkName, doc, isNumeric);    // 10..19
+            else if (fld.getLength() > 4 || ww ==WordWidth.W4) useInt(fld, wrkName, doc, isNumeric);     // 5..9
+            else if (fld.getLength() > 2 || ww ==WordWidth.W2) useShort(fld, wrkName, doc, isNumeric);   // 3..4
+            else useByte(fld, wrkName, doc, isNumeric);  // ..2
         }
     }
 

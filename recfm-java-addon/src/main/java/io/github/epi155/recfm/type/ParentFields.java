@@ -200,7 +200,10 @@ public interface ParentFields {
     default void scanBadName(FieldModel it, AtomicInteger dup) {
         if (it instanceof NamedField) {
             NamedField kt = (NamedField) it;
-            if (!kt.getName().matches("[a-zA-Z_][a-zA-Z_0-9$]*")) {
+            if (kt.getName() == null) {
+                log.error("  [X....]  null name @{}+{} XXX", it.getOffset(), it.getLength());
+                dup.getAndIncrement();
+            } else if (!kt.getName().matches("[a-zA-Z_][a-zA-Z_0-9$]*")) {
                 log.error("  [X....]  FieldName '{}' not valid @{}+{} XXX", kt.getName(), it.getOffset(), it.getLength());
                 dup.getAndIncrement();
             }

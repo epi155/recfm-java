@@ -40,7 +40,7 @@ public class TraitDefine implements ParentFields, TraitModel {
         checkSuccesful &= noOverlap(base);
         if (checkSuccesful) {
             log.info("  [#####o] Creating ...");
-            File srcMainJava = ga.sourceDirectory;
+            File srcMainJava = new File(ga.sourceDirectory);
             File pkgFolder = new File(srcMainJava, namespace.replace('.', File.separatorChar));
             File clsFile = new File(pkgFolder, getName()+DOT_JAVA);
             try (PrintWriter pw = new PrintWriter(clsFile)) {

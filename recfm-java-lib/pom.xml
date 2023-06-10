@@ -57,7 +57,6 @@
                         </goals>
                         <phase>generate-test-sources</phase>
                         <configuration>
-                            <doc>true</doc>
                             <settingsDirectory>${project.basedir}/src/test/resources</settingsDirectory>
                             <generateDirectory>target/generated-test-sources/recfm</generateDirectory>
                             <settings>

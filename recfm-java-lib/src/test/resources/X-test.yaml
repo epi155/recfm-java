@@ -85,9 +85,9 @@ packages:
       - &Error
         name: IError
         len: 49
-        fileds:
-          - !Abc { name: status  , at:  1, len:  5},
-          - !Num { name: code    , at:  6, len:  4},
+        fields:
+          - !Abc { name: status  , at:  1, len:  5}
+          - !Num { name: code    , at:  6, len:  4}
           - !Abc { name: message , at: 10, len: 40}
 
 
@@ -194,4 +194,4 @@ packages:
         length: 590
         fields:
           - !Num { name: nmErrors, at: 1, len: 2}
-          - !Occ { name: tabError, at: 3, len: 49, x: 12, as: *Error }
+          - !OCC { name: tabError, at: 3, len: 49, x: 12, as: *Error }

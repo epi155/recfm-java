@@ -1,7 +1,7 @@
 package io.github.epi155.recfm.type;
 
 import io.github.epi155.recfm.api.AlignMode;
-import io.github.epi155.recfm.api.CheckUser;
+import io.github.epi155.recfm.api.CheckCus;
 import io.github.epi155.recfm.api.CusModel;
 import io.github.epi155.recfm.api.NormalizeAbcMode;
 import lombok.Data;
@@ -18,7 +18,7 @@ import java.util.regex.PatternSyntaxException;
 public class FieldCustom extends FloatingField implements SelfCheck, CusModel {
     private Character padChar;
     private Character initChar;
-    private CheckUser check;
+    private CheckCus check;
     private AlignMode align;
     private NormalizeAbcMode normalize;
     private String regex;

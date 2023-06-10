@@ -2,7 +2,7 @@ package io.github.epi155.recfm.type;
 
 import io.github.epi155.recfm.api.AbcModel;
 import io.github.epi155.recfm.api.AlignMode;
-import io.github.epi155.recfm.api.CheckChar;
+import io.github.epi155.recfm.api.CheckAbc;
 import io.github.epi155.recfm.api.NormalizeAbcMode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,7 +12,7 @@ import lombok.val;
 @EqualsAndHashCode(callSuper = true)
 public class FieldAbc extends FloatingField implements AbcModel {
     private char padChar = ' ';
-    private CheckChar check;
+    private CheckAbc check;
     private NormalizeAbcMode normalize;
     private Boolean checkSetter;
     private Boolean checkGetter;

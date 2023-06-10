@@ -75,6 +75,20 @@ packages:
             !Fil {                    at: 30, len: 1 },
             !Num { name: giorno     , at: 31, len: 2 },
           ] }
+      - &Time
+        name: ITime
+        len: 6
+        fields:
+          - !Num { name: hours  , at: 1, len: 2 }
+          - !Num { name: minutes, at: 3, len: 2 }
+          - !Num { name: seconds, at: 5, len: 2 }
+      - &Error
+        name: IError
+        len: 49
+        fileds:
+          - !Abc { name: status  , at:  1, len:  5},
+          - !Num { name: code    , at:  6, len:  4},
+          - !Abc { name: message , at: 10, len: 40}
 
 
     classes:
@@ -124,7 +138,7 @@ packages:
           - !Abc { name: xyel, at: 13, len: 4, ovr: yes }
           - !Abc { name: xcya, at: 17, len: 4, ovr: true }
 
-      - name: Foo312
+      - name: Foo3111
         length: 50
         doc: No
         fields:
@@ -133,3 +147,51 @@ packages:
           - !Abc { name: stCivile   , at:  46, len:     1 }
           - !Abc { name: nazionalita, at:  47, len:     3 }
           - !Abc { name: sesso      , at:  50, len:     1 }
+      - name: Foo3112
+        length: 8
+        doc: No
+        fields:
+          - !Num { name: year , at: 1, len: 4 }
+          - !Num { name: month, at: 5, len: 2 }
+          - !Num { name: mday , at: 7, len: 2 }
+      - name: Foo3115
+        length: 12
+        doc: No
+        fields:
+          - !Num { name: year , at: 1, len: 4 }
+          - !Dom { name: month, at: 5, len: 3,
+                   items: [ Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec ] }
+          - !Num { name: mday , at: 8, len: 2 }
+          - !Dom { name: wday , at: 10, len: 3, items: [ Sun, Mon, Tue, Wed, Thu, Fri, Sat ] }
+      - name: Foo3118
+        length: 12
+        fields:
+          - !Grp { name: startTime, at: 1, len: 6, fields: [
+            !Num { name: hours  , at: 1, len: 2},
+            !Num { name: minutes, at: 3, len: 2},
+            !Num { name: seconds, at: 5, len: 2}
+          ] }
+          - !Grp { name: stopTime , at: 7, len: 6, fields: [
+            !Num { name: hours  , at:  7, len: 2},
+            !Num { name: minutes, at:  9, len: 2},
+            !Num { name: seconds, at: 11, len: 2}
+          ] }
+      - name: Foo3119
+        length: 590
+        fields:
+          - !Num { name: nmErrors, at: 1, len: 2}
+          - !Occ { name: tabError, at: 3, len: 49, x: 12, fields: [
+            !Abc { name: status  , at:  3, len:  5},
+            !Num { name: code    , at:  8, len:  4},
+            !Abc { name: message , at: 12, len: 40}
+          ] }
+      - name: Foo311b
+        length: 12
+        fields:
+          - !GRP { name: startTime, at: 1, len: 6, as: *Time }
+          - !GRP { name: stopTime , at: 7, len: 6, as: *Time }
+      - name: Foo311c
+        length: 590
+        fields:
+          - !Num { name: nmErrors, at: 1, len: 2}
+          - !Occ { name: tabError, at: 3, len: 49, x: 12, as: *Error }

@@ -146,9 +146,9 @@ public class InterfaceFactory extends CodeHelper {
             val ww = notNullOf(fld.getWordWidth(), defaults.getNum().getWordWidth());
             boolean isNumber = access == AccesMode.Number;
             if (fld.getLength() > 19) useBigInt(fld, wrkName, isNumber);
-            else if (fld.getLength() > 9 || ww == WordWidth.W8) useLong(fld, wrkName, isNumber);    // 10..19
-            else if (fld.getLength() > 4 || ww == WordWidth.W4) useInt(fld, wrkName, isNumber);     // 5..9
-            else if (fld.getLength() > 2 || ww == WordWidth.W2) useShort(fld, wrkName, isNumber);   // 3..4
+            else if (fld.getLength() > 9 || ww == WordWidth.Long) useLong(fld, wrkName, isNumber);    // 10..19
+            else if (fld.getLength() > 4 || ww == WordWidth.Int) useInt(fld, wrkName, isNumber);     // 5..9
+            else if (fld.getLength() > 2 || ww == WordWidth.Short) useShort(fld, wrkName, isNumber);   // 3..4
             else useByte(fld, wrkName, isNumber);  // ..2
         }
     }

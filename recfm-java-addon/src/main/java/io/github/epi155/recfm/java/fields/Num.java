@@ -54,9 +54,9 @@ public class Num extends DelegateWriter implements MutableField<FieldNum> {
             WordWidth ww = notNullOf(fld.getWordWidth(), defaults.getWordWidth());
             boolean isNumeric = access == AccesMode.Number;
             if (fld.getLength() > 19) useBigInt(fld, wrkName, doc, isNumeric);
-            else if (fld.getLength() > 9 || ww ==WordWidth.W8) useLong(fld, wrkName, doc, isNumeric);    // 10..19
-            else if (fld.getLength() > 4 || ww ==WordWidth.W4) useInt(fld, wrkName, doc, isNumeric);     // 5..9
-            else if (fld.getLength() > 2 || ww ==WordWidth.W2) useShort(fld, wrkName, doc, isNumeric);   // 3..4
+            else if (fld.getLength() > 9 || ww ==WordWidth.Long) useLong(fld, wrkName, doc, isNumeric);    // 10..19
+            else if (fld.getLength() > 4 || ww ==WordWidth.Int) useInt(fld, wrkName, doc, isNumeric);     // 5..9
+            else if (fld.getLength() > 2 || ww ==WordWidth.Short) useShort(fld, wrkName, doc, isNumeric);   // 3..4
             else useByte(fld, wrkName, doc, isNumeric);  // ..2
         }
     }

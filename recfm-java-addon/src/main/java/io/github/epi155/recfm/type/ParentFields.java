@@ -32,6 +32,52 @@ public interface ParentFields {
         return wid.get();
     }
 
+    default void autoOffset(int base) {
+        int prevOff = 0;
+        int prevLen = 0;
+        String prevName = null;
+        for (FieldModel fld: getFields()) {
+            if (fld.getOffset() == null) {
+                if (fld instanceof NamedField && ((NamedField) fld).isOverride()) {
+                    if (prevOff>0) {
+                        if (fld.getLength()!=prevLen) {
+                            if (prevName == null) {
+                                log.warn("field {} overrides field @{}+{}, but lengths are different, expected {} provided {}",
+                                        ((NamedField) fld).getName(), prevOff, prevLen, prevLen, fld.getLength());
+                            } else {
+                                log.warn("field {} overrides field {}@{}, but lengths are different, expected {} provided {}",
+                                        ((NamedField) fld).getName(), prevName, prevLen, prevLen, fld.getLength());
+                            }
+                        }
+                        fld.setOffset(prevOff);
+                    } else {
+                        throw new ClassDefineException("Field "+((NamedField) fld).getName() + " isOverride without reference in "+getName());
+                    }
+                } else {
+                    fld.setOffset(base);
+                }
+            } else {
+                base = fld.getOffset();
+            }
+            if (fld instanceof ParentFields) {
+                ParentFields par = (ParentFields) fld;
+                par.autoOffset(fld.getOffset());
+            }
+            if (fld instanceof NamedField) {
+                if (! ((NamedField) fld).isOverride()) {
+                    prevOff = base;
+                    prevLen = fld.getLength();
+                    prevName = ((NamedField) fld).getName();
+                    base += fld.getLength();
+                }
+            } else {
+                prevOff = base;
+                prevLen = fld.getLength();
+                prevName = null;
+                base += fld.getLength();
+            }
+        }
+    }
     default boolean noHole(int bias) {
         log.info("  [###o..] Checking for hole in group {}: [{}..{}] ...", getName(), bias, bias + getLength() - 1);
         boolean[] b = new boolean[getLength()];

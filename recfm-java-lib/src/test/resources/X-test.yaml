@@ -79,16 +79,16 @@ packages:
         name: ITime
         len: 6
         fields:
-          - !Num { name: hours  , at: 1, len: 2 }
-          - !Num { name: minutes, at: 3, len: 2 }
-          - !Num { name: seconds, at: 5, len: 2 }
+          - !Num { name: hours  , len: 2 }
+          - !Num { name: minutes, len: 2 }
+          - !Num { name: seconds, len: 2 }
       - &Error
         name: IError
         len: 49
         fields:
-          - !Abc { name: status  , at:  1, len:  5}
-          - !Num { name: code    , at:  6, len:  4}
-          - !Abc { name: message , at: 10, len: 40}
+          - !Abc { name: status  , len:  5}
+          - !Num { name: code    , len:  4}
+          - !Abc { name: message , len: 40}
 
 
     classes:
@@ -127,12 +127,12 @@ packages:
       - name: Alamos
         len: 20
         fields:
-          - !Nux { name: red, at:  1, len: 4 }
+          - !Nux { name: red, len: 4 }
+          - !Abc { name: xred, len: 4, ovr: yes }
           - !Nux { name: gre, at:  5, len: 4, nrm: Trim }
           - !Nux { name: blu, at:  9, len: 4, ini: Zeroes }
           - !Nux { name: yel, at: 13, len: 4, ini: Zeroes, nrm: Trim }
           - !Nux { name: cya, at: 17, len: 4, ini: Space, nrm: Trim, acc: Num }
-          - !Abc { name: xred, at:  1, len: 4, ovr: yes }
           - !Abc { name: xgre, at:  5, len: 4, ovr: true }
           - !Abc { name: xblu, at:  9, len: 4, ovr: true }
           - !Abc { name: xyel, at: 13, len: 4, ovr: yes }
@@ -142,11 +142,11 @@ packages:
         length: 50
         doc: No
         fields:
-          - !Abc { name: cognome    , at:   1, len:    25 }
-          - !Abc { name: nome       , at:  26, len:    20 }
-          - !Abc { name: stCivile   , at:  46, len:     1 }
-          - !Abc { name: nazionalita, at:  47, len:     3 }
-          - !Abc { name: sesso      , at:  50, len:     1 }
+          - !Abc { name: cognome    , len:    25 }
+          - !Abc { name: nome       , len:    20 }
+          - !Abc { name: stCivile   , len:     1 }
+          - !Abc { name: nazionalita, len:     3 }
+          - !Abc { name: sesso      , len:     1 }
       - name: Foo3112
         length: 8
         doc: No
@@ -166,10 +166,10 @@ packages:
       - name: Foo3118
         length: 12
         fields:
-          - !Grp { name: startTime, at: 1, len: 6, fields: [
-            !Num { name: hours  , at: 1, len: 2},
-            !Num { name: minutes, at: 3, len: 2},
-            !Num { name: seconds, at: 5, len: 2}
+          - !Grp { name: startTime, len: 6, fields: [
+            !Num { name: hours  , len: 2},
+            !Num { name: minutes, len: 2},
+            !Num { name: seconds, len: 2}
           ] }
           - !Grp { name: stopTime , at: 7, len: 6, fields: [
             !Num { name: hours  , at:  7, len: 2},
@@ -179,19 +179,19 @@ packages:
       - name: Foo3119
         length: 590
         fields:
-          - !Num { name: nmErrors, at: 1, len: 2}
-          - !Occ { name: tabError, at: 3, len: 49, x: 12, fields: [
-            !Abc { name: status  , at:  3, len:  5},
-            !Num { name: code    , at:  8, len:  4},
-            !Abc { name: message , at: 12, len: 40}
+          - !Num { name: nmErrors, len: 2}
+          - !Occ { name: tabError, len: 49, x: 12, fields: [
+            !Abc { name: status  , len:  5},
+            !Num { name: code    , len:  4},
+            !Abc { name: message , len: 40}
           ] }
       - name: Foo311b
         length: 12
         fields:
-          - !GRP { name: startTime, at: 1, len: 6, as: *Time }
-          - !GRP { name: stopTime , at: 7, len: 6, as: *Time }
+          - !GRP { name: startTime, len: 6, as: *Time }
+          - !GRP { name: stopTime , len: 6, as: *Time }
       - name: Foo311c
         length: 590
         fields:
-          - !Num { name: nmErrors, at: 1, len: 2}
-          - !OCC { name: tabError, at: 3, len: 49, x: 12, as: *Error }
+          - !Num { name: nmErrors, len: 2}
+          - !OCC { name: tabError, len: 49, x: 12, as: *Error }

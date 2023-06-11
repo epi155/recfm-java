@@ -28,11 +28,13 @@ public class TraitDefine implements ParentFields, TraitModel {
     @Override
     public void create(String namespace, GenerateArgs ga, FieldDefault defaults) {
         if (getFields().isEmpty()) return;
-        val base = getFields().get(0).getOffset();
 
         log.info("- Prepare interface {} ...", getName());
 
         checkForVoid();
+        autoOffset(1);
+        val base = getFields().get(0).getOffset();
+
         boolean checkSuccesful = noBadName();
         checkSuccesful &= checkLength();
         checkSuccesful &= noDuplicateName(Tools::testCollision);

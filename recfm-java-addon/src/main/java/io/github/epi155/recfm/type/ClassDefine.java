@@ -29,6 +29,7 @@ public class ClassDefine implements ParentFields, ClassModel {
         log.info("- Prepare class {} ...", getName());
 
         checkForVoid();
+        autoOffset(1);
 
         boolean checkSuccesful = noBadName();
         checkSuccesful &= checkLength();

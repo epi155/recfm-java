@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 @Data
 @Slf4j
 public abstract class NakedField implements FieldModel {
-    private int offset;
+    private Integer offset;
     private int length;
 
     public void mark(boolean[] b, int bias) {

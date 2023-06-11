@@ -56,13 +56,13 @@ packages:
       - name: FooDate
         length: 10
         fields:
-          - !Abc { name: date   , at: 1, len: 10 }
-          - !Grp { name: date   , at: 1, len: 10, ovr: true, fields: [
-              !Num { name: year , at: 1, len:  4, acc: Num, wid: short },
-              !Fil {              at: 5, len:  1 },
-              !Num { name: month, at: 6, len:  2, acc: Num, wid: byte },
-              !Fil {              at: 8, len:  1 },
-              !Num { name: day  , at: 9, len:  2, acc: Num }
+          - !Abc { name: date   , len: 10 }
+          - !Grp { name: date   , len: 10, ovr: true, fields: [
+              !Num { name: year , len:  4, acc: Num, wid: short },
+              !Fil {              len:  1 },
+              !Num { name: month, len:  2, acc: Num, wid: byte },
+              !Fil {              len:  1 },
+              !Num { name: day  , len:  2, acc: Num }
           ]}
 
       - name: FooAlpha

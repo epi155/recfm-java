@@ -155,6 +155,7 @@ public class ClassFactory extends CodeHelper {
         }
         printf("};%n");
         printf("public %s %s(int k) { return this.%2$s[k-1]; }%n", capName, occurs.getName());
+        printf("public void with%1$s(int k, WithAction<%1$s> action) { action.accept(this.%2$s[k-1]); }%n", capName, occurs.getName());
         if (doc)
             javadocGroupDef(occurs);
 
@@ -193,6 +194,7 @@ public class ClassFactory extends CodeHelper {
         }
         printf("};%n");
         printf("public %s %s(int k) { return this.%2$s[k-1]; }%n", capName, occurs.getName());
+        printf("public void with%1$s(int k, WithAction<%1$s> action) { action.accept(this.%2$s[k-1]); }%n", capName, occurs.getName());
         if (doc)
             javadocGroupDef(occurs);
 
@@ -233,7 +235,7 @@ public class ClassFactory extends CodeHelper {
         String capName = Tools.capitalize(name);
         printf("private final %s %s = this.new %1$s();%n", capName, name);
         printf("public %s %s() { return this.%2$s; }%n", capName, name);
-        printf("public void with%1$s(WithAction<%1$s> action) { action.call(this.%2$s); }%n", capName, name);
+        printf("public void with%1$s(WithAction<%1$s> action) { action.accept(this.%2$s); }%n", capName, name);
 
         if (doc) javadocGroupDef(group);
 
@@ -267,7 +269,7 @@ public class ClassFactory extends CodeHelper {
         String capName = Tools.capitalize(name);
         printf("private final %s %s = this.new %1$s();%n", capName, name);
         printf("public %s %s() { return this.%2$s; }%n", capName, name);
-        printf("public void with%1$s(WithAction<%1$s> action) { action.call(this.%2$s); }%n", capName, name);
+        printf("public void with%1$s(WithAction<%1$s> action) { action.accept(this.%2$s); }%n", capName, name);
 
         if (doc) javadocGroupDef(group);
 

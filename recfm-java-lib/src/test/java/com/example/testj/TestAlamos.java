@@ -1,7 +1,9 @@
 package com.example.testj;
 
 import com.example.sysj.test.Alamos;
+import com.example.sysj.test.Foo311b;
 import io.github.epi155.recfm.java.NotDigitBlankException;
+import io.github.epi155.recfm.java.WithAction;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -44,5 +46,21 @@ class TestAlamos {
         a.setCya(null);
         Assertions.assertEquals("    ", a.getXcya());
         Assertions.assertNull(a.getCya());
+    }
+    @Test
+    void testGrp01() {
+        Foo311b foo = new Foo311b();
+        foo.stopTime().setHours("01");
+        foo.withStopTime(stop -> {
+            stop.setHours("01");
+        });
+        foo.withStopTime(new WithAction<Foo311b.StopTime>() {
+            @Override
+            public void accept(Foo311b.StopTime stop) {
+                stop.setHours("01");
+            }
+        });
+        String hours = foo.stopTime().getHours();
+        boolean test = foo.validateFails(x -> System.out.println(x.message()));
     }
 }

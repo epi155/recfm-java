@@ -4,7 +4,7 @@ package io.github.epi155.recfm.java;
  * Collector of exceptions that can occur in the management of fixed-path records
  */
 public class FixError {
-    static volatile boolean failFirst = false;
+    static volatile boolean failFirst = true;
     static final int RECORD_BASE = 1;
 
     /**

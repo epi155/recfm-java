@@ -9,4 +9,10 @@ public interface FixBasic extends Validable {
      * @return  serialized string
      */
     String encode();
+
+    /**
+     * Record length
+     * @return record length
+     */
+    int length();
 }

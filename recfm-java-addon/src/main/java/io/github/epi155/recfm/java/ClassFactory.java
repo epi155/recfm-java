@@ -68,6 +68,7 @@ public class ClassFactory extends CodeHelper {
         val access = AccessFactory.getInstance(this, defaults, BASE_ONE);
         writeCtorVoid(clazz.getName());
         writeCtorParm(clazz);
+        printf("public int length() { return LRECL; }%n");
         writeInitializer(clazz);
         writeValidator(clazz, BASE_ONE);
         clazz.forEachField(it -> {
@@ -91,7 +92,7 @@ public class ClassFactory extends CodeHelper {
         }
     }
     private void writeConstant(@NotNull ParentFields struct) {
-        printf("    public static final int LRECL = %d;%n", struct.getLength());
+        printf("    private static final int LRECL = %d;%n", struct.getLength());
         val preparer = PrepareFactory.getInstance(this);
         struct.forEachField(it -> preparer.prepare(it, 1));
 

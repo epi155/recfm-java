@@ -63,7 +63,6 @@ class TestBar {
     }
     @Test
     void testDigit() {
-        FixError.failAll();
         BarDigit digit = new BarDigit();
 
         Assertions.assertThrows(FieldUnderFlowException.class, () -> digit.setStrict(null), "test Num underflow");
@@ -85,7 +84,7 @@ class TestBar {
         }
 
         BarDigit n = BarDigit.decode(CharBuffer.allocate(10).toString());
-        if (!n.validateFails(it ->
+        if (!n.validateAllFails(it ->
             System.out.printf("Error field %s@%d+%d: %s%n",
                 it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");

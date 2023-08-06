@@ -341,6 +341,23 @@ public class ClassFactory extends CodeHelper {
         val validator = ValidateFactory.getInstance(this, defaults);
         printf(OVERRIDE_METHOD);
         printf("public boolean validateFails(FieldValidateHandler handler) {%n");
+        println("    try {");
+        println("        ValidateContext.setFirst();");
+        println("        return assessFails(handler);");
+        println("    } finally {");
+        println("        ValidateContext.unset();");
+        println("    }");
+        closeBrace();
+        printf(OVERRIDE_METHOD);
+        printf("public boolean validateAllFails(FieldValidateHandler handler) {%n");
+        println("    try {");
+        println("        ValidateContext.setAll();");
+        println("        return assessFails(handler);");
+        println("    } finally {");
+        println("        ValidateContext.unset();");
+        println("    }");
+        closeBrace();
+        printf("private boolean assessFails(FieldValidateHandler handler) {%n");
         AtomicBoolean firstCheck = new AtomicBoolean(true);
         struct.forEachField(fld -> validator.validate(fld, padWidth, pos, firstCheck));
         if (firstCheck.get()) {

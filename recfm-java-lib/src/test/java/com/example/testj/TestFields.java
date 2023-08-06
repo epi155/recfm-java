@@ -18,7 +18,7 @@ class TestFields {
     }
     @Test
     void testAbc() {
-        FixError.failFirst();
+        //FixError.failFirst();
 
         foo.setAlpha01("A");
         Assertions.assertEquals("A         ", foo.getAlpha01(), "test align/pad");
@@ -200,7 +200,7 @@ class TestFields {
     }
     @Test
     void testDigit() {
-        FixError.failAll();
+        //FixError.failAll();
         FooDigit digit = new FooDigit();
 
         Assertions.assertThrows(FieldUnderFlowException.class, () -> digit.setStrict(null), "test Num underflow");

@@ -7,7 +7,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static io.github.epi155.recfm.java.FixError.RECORD_BASE;
-import static io.github.epi155.recfm.java.FixError.failFirst;
 
 abstract class FixEngine {
     private static final String FIELD_AT = "Field @";
@@ -539,7 +538,7 @@ abstract class FixEngine {
                     .code(ValidateError.NotNumber)
                     .wrong(c)
                     .build());
-                if (failFirst) return true;
+                if (ValidateContext.isFailFirst()) return true;
                 else fault = true;
             }
         }
@@ -602,7 +601,7 @@ abstract class FixEngine {
                     .code(ValidateError.NotBlank)  // ??
                     .wrong(c)
                     .build());
-                if (failFirst) return true;
+                if (ValidateContext.isFailFirst()) return true;
                 else fault = true;
             }
         }
@@ -624,7 +623,7 @@ abstract class FixEngine {
                     .code(ValidateError.NotNumber)
                     .wrong(c)
                     .build());
-                if (failFirst) return true;
+                if (ValidateContext.isFailFirst()) return true;
                 else fault = true;
             }
         }
@@ -690,7 +689,7 @@ abstract class FixEngine {
                     .code(ValidateError.NotAscii)
                     .wrong(c)
                     .build());
-                if (failFirst) return true;
+                if (ValidateContext.isFailFirst()) return true;
                 else fault = true;
             }
         }
@@ -745,7 +744,7 @@ abstract class FixEngine {
                     .code(ValidateError.NotLatin)
                     .wrong(c)
                     .build());
-                if (failFirst) return true;
+                if (ValidateContext.isFailFirst()) return true;
                 else fault = true;
             }
         }
@@ -794,7 +793,7 @@ abstract class FixEngine {
                     .code(ValidateError.NotValid)
                     .wrong(c)
                     .build());
-                if (failFirst) return true;
+                if (ValidateContext.isFailFirst()) return true;
                 else fault = true;
             }
         }

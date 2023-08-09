@@ -45,7 +45,7 @@ public class Nux extends DelegateWriter implements MutableField<FieldNux> {
     @Override
     public void validate(@NotNull FieldNux fld, int w, @NotNull IntFunction<String> bias, @NotNull AtomicBoolean isFirst) {
         String prefix = prefixOf(isFirst.getAndSet(false));
-        printf("%s checkDigitBlank(\"%s\"%s, %-5s, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), bias.apply(fld.getOffset()), fld.getLength());
+        printf("%s checkDigitBlank(mode, \"%s\"%s, %-5s, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), bias.apply(fld.getOffset()), fld.getLength());
     }
 
     @Override

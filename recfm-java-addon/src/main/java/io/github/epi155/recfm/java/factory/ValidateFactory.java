@@ -38,14 +38,14 @@ public class ValidateFactory {
     protected void validateGrp(@NotNull GroupAware fld, AtomicBoolean isFirst) {
         if (fld.isOverride()) return;
         String prefix = prefixOf(isFirst.getAndSet(false));
-        pw.printf("%s %s.assessFails(handler);%n", prefix, fld.getName());
+        pw.printf("%s %s.assessFails(mode, handler);%n", prefix, fld.getName());
     }
 
     protected void validateOcc(OccursAware fld, AtomicBoolean isFirst) {
         if (fld.isOverride()) return;
         for (int k = 1; k <= fld.getTimes(); k++) {
             String prefix = prefixOf(isFirst.getAndSet(false));
-            pw.printf("%s %s(%d).assessFails(handler);%n", prefix, fld.getName(), k);
+            pw.printf("%s %s(%d).assessFails(mode, handler);%n", prefix, fld.getName(), k);
         }
     }
 

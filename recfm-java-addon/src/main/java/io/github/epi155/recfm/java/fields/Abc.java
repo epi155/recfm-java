@@ -40,15 +40,15 @@ public class Abc extends DelegateWriter implements MutableField<FieldAbc>, JavaD
             case None:
                 break;
             case Ascii:
-                printf("%s checkAscii(\"%s\"%s, %-5s, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), bias.apply(fld.getOffset()), fld.getLength());
+                printf("%s checkAscii(mode, \"%s\"%s, %-5s, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), bias.apply(fld.getOffset()), fld.getLength());
                 isFirst.set(false);
                 break;
             case Latin1:
-                printf("%s checkLatin(\"%s\"%s, %-5s, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), bias.apply(fld.getOffset()), fld.getLength());
+                printf("%s checkLatin(mode, \"%s\"%s, %-5s, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), bias.apply(fld.getOffset()), fld.getLength());
                 isFirst.set(false);
                 break;
             case Valid:
-                printf("%s checkValid(\"%s\"%s, %-5s, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), bias.apply(fld.getOffset()), fld.getLength());
+                printf("%s checkValid(mode, \"%s\"%s, %-5s, %4d, handler);%n", prefix, fld.getName(), fld.pad(w), bias.apply(fld.getOffset()), fld.getLength());
                 isFirst.set(false);
                 break;
         }

@@ -277,6 +277,13 @@ abstract class FixEngine {
     protected String getAbc(int offset, int length) {
         return new String(rawData, offset, length);
     }
+
+    /**
+     * Numeric nullable getter (raw)
+     * @param offset field offset
+     * @param length field length
+     * @return field value
+     */
     protected String getAbcNull(int offset, int length) {
         if (isAllSpaces(offset, length)) return null;
         return getAbc(offset, length);
@@ -311,6 +318,15 @@ abstract class FixEngine {
                 throw new IllegalStateException();  // dead branch
         }
     }
+
+    /**
+     * Nullabile numeric getter (normalized)
+     * @param offset    field offset
+     * @param length    field length
+     * @param flg       normalization rule
+     * @param pad       padding char
+     * @return          normalized field value
+     */
     protected String getAbcNull(int offset, int length, int flg, char pad) {
         if (isAllSpaces(offset, length)) return null;
         return getAbc(offset, length, flg, pad);
@@ -517,13 +533,14 @@ abstract class FixEngine {
     /**
      * Check that the record field is of digits only
      *
+     * @param mode    validation mode
      * @param name    field name
      * @param offset  field offset
      * @param length  field length
      * @param handler error handler
      * @return <b>true</b> if there is an error, <b>false</b> if there are no errors
      */
-    protected boolean checkDigit(String name, int offset, int length, FieldValidateHandler handler) {
+    protected boolean checkDigit(ValidateMode mode, String name, int offset, int length, FieldValidateHandler handler) {
         boolean fault = false;
         for (int u = offset, v = 0; v < length; u++, v++) {
             char c = rawData[u];
@@ -538,7 +555,7 @@ abstract class FixEngine {
                     .code(ValidateError.NotNumber)
                     .wrong(c)
                     .build());
-                if (ValidateContext.isFailFirst()) return true;
+                if (mode.isFailFirst()) return true;
                 else fault = true;
             }
         }
@@ -559,18 +576,19 @@ abstract class FixEngine {
     /**
      * Check that the record field is of digits only or SPACE only
      *
+     * @param mode    validation mode
      * @param name    field name
      * @param offset  field offset
      * @param length  field length
      * @param handler error handler
      * @return <b>true</b> if there is an error, <b>false</b> if there are no errors
      */
-    protected boolean checkDigitBlank(String name, int offset, int length, FieldValidateHandler handler) {
+    protected boolean checkDigitBlank(ValidateMode mode, String name, int offset, int length, FieldValidateHandler handler) {
         char c = rawData[offset];
         if (c == ' ') {
-            return checkAllSpace(name, offset, length, handler);
+            return checkAllSpace(mode, name, offset, length, handler);
         } else if ('0' <= c && c <= '9') {
-            return checkAllDigit(name, offset, length, handler);
+            return checkAllDigit(mode, name, offset, length, handler);
         } else {
             handler.error(Detail
                     .builder()
@@ -586,7 +604,7 @@ abstract class FixEngine {
         }
     }
 
-    private boolean checkAllSpace(String name, int offset, int length, FieldValidateHandler handler) {
+    private boolean checkAllSpace(ValidateMode mode, String name, int offset, int length, FieldValidateHandler handler) {
         boolean fault = false;
         for (int u = offset + 1, v = 1; v < length; u++, v++) {
             char c = rawData[u];
@@ -601,14 +619,14 @@ abstract class FixEngine {
                     .code(ValidateError.NotBlank)  // ??
                     .wrong(c)
                     .build());
-                if (ValidateContext.isFailFirst()) return true;
+                if (mode.isFailFirst()) return true;
                 else fault = true;
             }
         }
         return fault;
     }
 
-    private boolean checkAllDigit(String name, int offset, int length, FieldValidateHandler handler) {
+    private boolean checkAllDigit(ValidateMode mode, String name, int offset, int length, FieldValidateHandler handler) {
         boolean fault = false;
         for (int u = offset + 1, v = 1; v < length; u++, v++) {
             char c = rawData[u];
@@ -623,7 +641,7 @@ abstract class FixEngine {
                     .code(ValidateError.NotNumber)
                     .wrong(c)
                     .build());
-                if (ValidateContext.isFailFirst()) return true;
+                if (mode.isFailFirst()) return true;
                 else fault = true;
             }
         }
@@ -668,13 +686,14 @@ abstract class FixEngine {
     /**
      * Check that the record field is of ascii char only
      *
+     * @param mode    validation mode
      * @param name    field name
      * @param offset  field offset
      * @param length  field length
      * @param handler error handler
      * @return <b>true</b> if there is an error, <b>false</b> if there are no errors
      */
-    protected boolean checkAscii(String name, int offset, int length, FieldValidateHandler handler) {
+    protected boolean checkAscii(ValidateMode mode, String name, int offset, int length, FieldValidateHandler handler) {
         boolean fault = false;
         for (int u = offset, v = 0; v < length; u++, v++) {
             char c = rawData[u];
@@ -689,7 +708,7 @@ abstract class FixEngine {
                     .code(ValidateError.NotAscii)
                     .wrong(c)
                     .build());
-                if (ValidateContext.isFailFirst()) return true;
+                if (mode.isFailFirst()) return true;
                 else fault = true;
             }
         }
@@ -723,13 +742,14 @@ abstract class FixEngine {
     /**
      * Validate alphanumeric latin1 field type
      *
+     * @param mode    validation mode
      * @param name    field name
      * @param offset  field offset
      * @param length  field length
      * @param handler error handler
      * @return <b>true</b> if there is an error, <b>false</b> if there are no errors
      */
-    protected boolean checkLatin(String name, int offset, int length, FieldValidateHandler handler) {
+    protected boolean checkLatin(ValidateMode mode, String name, int offset, int length, FieldValidateHandler handler) {
         boolean fault = false;
         for (int u = offset, v = 0; v < length; u++, v++) {
             char c = rawData[u];
@@ -744,7 +764,7 @@ abstract class FixEngine {
                     .code(ValidateError.NotLatin)
                     .wrong(c)
                     .build());
-                if (ValidateContext.isFailFirst()) return true;
+                if (mode.isFailFirst()) return true;
                 else fault = true;
             }
         }
@@ -772,13 +792,14 @@ abstract class FixEngine {
     /**
      * Validate an alphanumeric UTF-8 field
      *
+     * @param mode    validation mode
      * @param name    field name
      * @param offset  field offset
      * @param length  field length
      * @param handler error handler
      * @return <b>true</b> if there is an error, <b>false</b> if there are no errors
      */
-    protected boolean checkValid(String name, int offset, int length, FieldValidateHandler handler) {
+    protected boolean checkValid(ValidateMode mode, String name, int offset, int length, FieldValidateHandler handler) {
         boolean fault = false;
         for (int u = offset, v = 0; v < length; u++, v++) {
             char c = rawData[u];
@@ -793,7 +814,7 @@ abstract class FixEngine {
                     .code(ValidateError.NotValid)
                     .wrong(c)
                     .build());
-                if (ValidateContext.isFailFirst()) return true;
+                if (mode.isFailFirst()) return true;
                 else fault = true;
             }
         }
@@ -906,6 +927,14 @@ abstract class FixEngine {
                 throw new FieldOverFlowException(xxflowMessage(offset, length, s.length()));
         }
     }
+
+    /**
+     * Nullable numeric setter
+     * @param s               field value
+     * @param offset          field offset
+     * @param length          field length
+     * @param flg             behaviour
+     */
     protected void setNumNull(String s, int offset, int length, int flg) {
         if (s == null) {
             fill(offset, length, ' ');

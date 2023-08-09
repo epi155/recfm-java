@@ -40,7 +40,7 @@ public class Num extends DelegateWriter implements MutableField<FieldNum> {
     @Override
     public void validate(@NotNull FieldNum fld, int w, @NotNull IntFunction<String> bias, @NotNull AtomicBoolean isFirst) {
         String prefix = prefixOf(isFirst.getAndSet(false));
-        printf("%s checkDigit(\"%s\"%s, %-5s, %4d, handler);%n", prefix, fld.getName(), fld.pad(w),
+        printf("%s checkDigit(mode, \"%s\"%s, %-5s, %4d, handler);%n", prefix, fld.getName(), fld.pad(w),
                 bias.apply(fld.getOffset()), fld.getLength());
     }
 

@@ -1,5 +1,8 @@
 package io.github.epi155.recfm.java;
 
+/**
+ * Single Field Validate Mode Enum
+ */
 public enum ValidateMode {
     /**
      * Fail First Mode

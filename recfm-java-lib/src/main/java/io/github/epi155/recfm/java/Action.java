@@ -24,6 +24,9 @@ public class Action {
      * All padding characters to the left are removed up to the minimum length of a single character value
      */
     public static final int F_NRM_LT1 = 0x04;
+    /**
+     * Normalization Mask Filter
+     */
     public static final int F_NRM_MSK = 0x07;
 
     /**
@@ -38,6 +41,9 @@ public class Action {
      * Truncate left
      */
     public static final int F_OVF_TRL = 0x02 << 3;
+    /**
+     * Overflow Mask Filter
+     */
     public static final int F_OVF_MSK = 0x03 << 3;
 
     /**
@@ -52,6 +58,9 @@ public class Action {
      * Pad left
      */
     public static final int F_UNF_PAL = 0x02 << 5;
+    /**
+     * Underflow Mask Filter
+     */
     public static final int F_UNF_MSK = 0x03 << 5;
     private Action() {}
 

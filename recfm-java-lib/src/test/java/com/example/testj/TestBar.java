@@ -1,13 +1,16 @@
 package com.example.testj;
 
-import com.example.sysj.test.*;
+import com.example.sysj.test.BarAlpha;
+import com.example.sysj.test.BarCustom;
+import com.example.sysj.test.BarDigit;
+import com.example.sysj.test.BarDom;
 import io.github.epi155.recfm.java.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.nio.CharBuffer;
 
-public class TestBar {
+class TestBar {
     @Test
     void testAlpha() {
         BarAlpha alpha = new BarAlpha();
@@ -40,20 +43,26 @@ public class TestBar {
         }
 
         BarAlpha a = BarAlpha.decode(CharBuffer.allocate(10).toString());
-        Assertions.assertDoesNotThrow(() -> a.getStrict(), "test ASCII");
-        Assertions.assertDoesNotThrow(() -> a.getWeak(), "test Latin1");
-        Assertions.assertDoesNotThrow(() -> a.getUtf8(), "test UTF-8");
-        Assertions.assertDoesNotThrow(() -> a.getAll(), "test no check");
+        Assertions.assertDoesNotThrow(a::getStrict, "test ASCII");
+        Assertions.assertDoesNotThrow(a::getWeak, "test Latin1");
+        Assertions.assertDoesNotThrow(a::getUtf8, "test UTF-8");
+        Assertions.assertDoesNotThrow(a::getAll, "test no check");
 
         if (!a.validateFails(it ->
             System.out.printf("Error field %s@%d+%d: %s%n",
                 it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
+        alpha.setWeak("abc  ");
+        Assertions.assertEquals("abc", alpha.getWeak());
+        alpha.setWeak(" ");
+        Assertions.assertEquals("", alpha.getWeak());
+
+        alpha.setUtf8("  ");
+        Assertions.assertEquals(" ", alpha.getUtf8());
     }
     @Test
     void testDigit() {
-        FixError.failAll();
         BarDigit digit = new BarDigit();
 
         Assertions.assertThrows(FieldUnderFlowException.class, () -> digit.setStrict(null), "test Num underflow");
@@ -64,7 +73,6 @@ public class TestBar {
         Assertions.assertDoesNotThrow(() -> digit.setWeak("12345"), "test Num overflow/trunc");
 
         Assertions.assertDoesNotThrow(() -> digit.setRex("Hi"), "test Num invalid");
-        ;
 
         BarAlpha alpha = BarAlpha.of(digit);    // cast
         BarDigit numer = digit.copy();      // clone / deep-copy
@@ -76,13 +84,13 @@ public class TestBar {
         }
 
         BarDigit n = BarDigit.decode(CharBuffer.allocate(10).toString());
-        if (!n.validateFails(it ->
+        if (!n.validateAllFails(it ->
             System.out.printf("Error field %s@%d+%d: %s%n",
                 it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
-        Assertions.assertThrows(NotDigitException.class, () -> n.getStrict(), "test Num get");
-        Assertions.assertDoesNotThrow(() -> n.getRex(), "test Num get");
+        Assertions.assertThrows(NotDigitException.class, n::getStrict, "test Num get");
+        Assertions.assertDoesNotThrow(n::getRex, "test Num get");
 
         n.setRex("11");
         System.out.println(n.getRex());
@@ -95,6 +103,11 @@ public class TestBar {
 
         Assertions.assertDoesNotThrow(() -> BarDigit.decode("123"), "test underflow");
         Assertions.assertDoesNotThrow(() -> BarDigit.decode("123456789012"), "test overflow");
+
+        digit.setWeak("0000");
+        Assertions.assertEquals("0", digit.getWeak());
+        digit.setWeak("0100");
+        Assertions.assertEquals("100", digit.getWeak());
     }
     @Test
     void testCustom() {
@@ -145,7 +158,7 @@ public class TestBar {
                 it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
-        Assertions.assertDoesNotThrow(() -> cu2.getDig(), "testCus invalid");
+        Assertions.assertDoesNotThrow(cu2::getDig, "testCus invalid");
 
         BarCustom cu3 = BarCustom.decode("12345678x0");
         if (!cu3.validateFails(it ->
@@ -153,7 +166,7 @@ public class TestBar {
                 it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
-        Assertions.assertDoesNotThrow(() -> cu3.getDig(), "testCus invalid");
+        Assertions.assertDoesNotThrow(cu3::getDig, "testCus invalid");
 
         BarCustom cu4 = BarCustom.decode("1234567 x0");
         if (!cu4.validateFails(it ->
@@ -161,13 +174,23 @@ public class TestBar {
                 it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
-        Assertions.assertDoesNotThrow(() -> cu4.getDig(), "testCus invalid");
+        Assertions.assertDoesNotThrow(cu4::getDig, "testCus invalid");
 
         try {
             cu4.getDig();
         } catch (NotBlankException e) {
             e.printStackTrace();
         }
+
+        cust.setRgt("00");
+        Assertions.assertEquals("", cust.getRgt());
+        cust.setRgt("010");
+        Assertions.assertEquals("10", cust.getRgt());
+
+        cust.setLft("**");
+        Assertions.assertEquals("", cust.getLft());
+        cust.setLft("*1*");
+        Assertions.assertEquals("*1", cust.getLft());
     }
     @Test
     void testDomain() {
@@ -184,7 +207,7 @@ public class TestBar {
                         it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
-        Assertions.assertThrows(NotDomainException.class, () -> d1.getCur(), "test Dom invalid");
+        Assertions.assertThrows(NotDomainException.class, d1::getCur, "test Dom invalid");
 
     }
 }

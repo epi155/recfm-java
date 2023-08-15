@@ -4,14 +4,15 @@
 
     <groupId>io.github.epi155</groupId>
     <artifactId>recfm-java</artifactId>
-    <version>0.6.3-SNAPSHOT</version>
+    <version>0.7.0</version>
     <packaging>pom</packaging>
     <name>recfm java implementation addon and lib</name>
 
-    <!-- mvn versions:display-dependency-updates ! check for new version -->
-    <!-- mvn release:clean ! clean release file -->
-    <!-- mvn release:prepare ! creare RELEASE and next SNAPSHOT -->
     <!-- mvn versions:set -DnewVersion=x.y.z -->
+    <!-- mvn release:clean -->
+    <!-- mvn versions:display-dependency-updates -->
+    <!-- mvn release:prepare -->
+    <!-- mvn release:perform -->
     <!-- mvn release:update-versions -->
     <!-- mvn dependency:tree -->
 
@@ -30,7 +31,7 @@
     </modules>
 
     <description>java class utilities for fixed format file I/O</description>
-    <url>https://github.com/epi155/recfm-java/tree/recfm-java-0.6.2</url>
+    <url>https://github.com/epi155/recfm-java/tree/recfm-java-0.7.0</url>
 
     <developers>
         <developer>
@@ -49,7 +50,7 @@
         <connection>scm:git:git://github.com/epi155/recfm-java.git</connection>
         <developerConnection>scm:git:https://github.com/epi155/recfm-java.git</developerConnection>
         <url>https://github.com/epi155/recfm-java</url>
-        <tag>HEAD</tag>
+        <tag>recfm-java-0.7.0</tag>
     </scm>
 
     <profiles>

@@ -1,15 +1,14 @@
 package io.github.epi155.recfm.java.fields;
 
+import io.github.epi155.recfm.java.factory.CodeWriter;
+import io.github.epi155.recfm.java.factory.DelegateWriter;
+import io.github.epi155.recfm.java.rule.PrepareField;
 import io.github.epi155.recfm.type.FieldConstant;
-import io.github.epi155.recfm.util.AbstractPrinter;
-import io.github.epi155.recfm.util.PrepareField;
 import org.apache.commons.text.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.PrintWriter;
-
-public class PreConstant extends AbstractPrinter implements PrepareField<FieldConstant> {
-    public PreConstant(PrintWriter pw) {
+public class PreConstant extends DelegateWriter implements PrepareField<FieldConstant> {
+    public PreConstant(CodeWriter pw) {
         super(pw);
     }
 

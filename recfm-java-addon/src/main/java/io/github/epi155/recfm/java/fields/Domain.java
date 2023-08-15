@@ -1,51 +1,50 @@
 package io.github.epi155.recfm.java.fields;
 
 import io.github.epi155.recfm.java.JavaDoc;
+import io.github.epi155.recfm.java.factory.CodeWriter;
+import io.github.epi155.recfm.java.factory.DelegateWriter;
+import io.github.epi155.recfm.java.rule.MutableField;
 import io.github.epi155.recfm.type.FieldDomain;
-import io.github.epi155.recfm.util.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntFunction;
 
 import static io.github.epi155.recfm.java.JavaTools.prefixOf;
 
-public class Domain extends IndentPrinter implements MutableField<FieldDomain>, JavaDoc {
-    public Domain(PrintWriter pw) {
+public class Domain extends DelegateWriter implements MutableField<FieldDomain>, JavaDoc {
+    public Domain(CodeWriter pw) {
         super(pw);
     }
 
-    public Domain(PrintWriter pw, IntFunction<String> pos) {
+    public Domain(CodeWriter pw, IntFunction<String> pos) {
         super(pw, pos);
     }
 
-    public void access(FieldDomain fld, String wrkName, int indent, @NotNull GenerateArgs ga) {
-        pushIndent(indent);
-        if (ga.doc) docGetter(fld);
+    public void access(FieldDomain fld, String wrkName, boolean doc) {
+        if (doc) docGetter(fld);
         printf("public String get%s() {%n", wrkName);
         printf("    testArray(%1$s, %2$d, DOMAIN_AT%3$sPLUS%2$d);%n", pos.apply(fld.getOffset()), fld.getLength(), pos.apply(fld.getOffset() + 1));
         printf("    return getAbc(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());
         printf("}%n");
-        if (ga.doc) docSetter(fld);
+        if (doc) docSetter(fld);
         printf("public void set%s(String s) {%n", wrkName);
         printf("    testArray(s, DOMAIN_AT%sPLUS%d);%n", pos.apply(fld.getOffset() + 1), fld.getLength());
         printf("    setDom(s, %s, VALUE_AT%dPLUS%d);%n",
                 pos.apply(fld.getOffset()), fld.getOffset(), fld.getLength());
         printf("}%n");
-        popIndent();
     }
 
     public void initialize(@NotNull FieldDomain fld, int bias) {
-        printf("        fill(%5d, %4d, VALUE_AT%dPLUS%d);%n",
+        printf("    fill(%5d, %4d, VALUE_AT%dPLUS%d);%n",
                 fld.getOffset() - bias, fld.getLength(), fld.getOffset(), fld.getLength());
     }
 
-    public void validate(@NotNull FieldDomain fld, int w, int bias, AtomicBoolean isFirst) {
+    public void validate(@NotNull FieldDomain fld, int w, @NotNull IntFunction<String> bias, @NotNull AtomicBoolean isFirst) {
         String prefix = prefixOf(isFirst.getAndSet(false));
-        printf("%s checkArray(\"%s\"%s, %5d, %4d, handler, DOMAIN_AT%dPLUS%d);%n", prefix,
+        printf("%s checkArray(\"%s\"%s, %-5s, %4d, handler, DOMAIN_AT%dPLUS%d);%n", prefix,
                 fld.getName(), fld.pad(w),
-                fld.getOffset() - bias, fld.getLength(),
+                bias.apply(fld.getOffset()), fld.getLength(),
                 fld.getOffset(), fld.getLength()
         );
     }

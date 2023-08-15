@@ -1,0 +1,197 @@
+packages:
+  - name: com.example.sysj.test
+
+    interfaces:
+      - &TransactionArea
+        name: ITransactionArea
+        length: 12
+        fields:
+          - !Abc { name: transId   , at:  1, len: 9 }
+          - !Num { name: esitoAgg  , at: 10, len: 1 }
+          - !Num { name: esitoCompl, at: 11, len: 1 }
+          - !Val { val: "\n"       , at: 12, len: 1 }
+
+      - &MessageArea
+        name: IMessageArea
+        length: 100
+        fields:
+          - !Abc { name: cdMsgId   , at:  13, len:  8 }
+          - !Num { name: versMsg   , at:  21, len:  4 }
+          - !Abc { name: cdInterno1, at:  25, len:  1 }
+          - !Num { name: abiEmitt  , at:  26, len:  5 }
+          - !Abc { name: cdInterno2, at:  31, len:  1 }
+          - !Abc { name: cdInterno3, at:  32, len:  1 }
+          - !Abc { name: cdUtente  , at:  33, len:  8 }
+          - !Abc { name: abi       , at:  41, len:  5 }
+          - !Abc { name: cdSegm1   , at:  46, len:  5 }
+          - !Abc { name: cdSegm2   , at:  51, len:  5 }
+          - !Abc { name: tsMsg     , at:  56, len: 26 }
+          - !Abc { name: areaCode  , at:  82, len: 30 }
+          - !Val { val: "\n"       , at: 112, len:  1 }
+
+      - &SegmentArea
+        name: ISegmentArea
+        length: 11
+        fields:
+          - !Abc { name: cdSegmento , at: 113, len: 8 }
+          - !Num { name: esitoAgg   , at: 121, len: 1 }
+          - !Num { name: esitoCompl , at: 122, len: 1 }
+          - !Val { val: "\n"        , at: 123, len: 1 }
+
+      - &Date
+        name: IData
+        length: 10
+        fields:
+          - !Num { name: anno       , at: 23, len: 4 }
+          - !Fil { fill: '-'        , at: 27, len: 1 }
+          - !Num { name: mese       , at: 28, len: 2 }
+          - !Fil { fill: '-'        , at: 30, len: 1 }
+          - !Num { name: giorno     , at: 31, len: 2 }
+
+      - &Area51
+        name: IArea51
+        length: 32
+        fields:
+          - !Abc { name: cdSegmento1 , at:   1, len: 8 }
+          - !Num { name: esitoAgg1   , at:   9, len: 2 }
+          - !Emb { src: *TransactionArea, at:  11, len: 12  }
+    #      - !GRP { name: areaTra    , at:  11, len: 12, as: *TransactionArea }
+          - !Grp { name: data       , at:  23, len: 10, fields: [
+            !Num { name: anno       , at: 23, len: 4 },
+            !Fil {                    at: 27, len: 1 },
+            !Num { name: mese       , at: 28, len: 2 },
+            !Fil {                    at: 30, len: 1 },
+            !Num { name: giorno     , at: 31, len: 2 },
+          ] }
+
+      - &Area52
+        name: IArea52
+        length: 30
+        fields:
+          - !Occ { name: data      , at:  23, len: 10, x: 3, fields: [
+            !Num { name: anno       , at: 23, len: 4 },
+            !Fil {                    at: 27, len: 1 },
+            !Num { name: mese       , at: 28, len: 2 },
+            !Fil {                    at: 30, len: 1 },
+            !Num { name: giorno     , at: 31, len: 2 },
+          ] }
+      - &Time
+        name: ITime
+        len: 6
+        fields:
+          - !Num { name: hours  , len: 2 }
+          - !Num { name: minutes, len: 2 }
+          - !Num { name: seconds, len: 2 }
+      - &Error
+        name: IError
+        len: 49
+        fields:
+          - !Abc { name: status  , len:  5}
+          - !Num { name: code    , len:  4}
+          - !Abc { name: message , len: 40}
+
+
+    classes:
+      - name: KDate
+        length: 10
+        fields:
+          - !Emb { src: *Date, at:   1, len:  10 }
+
+      - name: B280v2xReq
+        length: 19324
+        fields:
+    #      - !GRP { name: messageArea    , at:   1, len: 100, proxy: *MessageArea }
+    #      - !GRP { name: transactionArea, at:   1, len:  12, as: *TransactionArea }
+          - !Emb { src: *TransactionArea, at:   1, len:  12 }
+          - !Emb { src: *MessageArea    , at:  13, len: 100 }
+          - !Fil {                        at: 113, len:   1 }
+    #      - !GRP { name: messageArea    , at:  14, len: 100, as: *MessageArea }
+          - !GRP { name: SegmentArea    , at: 114, len:  11, as: *SegmentArea }
+          - !Fil {                        at: 125, len: 19200 }
+
+      - name: Nevada
+        length: 150
+        fields:
+          - !GRP { name: area51, at: 1, len: 32, as: *Area51 }
+          - !OCC { name: lastThree, at: 33, len: 10, x: 3, as: *Date }
+    #      - !Fil {                 at: 33, len: 30 }
+          - !GRP { name: area52, at: 63, len: 30, as: *Area52 }
+          - !Grp { name: documento   , at:  93, len: 40, fields: [
+            !Abc { name: numero      , at: 93, len: 16, set: false },
+            !Emb { src: *Date        , at: 109, len: 10 },
+            !Nux { name: tasso       , at: 119, len: 5, ini: Spaces },
+            !Fil {                    at: 124, len:  9 }
+          ] }
+          - !Fil { at: 133, len: 18 }
+
+      - name: Alamos
+        len: 20
+        fields:
+          - !Nux { name: red, len: 4 }
+          - !Abc { name: xred, len: 4, ovr: yes }
+          - !Nux { name: gre, at:  5, len: 4, nrm: Trim }
+          - !Nux { name: blu, at:  9, len: 4, ini: Zeroes }
+          - !Nux { name: yel, at: 13, len: 4, ini: Zeroes, nrm: Trim }
+          - !Nux { name: cya, at: 17, len: 4, ini: Space, nrm: Trim, acc: Num }
+          - !Abc { name: xgre, at:  5, len: 4, ovr: true }
+          - !Abc { name: xblu, at:  9, len: 4, ovr: true }
+          - !Abc { name: xyel, at: 13, len: 4, ovr: yes }
+          - !Abc { name: xcya, at: 17, len: 4, ovr: true }
+
+      - name: Foo3111
+        length: 50
+        doc: No
+        fields:
+          - !Abc { name: cognome    , len:    25 }
+          - !Abc { name: nome       , len:    20 }
+          - !Abc { name: stCivile   , len:     1 }
+          - !Abc { name: nazionalita, len:     3 }
+          - !Abc { name: sesso      , len:     1 }
+      - name: Foo3112
+        length: 8
+        doc: No
+        fields:
+          - !Num { name: year , at: 1, len: 4 }
+          - !Num { name: month, at: 5, len: 2 }
+          - !Num { name: mday , at: 7, len: 2 }
+      - name: Foo3115
+        length: 12
+        doc: No
+        fields:
+          - !Num { name: year , at: 1, len: 4 }
+          - !Dom { name: month, at: 5, len: 3,
+                   items: [ Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec ] }
+          - !Num { name: mday , at: 8, len: 2 }
+          - !Dom { name: wday , at: 10, len: 3, items: [ Sun, Mon, Tue, Wed, Thu, Fri, Sat ] }
+      - name: Foo3118
+        length: 12
+        fields:
+          - !Grp { name: startTime, len: 6, fields: [
+            !Num { name: hours  , len: 2},
+            !Num { name: minutes, len: 2},
+            !Num { name: seconds, len: 2}
+          ] }
+          - !Grp { name: stopTime , at: 7, len: 6, fields: [
+            !Num { name: hours  , at:  7, len: 2},
+            !Num { name: minutes, at:  9, len: 2},
+            !Num { name: seconds, at: 11, len: 2}
+          ] }
+      - name: Foo3119
+        length: 590
+        fields:
+          - !Num { name: nmErrors, len: 2}
+          - !Occ { name: tabError, len: 49, x: 12, fields: [
+            !Abc { name: status  , len:  5},
+            !Num { name: code    , len:  4},
+            !Abc { name: message , len: 40}
+          ] }
+      - name: Foo311b
+        length: 12
+        fields:
+          - !GRP { name: startTime, len: 6, as: *Time }
+          - !GRP { name: stopTime , len: 6, as: *Time }
+      - name: Foo311c
+        length: 590
+        fields:
+          - !Num { name: nmErrors, len: 2}
+          - !OCC { name: tabError, len: 49, x: 12, as: *Error }

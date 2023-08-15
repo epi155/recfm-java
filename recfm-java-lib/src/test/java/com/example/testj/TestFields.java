@@ -5,7 +5,6 @@ import io.github.epi155.recfm.java.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 
 import java.nio.CharBuffer;
 
@@ -19,17 +18,14 @@ class TestFields {
     }
     @Test
     void testAbc() {
-        FixError.failFirst();
+        //FixError.failFirst();
 
         foo.setAlpha01("A");
         Assertions.assertEquals("A         ", foo.getAlpha01(), "test align/pad");
         foo.setAlpha01("precipitevolissimevolmente");
         Assertions.assertEquals("precipitev", foo.getAlpha01(), "test align/truncate");
 
-        Assertions.assertThrows(NotAsciiException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable { foo.setAlpha01("Niña"); }
-        }, "test not ascii (default)");
+        Assertions.assertThrows(NotAsciiException.class, () -> foo.setAlpha01("Niña"), "test not ascii (default)");
         Assertions.assertThrows(NotAsciiException.class, () -> foo.setAlpha02("Niña"), "test not ascii");
 
         Assertions.assertThrows(NotLatinException.class, () -> foo.setAlpha03("10 €"), "test not latin1");
@@ -101,12 +97,12 @@ class TestFields {
         Assertions.assertDoesNotThrow(() -> foo.setHackDom1("AUD"), "test value falsified (redefines)");
         Assertions.assertThrows(NotDomainException.class, () -> foo.getDomain01(), "test get failure");
 
-        foo.validateFails(it -> {
-            System.out.printf("Error on field %s at offset %d, length %d, code %s%n",
-                it.name(), it.offset(), it.length(), it.code().name());
-            System.out.printf("Value: /%s/%n", it.value());
-            System.out.println(it.message());
-        });
+            foo.validateFails(it -> {
+                System.out.printf("Error on field %s at offset %d, length %d, code %s%n",
+                        it.name(), it.offset(), it.length(), it.code().name());
+                System.out.printf("Value: /%s/%n", it.value());
+                System.out.println(it.message());
+            });
 
         foo.setDomain01(null);
         System.out.println(foo.getDomain01());
@@ -117,23 +113,20 @@ class TestFields {
         Assertions.assertEquals("HELLO     ", foo.group01().getAlpha01(), "test align/pad");
         foo.group01().setAlpha01("HELLO WORLD");
         Assertions.assertEquals("HELLO WORL", foo.group01().getAlpha01(), "test align/truncate");
-        foo.withGroup01(it ->
-                Assertions.assertThrows(NotAsciiException.class, () -> it.setAlpha01("привет"), "test ascii"));
+        Assertions.assertThrows(NotAsciiException.class, () -> foo.group01().setAlpha01("привет"), "test ascii");
 
         foo.group01().setDigit01("12");
         Assertions.assertEquals("00012", foo.group01().getDigit01(), "test align/pad");
         foo.group01().setDigit01("1415926535897932384626433832");
         Assertions.assertEquals("33832", foo.group01().getDigit01(), "test align/truncate");
-        foo.withGroup01(it ->
-                Assertions.assertThrows(NotDigitException.class, () -> it.setDigit01("one"), "test digit"));
+        Assertions.assertThrows(NotDigitException.class, () -> foo.group01().setDigit01("one"), "test digit");
 
         foo.group01().setCustom01("12");
         Assertions.assertEquals("12   ", foo.group01().getCustom01(), "test align/pad");
         foo.group01().setCustom01("1415926535897932384626433832");
         Assertions.assertEquals("14159", foo.group01().getCustom01(), "test align/truncate");
         Assertions.assertDoesNotThrow(() -> foo.group01().setCustom01("three"), "test plain ascii");
-        foo.withGroup01(it ->
-                Assertions.assertThrows(NotAsciiException.class, () -> it.setCustom01("Niña"), "test not ascii"));
+        Assertions.assertThrows(NotAsciiException.class, () -> foo.group01().setCustom01("Niña"), "test not ascii");
     }
     @Test
     void testOcc() {
@@ -158,12 +151,6 @@ class TestFields {
             })) {
             System.out.println("Valid Date");
         }
-        fDate.withDate(new WithAction<FooDate.Date>() {
-            @Override
-            public void call(FooDate.Date value) {
-                value.setYear(2020);
-            }
-        });
     }
 
     @Test
@@ -213,7 +200,7 @@ class TestFields {
     }
     @Test
     void testDigit() {
-        FixError.failAll();
+        //FixError.failAll();
         FooDigit digit = new FooDigit();
 
         Assertions.assertThrows(FieldUnderFlowException.class, () -> digit.setStrict(null), "test Num underflow");
@@ -224,6 +211,7 @@ class TestFields {
         Assertions.assertDoesNotThrow(() -> digit.setWeak("12345"), "test Num overflow/trunc");
 
         Assertions.assertThrows(NotMatchesException.class, () -> digit.setRex("Hi"), "test Num invalid");
+        ;
 
         FooAlpha alpha = FooAlpha.of(digit);    // cast
         FooDigit numer = digit.copy();      // clone / deep-copy
@@ -240,8 +228,8 @@ class TestFields {
                         it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
-        Assertions.assertThrows(NotDigitException.class, () -> n.getStrict(), "test Num get");
-        Assertions.assertThrows(NotMatchesException.class, () -> n.getRex(), "test Num get");
+        Assertions.assertThrows(NotDigitException.class, n::getStrict, "test Num get");
+        Assertions.assertThrows(NotMatchesException.class, n::getRex, "test Num get");
 
         n.setRex("11");
         System.out.println(n.getRex());
@@ -304,7 +292,7 @@ class TestFields {
                         it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
-        Assertions.assertThrows(NotDigitBlankException.class, () -> cu2.getDig(), "testCus invalid");
+        Assertions.assertThrows(NotDigitBlankException.class, cu2::getDig, "testCus invalid");
 
         FooCustom cu3 = FooCustom.decode("12345678x0");
         if (!cu3.validateFails(it ->
@@ -312,7 +300,7 @@ class TestFields {
                         it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
-        Assertions.assertThrows(NotDigitException.class, () -> cu3.getDig(), "testCus invalid");
+        Assertions.assertThrows(NotDigitException.class, cu3::getDig, "testCus invalid");
 
         FooCustom cu4 = FooCustom.decode("1234567 x0");
         if (!cu4.validateFails(it ->
@@ -320,7 +308,7 @@ class TestFields {
                         it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
-        Assertions.assertThrows(NotBlankException.class, () -> cu4.getDig(), "testCus invalid");
+        Assertions.assertThrows(NotBlankException.class, cu4::getDig, "testCus invalid");
 
         try {
             cu4.getDig();
@@ -348,7 +336,7 @@ class TestFields {
                         it.name(), it.offset(), it.length(), it.message()))) {
             System.out.println("Valid Date");
         }
-        Assertions.assertThrows(NotDomainException.class, () -> d1.getCur(), "test Dom invalid");
+        Assertions.assertThrows(NotDomainException.class, d1::getCur, "test Dom invalid");
 
     }
 }

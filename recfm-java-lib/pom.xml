@@ -3,12 +3,12 @@
     <parent>
         <artifactId>recfm-java</artifactId>
         <groupId>io.github.epi155</groupId>
-        <version>0.6.3-SNAPSHOT</version>
+        <version>0.7.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>recfm-java-lib</artifactId>
-    <url>https://github.com/epi155/recfm-java/tree/recfm-java-0.6.2/recfm-java-lib</url>
+    <url>https://github.com/epi155/recfm-java/tree/recfm-java-0.7.0/recfm-java-lib</url>
 
     <properties>
         <maven.compiler.source>5</maven.compiler.source>
@@ -24,21 +24,21 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.9.3</version>
+            <version>5.10.0</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.9.3</version>
+            <version>5.10.0</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.junit.vintage/junit-vintage-engine -->
         <dependency>
             <groupId>org.junit.vintage</groupId>
             <artifactId>junit-vintage-engine</artifactId>
-            <version>5.9.3</version>
+            <version>5.10.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -46,9 +46,24 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.16.0</version>
+                <configuration>
+                    <ruleSet>
+                        <ignoreVersions>
+                            <ignoreVersion>
+                                <type>regex</type>
+                                <version>.+-(alpha|beta)(-\d+)?</version>
+                            </ignoreVersion>
+                        </ignoreVersions>
+                    </ruleSet>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>io.github.epi155</groupId>
                 <artifactId>recfm-maven-plugin</artifactId>
-                <version>0.6.1</version>
+                <version>0.7.0</version>
                 <executions>
                     <execution>
                         <id>enforced</id>
@@ -57,30 +72,14 @@
                         </goals>
                         <phase>generate-test-sources</phase>
                         <configuration>
-                            <doc>true</doc>
                             <settingsDirectory>${project.basedir}/src/test/resources</settingsDirectory>
                             <generateDirectory>target/generated-test-sources/recfm</generateDirectory>
                             <settings>
                                 <setting>J-test.yaml</setting>
+                                <setting>K-test.yaml</setting>
+                                <setting>X-test.yaml</setting>
                             </settings>
                             <codeProviderClassName>io.github.epi155.recfm.java.CodeGenerator</codeProviderClassName>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>relaxed</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <phase>generate-test-sources</phase>
-                        <configuration>
-                            <enforceGetter>false</enforceGetter>
-                            <enforceSetter>false</enforceSetter>
-                            <doc>true</doc>
-                            <settingsDirectory>${project.basedir}/src/test/resources</settingsDirectory>
-                            <generateDirectory>target/generated-test-sources/recfm</generateDirectory>
-                            <settings>
-                                <setting>K-test.yaml</setting>
-                            </settings>
                         </configuration>
                     </execution>
                 </executions>
@@ -88,7 +87,7 @@
                     <dependency>
                         <groupId>io.github.epi155</groupId>
                         <artifactId>recfm-java-addon</artifactId>
-                        <version>0.6.3-SNAPSHOT</version>
+                        <version>${project.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -106,7 +105,7 @@
                                 <include>module-info.java</include>
                             </includes>
                             <outputDirectory>${project.build.outputDirectory}/META-INF/versions/9</outputDirectory>
-<!--                            <release>9</release>-->
+                            <!--                            <release>9</release>-->
                             <!-- still need this for IntelliJ -->
                             <source>9</source>
                             <target>9</target>

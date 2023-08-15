@@ -1,0 +1,9 @@
+  - name: B280v2xReq
+    length: 19324
+    fields:
+#      - !GRP { name: messageArea    , at:   1, len: 100, proxy: *MessageArea }
+      - !GRP { name: transactionArea, at:   1, len:  12, as: *TransactionArea }
+      - !GRP { name: messageArea    , at:  13, len: 100, as: *MessageArea }
+      - !GRP { name: SegmentArea    , at: 113, len:  11, as: *SegmentArea }
+      - !Fil {                        at: 124, len: 19201 }
+

@@ -1,92 +1,99 @@
 package io.github.epi155.recfm.java.factory;
 
+import io.github.epi155.recfm.api.FieldDefault;
+import io.github.epi155.recfm.api.FieldModel;
 import io.github.epi155.recfm.java.fields.*;
+import io.github.epi155.recfm.java.rule.ValidateField;
 import io.github.epi155.recfm.type.*;
-import io.github.epi155.recfm.util.ValidateField;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.IntFunction;
+
+import static io.github.epi155.recfm.java.JavaTools.prefixOf;
 
 public class ValidateFactory {
     private final ValidateField<FieldAbc> delegateAbc;
     private final ValidateField<FieldNum> delegateNum;
+    private final ValidateField<FieldNux> delegateNux;
     private final ValidateField<FieldCustom> delegateCus;
-    private final ValidateField<FieldFiller> delegateFil;
     private final ValidateField<FieldConstant> delegateVal;
     private final ValidateField<FieldDomain> delegateDom;
+    private final CodeWriter pw;
 
-    private ValidateFactory(PrintWriter pw, Defaults defaults) {
+    private ValidateFactory(CodeWriter pw, FieldDefault defaults) {
         this.delegateAbc = new Abc(pw, defaults.getAbc());
-        this.delegateNum = new Num(pw);
+        this.delegateNum = new Num(pw, defaults.getNum());
+        this.delegateNux = new Nux(pw, defaults.getNux());
         this.delegateCus = new Custom(pw, defaults.getCus());
         this.delegateDom = new Domain(pw);
-        this.delegateFil = new Filler(pw, defaults.getFil());
         this.delegateVal = new Constant(pw);
+        this.pw = pw;
     }
 
-    public static ValidateFactory getInstance(PrintWriter pw, Defaults defaults) {
+    public static ValidateFactory getInstance(CodeWriter pw, FieldDefault defaults) {
         return new ValidateFactory(pw, defaults);
     }
 
-    protected void validateGrp(@NotNull FieldGroup fld, int w, int bias, AtomicBoolean firstField) {
-        if (fld.isRedefines()) return;
-        fld.getFields().forEach(it -> validate(it, w, bias, firstField));
+    protected void validateGrp(@NotNull GroupAware fld, AtomicBoolean isFirst) {
+        if (fld.isOverride()) return;
+        String prefix = prefixOf(isFirst.getAndSet(false));
+        pw.printf("%s %s.assessFails(mode, handler);%n", prefix, fld.getName());
     }
 
-    protected void validateOcc(FieldOccurs fld, int w, int bias, AtomicBoolean firstField) {
-        if (fld.isRedefines()) return;
-        for (int k = 0, shift = 0; k < fld.getTimes(); k++, shift += fld.getLength()) {
-            int backShift = shift;
-            fld.getFields().forEach(it -> validate(it, w, bias - backShift, firstField));
+    protected void validateOcc(OccursAware fld, AtomicBoolean isFirst) {
+        if (fld.isOverride()) return;
+        for (int k = 1; k <= fld.getTimes(); k++) {
+            String prefix = prefixOf(isFirst.getAndSet(false));
+            pw.printf("%s %s(%d).assessFails(mode, handler);%n", prefix, fld.getName(), k);
         }
     }
 
-    protected void validateFil(FieldFiller fld, int w, int bias, AtomicBoolean isFirst) {
-        delegateFil.validate(fld, w, bias, isFirst);
-    }
-
-    protected void validateVal(FieldConstant fld, int w, int bias, AtomicBoolean isFirst) {
+    protected void validateVal(FieldConstant fld, int w, IntFunction<String> bias, AtomicBoolean isFirst) {
         delegateVal.validate(fld, w, bias, isFirst);
     }
 
-    protected void validateNum(FieldNum fld, int w, int bias, AtomicBoolean isFirst) {
-        if (fld.isRedefines()) return;
+    protected void validateNum(FieldNum fld, int w, IntFunction<String> bias, AtomicBoolean isFirst) {
+        if (fld.isOverride()) return;
         delegateNum.validate(fld, w, bias, isFirst);
     }
+    protected void validateNux(FieldNux fld, int w, IntFunction<String> bias, AtomicBoolean isFirst) {
+        if (fld.isOverride()) return;
+        delegateNux.validate(fld, w, bias, isFirst);
+    }
 
-    protected void validateAbc(FieldAbc fld, int w, int bias, AtomicBoolean isFirst) {
-        if (fld.isRedefines()) return;
+    protected void validateAbc(FieldAbc fld, int w, IntFunction<String> bias, AtomicBoolean isFirst) {
+        if (fld.isOverride()) return;
         delegateAbc.validate(fld, w, bias, isFirst);
     }
 
-    protected void validateDom(FieldDomain fld, int w, int bias, AtomicBoolean isFirst) {
-        if (fld.isRedefines()) return;
+    protected void validateDom(FieldDomain fld, int w, IntFunction<String> bias, AtomicBoolean isFirst) {
+        if (fld.isOverride()) return;
         delegateDom.validate(fld, w, bias, isFirst);
     }
 
-    protected void validateCus(FieldCustom fld, int w, int bias, AtomicBoolean isFirst) {
-        if (fld.isRedefines()) return;
+    protected void validateCus(FieldCustom fld, int w, IntFunction<String> bias, AtomicBoolean isFirst) {
+        if (fld.isOverride()) return;
         delegateCus.validate(fld, w, bias, isFirst);
     }
 
-    public void validate(NakedField fld, int padWidth, int bias, AtomicBoolean firstStatement) {
+    public void validate(FieldModel fld, int padWidth, IntFunction<String> pos, AtomicBoolean firstStatement) {
         if (fld instanceof FieldAbc) {
-            validateAbc((FieldAbc) fld, padWidth, bias, firstStatement);
+            validateAbc((FieldAbc) fld, padWidth, pos, firstStatement);
+        } else if (fld instanceof FieldNux) {
+            validateNux((FieldNux) fld, padWidth, pos, firstStatement);
         } else if (fld instanceof FieldNum) {
-            validateNum((FieldNum) fld, padWidth, bias, firstStatement);
+            validateNum((FieldNum) fld, padWidth, pos, firstStatement);
         } else if (fld instanceof FieldCustom) {
-            validateCus((FieldCustom) fld, padWidth, bias, firstStatement);
+            validateCus((FieldCustom) fld, padWidth, pos, firstStatement);
         } else if (fld instanceof FieldDomain) {
-            validateDom((FieldDomain) fld, padWidth, bias, firstStatement);
+            validateDom((FieldDomain) fld, padWidth, pos, firstStatement);
         } else if (fld instanceof FieldConstant) {
-            validateVal((FieldConstant) fld, padWidth, bias, firstStatement);
-        } else if (fld instanceof FieldFiller) {
-            validateFil((FieldFiller) fld, padWidth, bias, firstStatement);
-        } else if (fld instanceof FieldOccurs) {
-            validateOcc((FieldOccurs) fld, padWidth, bias, firstStatement);
-        } else if (fld instanceof FieldGroup) {
-            validateGrp((FieldGroup) fld, padWidth, bias, firstStatement);
+            validateVal((FieldConstant) fld, padWidth, pos, firstStatement);
+        } else if (fld instanceof OccursAware) {
+            validateOcc((OccursAware) fld, firstStatement);
+        } else if (fld instanceof GroupAware) {
+            validateGrp((GroupAware) fld, firstStatement);
         }
     }
 

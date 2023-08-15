@@ -7,7 +7,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static io.github.epi155.recfm.java.FixError.RECORD_BASE;
-import static io.github.epi155.recfm.java.FixError.failFirst;
 
 abstract class FixEngine {
     private static final String FIELD_AT = "Field @";
@@ -15,6 +14,7 @@ abstract class FixEngine {
     private static final String CHARS_FOUND = " chars, found ";
     private static final String CHARS_FOUND_NULL = " chars, found [NULL]";
     private static final String RECORD_LENGTH = "Record length ";
+    private static final String EMPTY_STRING = "";
     /**
      * record store area
      */
@@ -181,8 +181,7 @@ abstract class FixEngine {
      * String value normalizer
      *
      * @param s               original value
-     * @param overflowAction  overflow behaviour
-     * @param underflowAction underflow behaviour
+     * @param flg             behaviour
      * @param pad             padding char
      * @param init            initialize char
      * @param offset          field offset
@@ -190,35 +189,42 @@ abstract class FixEngine {
      * @return normalized value
      */
     protected static String normalize(String s,
-                                      OverflowAction overflowAction,
-                                      UnderflowAction underflowAction,
+                                      int flg,
                                       char pad, char init,
                                       int offset, int length) {
+        int flgUnf = flg & Action.F_UNF_MSK;
+        int flgOvf = flg & Action.F_OVF_MSK;
         if (s == null) {
-            if (underflowAction == UnderflowAction.Error)
+            if (flgUnf == Action.F_UNF_ERR)
                 throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND_NULL);
             return fill(length, init);
         } else if (s.length() == length)
             return s;
         else if (s.length() < length) {
-            switch (underflowAction) {
-                case PadR:
+            switch (flgUnf) {
+                case Action.F_UNF_PAR:
                     return rpad(s, length, pad);
-                case PadL:
+                case Action.F_UNF_PAL:
                     return lpad(s, length, pad);
-                case Error:
-                    throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
+                case Action.F_UNF_ERR:
+                default:
+                    throw new FieldUnderFlowException(xxflowMessage(offset, length, s.length()));
             }
-        } else /* s.length() > length */switch (overflowAction) {
-            case TruncR:
+        } else /* s.length() > length */switch (flgOvf) {
+            case Action.F_OVF_TRR:
                 return rtrunc(s, length);
-            case TruncL:
+            case Action.F_OVF_TRL:
                 return ltrunc(s, length);
-            case Error:
-                throw new FieldOverFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
+            case Action.F_OVF_ERR:
+            default:
+                throw new FieldOverFlowException(xxflowMessage(offset, length, s.length()));
         }
-        return null; // dead branch (?)
     }
+
+    private static String xxflowMessage(int offset, int length, int length1) {
+        return FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + length1;
+    }
+
 
     private static String fill(int t, char pad) {
         return CharBuffer.allocate(t).toString().replace('\0', pad);
@@ -270,6 +276,88 @@ abstract class FixEngine {
      */
     protected String getAbc(int offset, int length) {
         return new String(rawData, offset, length);
+    }
+
+    /**
+     * Numeric nullable getter (raw)
+     * @param offset field offset
+     * @param length field length
+     * @return field value
+     */
+    protected String getAbcNull(int offset, int length) {
+        if (isAllSpaces(offset, length)) return null;
+        return getAbc(offset, length);
+    }
+
+    private boolean isAllSpaces(int offset, int length) {
+        for (int u = offset + 1, v = 1; v < length; u++, v++) {
+            char c = rawData[u];
+            if (c != ' ')
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * Alphanumeric getter
+     * @param offset    field offset
+     * @param length    field length
+     * @param flg       normalization rule
+     * @param pad       padding char
+     * @return          normalized field value
+     */
+    protected String getAbc(int offset, int length, int flg, char pad) {
+        int flgRule = flg & Action.F_NRM_MSK;
+        switch (flgRule) {
+            case Action.F_NRM_RT0: return rgtTrim(offset, length, pad);
+            case Action.F_NRM_RT1: return rgtTrim1(offset, length, pad);
+            case Action.F_NRM_LT0: return lftTrim(offset, length, pad);
+            case Action.F_NRM_LT1: return lftTrim1(offset, length, pad);
+            case Action.F_NRM_NOX: return new String(rawData, offset, length);  // String getAbc(int, int) should be used !!
+            default:
+                throw new IllegalStateException();  // dead branch
+        }
+    }
+
+    /**
+     * Nullabile numeric getter (normalized)
+     * @param offset    field offset
+     * @param length    field length
+     * @param flg       normalization rule
+     * @param pad       padding char
+     * @return          normalized field value
+     */
+    protected String getAbcNull(int offset, int length, int flg, char pad) {
+        if (isAllSpaces(offset, length)) return null;
+        return getAbc(offset, length, flg, pad);
+    }
+
+    private String lftTrim(int offset, int length, char pad) {
+        int min=offset;
+        int top = offset + length;
+        for(;min<top;min++) if (rawData[min]!=pad) break;
+        if (min==top) return EMPTY_STRING;
+        return new String(rawData, min, top-min);
+    }
+    private String lftTrim1(int offset, int length, char pad) {
+        int min=offset;
+        int top = offset + length;
+        for(;min<top;min++) if (rawData[min]!=pad) break;
+        if (min==top) return String.valueOf(pad);
+        return new String(rawData, min, top-min);
+    }
+
+    private String rgtTrim(int offset, int length, char pad) {
+        int max = offset + length - 1;
+        for(;max>=offset;max--) if (rawData[max]!=pad) break;
+        if (max<offset) return EMPTY_STRING;
+        return new String(rawData, offset, max-offset+1);
+    }
+    private String rgtTrim1(int offset, int length, char pad) {
+        int max = offset + length - 1;
+        for(;max>=offset;max--) if (rawData[max]!=pad) break;
+        if (max<offset) return String.valueOf(pad);
+        return new String(rawData, offset, max-offset+1);
     }
 
     /**
@@ -443,23 +531,16 @@ abstract class FixEngine {
     public abstract boolean validateFails(FieldValidateHandler handler);
 
     /**
-     * Validate fields marked with <i>audit</i>: <b>true</b>
-     *
-     * @param handler error handler
-     * @return <b>true</b> if there is an error, <b>false</b> if there are no errors
-     */
-    public abstract boolean auditFails(FieldValidateHandler handler);
-
-    /**
      * Check that the record field is of digits only
      *
+     * @param mode    validation mode
      * @param name    field name
      * @param offset  field offset
      * @param length  field length
      * @param handler error handler
      * @return <b>true</b> if there is an error, <b>false</b> if there are no errors
      */
-    protected boolean checkDigit(String name, int offset, int length, FieldValidateHandler handler) {
+    protected boolean checkDigit(ValidateMode mode, String name, int offset, int length, FieldValidateHandler handler) {
         boolean fault = false;
         for (int u = offset, v = 0; v < length; u++, v++) {
             char c = rawData[u];
@@ -474,7 +555,7 @@ abstract class FixEngine {
                     .code(ValidateError.NotNumber)
                     .wrong(c)
                     .build());
-                if (failFirst) return true;
+                if (mode.isFailFirst()) return true;
                 else fault = true;
             }
         }
@@ -495,18 +576,19 @@ abstract class FixEngine {
     /**
      * Check that the record field is of digits only or SPACE only
      *
+     * @param mode    validation mode
      * @param name    field name
      * @param offset  field offset
      * @param length  field length
      * @param handler error handler
      * @return <b>true</b> if there is an error, <b>false</b> if there are no errors
      */
-    protected boolean checkDigitBlank(String name, int offset, int length, FieldValidateHandler handler) {
+    protected boolean checkDigitBlank(ValidateMode mode, String name, int offset, int length, FieldValidateHandler handler) {
         char c = rawData[offset];
         if (c == ' ') {
-            return checkAllSpace(name, offset, length, handler);
+            return checkAllSpace(mode, name, offset, length, handler);
         } else if ('0' <= c && c <= '9') {
-            return checkAllDigit(name, offset, length, handler);
+            return checkAllDigit(mode, name, offset, length, handler);
         } else {
             handler.error(Detail
                     .builder()
@@ -522,7 +604,7 @@ abstract class FixEngine {
         }
     }
 
-    private boolean checkAllSpace(String name, int offset, int length, FieldValidateHandler handler) {
+    private boolean checkAllSpace(ValidateMode mode, String name, int offset, int length, FieldValidateHandler handler) {
         boolean fault = false;
         for (int u = offset + 1, v = 1; v < length; u++, v++) {
             char c = rawData[u];
@@ -537,14 +619,14 @@ abstract class FixEngine {
                     .code(ValidateError.NotBlank)  // ??
                     .wrong(c)
                     .build());
-                if (failFirst) return true;
+                if (mode.isFailFirst()) return true;
                 else fault = true;
             }
         }
         return fault;
     }
 
-    private boolean checkAllDigit(String name, int offset, int length, FieldValidateHandler handler) {
+    private boolean checkAllDigit(ValidateMode mode, String name, int offset, int length, FieldValidateHandler handler) {
         boolean fault = false;
         for (int u = offset + 1, v = 1; v < length; u++, v++) {
             char c = rawData[u];
@@ -559,7 +641,7 @@ abstract class FixEngine {
                     .code(ValidateError.NotNumber)
                     .wrong(c)
                     .build());
-                if (failFirst) return true;
+                if (mode.isFailFirst()) return true;
                 else fault = true;
             }
         }
@@ -604,13 +686,14 @@ abstract class FixEngine {
     /**
      * Check that the record field is of ascii char only
      *
+     * @param mode    validation mode
      * @param name    field name
      * @param offset  field offset
      * @param length  field length
      * @param handler error handler
      * @return <b>true</b> if there is an error, <b>false</b> if there are no errors
      */
-    protected boolean checkAscii(String name, int offset, int length, FieldValidateHandler handler) {
+    protected boolean checkAscii(ValidateMode mode, String name, int offset, int length, FieldValidateHandler handler) {
         boolean fault = false;
         for (int u = offset, v = 0; v < length; u++, v++) {
             char c = rawData[u];
@@ -625,7 +708,7 @@ abstract class FixEngine {
                     .code(ValidateError.NotAscii)
                     .wrong(c)
                     .build());
-                if (failFirst) return true;
+                if (mode.isFailFirst()) return true;
                 else fault = true;
             }
         }
@@ -659,13 +742,14 @@ abstract class FixEngine {
     /**
      * Validate alphanumeric latin1 field type
      *
+     * @param mode    validation mode
      * @param name    field name
      * @param offset  field offset
      * @param length  field length
      * @param handler error handler
      * @return <b>true</b> if there is an error, <b>false</b> if there are no errors
      */
-    protected boolean checkLatin(String name, int offset, int length, FieldValidateHandler handler) {
+    protected boolean checkLatin(ValidateMode mode, String name, int offset, int length, FieldValidateHandler handler) {
         boolean fault = false;
         for (int u = offset, v = 0; v < length; u++, v++) {
             char c = rawData[u];
@@ -680,7 +764,7 @@ abstract class FixEngine {
                     .code(ValidateError.NotLatin)
                     .wrong(c)
                     .build());
-                if (failFirst) return true;
+                if (mode.isFailFirst()) return true;
                 else fault = true;
             }
         }
@@ -699,22 +783,23 @@ abstract class FixEngine {
             setAsIs(s, offset);
         else // dead branch
             if (s.length() < length) {  // buffer underflow protection
-                throw new FieldUnderFlowException(FIELD_AT + (offset + RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
+                throw new FieldUnderFlowException(xxflowMessage(offset, length, s.length()));
             } else {                    // buffer overflow protection
-                throw new FieldOverFlowException(FIELD_AT + (offset + RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
+                throw new FieldOverFlowException(xxflowMessage(offset, length, s.length()));
             }
     }
 
     /**
      * Validate an alphanumeric UTF-8 field
      *
+     * @param mode    validation mode
      * @param name    field name
      * @param offset  field offset
      * @param length  field length
      * @param handler error handler
      * @return <b>true</b> if there is an error, <b>false</b> if there are no errors
      */
-    protected boolean checkValid(String name, int offset, int length, FieldValidateHandler handler) {
+    protected boolean checkValid(ValidateMode mode, String name, int offset, int length, FieldValidateHandler handler) {
         boolean fault = false;
         for (int u = offset, v = 0; v < length; u++, v++) {
             char c = rawData[u];
@@ -729,7 +814,7 @@ abstract class FixEngine {
                     .code(ValidateError.NotValid)
                     .wrong(c)
                     .build());
-                if (failFirst) return true;
+                if (mode.isFailFirst()) return true;
                 else fault = true;
             }
         }
@@ -763,38 +848,41 @@ abstract class FixEngine {
      * @param s               field value
      * @param offset          field offset
      * @param length          field length
-     * @param overflowAction  overflow behaviour
-     * @param underflowAction underflow behaviour
+     * @param flg             behaviour
      * @param pad             padding char
      * @param init            initialize char
      */
-    protected void setAbc(String s, int offset, int length, OverflowAction overflowAction, UnderflowAction underflowAction, char pad, char init) {
+    protected void setAbc(String s, int offset, int length, int flg, char pad, char init) {
+        int flgUnf = flg & Action.F_UNF_MSK;
+        int flgOvf = flg & Action.F_OVF_MSK;
         if (s == null) {
-            if (underflowAction == UnderflowAction.Error)
+            if (flgUnf == Action.F_UNF_ERR)
                 throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND_NULL);
             fillChar(offset, length, init);
         } else if (s.length() == length)
             setAsIs(s, offset);
         else if (s.length() < length) {
-            switch (underflowAction) {
-                case PadR:
+            switch (flgUnf) {
+                case Action.F_UNF_PAR:
                     padToRight(s, offset, length, pad);
                     break;
-                case Error:
-                    throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
-                case PadL:  // used by relaxed custom fields
+                case Action.F_UNF_PAL:  // used by relaxed custom fields
                     padToLeft(s, offset, length, pad);
                     break;
+                case Action.F_UNF_ERR:
+                default:
+                    throw new FieldUnderFlowException(xxflowMessage(offset, length, s.length()));
             }
-        } else switch (overflowAction) {
-            case TruncR:
+        } else switch (flgOvf) {
+            case Action.F_OVF_TRR:
                 truncRight(s, offset, length);
                 break;
-            case Error:
-                throw new FieldOverFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
-            case TruncL:    // used by relaxed custom fields
+            case Action.F_OVF_TRL:    // used by relaxed custom fields
                 truncLeft(s, offset, length);
                 break;
+            case Action.F_OVF_ERR:
+            default:
+                throw new FieldOverFlowException(xxflowMessage(offset, length, s.length()));
         }
     }
 
@@ -804,36 +892,54 @@ abstract class FixEngine {
      * @param s               field value
      * @param offset          field offset
      * @param length          field length
-     * @param overflowAction  overflow behaviour
-     * @param underflowAction underflow behaviour
+     * @param flg             behaviour
      */
-    protected void setNum(String s, int offset, int length, OverflowAction overflowAction, UnderflowAction underflowAction) {
+    protected void setNum(String s, int offset, int length, int flg) {
+        int flgUnf = flg & Action.F_UNF_MSK;
+        int flgOvf = flg & Action.F_OVF_MSK;
         if (s == null) {
-            if (underflowAction == UnderflowAction.Error)
+            if (flgUnf == Action.F_UNF_ERR)
                 throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND_NULL);
             fillChar(offset, length, '0');
         } else if (s.length() == length)
             setAsIs(s, offset);
         else if (s.length() < length) {
-            switch (underflowAction) {
-                case PadL:
+            switch (flgUnf) {
+                case Action.F_UNF_PAL:
                     padToLeft(s, offset, length, '0');
                     break;
-                case Error:
-                    throw new FieldUnderFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
-                case PadR:  // dead branch
+                case Action.F_UNF_PAR:  // dead branch, Number are LEFT padded !!
                     padToRight(s, offset, length, '0');
                     break;
+                case Action.F_UNF_ERR:
+                default:
+                    throw new FieldUnderFlowException(xxflowMessage(offset, length, s.length()));
             }
-        } else switch (overflowAction) {
-            case TruncL:
+        } else switch (flgOvf) {
+            case Action.F_OVF_TRL:
                 truncLeft(s, offset, length);
                 break;
-            case Error:
-                throw new FieldOverFlowException(FIELD_AT + (offset+RECORD_BASE) + EXPECTED + length + CHARS_FOUND + s.length());
-            case TruncR:    // dead branch
+            case Action.F_OVF_TRR:    // dead branch, Number are LEFT truncated !!
                 truncRight(s, offset, length);
                 break;
+            case Action.F_OVF_ERR:
+            default:
+                throw new FieldOverFlowException(xxflowMessage(offset, length, s.length()));
+        }
+    }
+
+    /**
+     * Nullable numeric setter
+     * @param s               field value
+     * @param offset          field offset
+     * @param length          field length
+     * @param flg             behaviour
+     */
+    protected void setNumNull(String s, int offset, int length, int flg) {
+        if (s == null) {
+            fill(offset, length, ' ');
+        } else {
+            setNum(s, offset, length, flg);
         }
     }
 

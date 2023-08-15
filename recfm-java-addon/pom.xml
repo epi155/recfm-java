@@ -4,11 +4,11 @@
     <parent>
         <groupId>io.github.epi155</groupId>
         <artifactId>recfm-java</artifactId>
-        <version>0.6.3-SNAPSHOT</version>
+        <version>0.7.0</version>
     </parent>
 
     <artifactId>recfm-java-addon</artifactId>
-    <url>https://github.com/epi155/recfm-java/tree/recfm-java-0.6.2/recfm-java-addon</url>
+    <url>https://github.com/epi155/recfm-java/tree/recfm-java-0.7.0/recfm-java-addon</url>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -21,13 +21,13 @@
         <dependency>
             <groupId>io.github.epi155</groupId>
             <artifactId>recfm-addon-api</artifactId>
-            <version>0.6.0</version>
+            <version>0.7.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.26</version>
+            <version>1.18.28</version>
             <scope>provided</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
@@ -35,14 +35,12 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>2.0.7</version>
-            <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.3.7</version>
-            <scope>test</scope>
+            <version>1.3.11</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
@@ -60,6 +58,21 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.16.0</version>
+                <configuration>
+                    <ruleSet>
+                        <ignoreVersions>
+                            <ignoreVersion>
+                                <type>regex</type>
+                                <version>.+-(alpha|beta)(-\d+)?</version>
+                            </ignoreVersion>
+                        </ignoreVersions>
+                    </ruleSet>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>

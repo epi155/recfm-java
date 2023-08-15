@@ -40,7 +40,7 @@ public class Tools {
     }
 
     public static Level testCollision(NamedField fld, FieldGroup grp) {
-        if (fld.getOffset()==grp.getOffset() && fld.getLength()==grp.getLength()) {
+        if (fld.getOffset().equals(grp.getOffset()) && fld.getLength()==grp.getLength()) {
             // fld and grp full overlap
             if (grp.isOverride() && !fld.isOverride()) {
                 log.info("  [#>...] Name '{}' group override field @{}+{} >>>", fld.getName(),

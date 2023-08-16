@@ -3,7 +3,7 @@
     <parent>
         <artifactId>recfm-java</artifactId>
         <groupId>io.github.epi155</groupId>
-        <version>0.7.0</version>
+        <version>0.7.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -17,6 +17,7 @@
         <maven.compiler.testTarget>8</maven.compiler.testTarget>
         <maven.recfm.addCompileSourceRoot>false</maven.recfm.addCompileSourceRoot>
         <maven.recfm.addTestCompileSourceRoot>true</maven.recfm.addTestCompileSourceRoot>
+        <maven.deploy.skip>false</maven.deploy.skip>
     </properties>
 
     <dependencies>

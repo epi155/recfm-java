@@ -6,6 +6,7 @@
     <artifactId>recfm-java-addon</artifactId>
     <version>0.7.0-SNAPSHOT</version>
 
+    <name>RECFM java code generator</name>
     <description>java code generator for RECFM</description>
     <url>https://github.com/epi155/recfm-java/tree/recfm-java-0.7.0/recfm-java-addon</url>
 

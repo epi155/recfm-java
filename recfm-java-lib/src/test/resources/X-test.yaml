@@ -89,6 +89,12 @@ packages:
           - !Abc { name: status  , len:  5}
           - !Num { name: code    , len:  4}
           - !Abc { name: message , len: 40}
+      - &Area53
+        name: IArea53
+        len: 16
+        fields:
+          - !Emb { src: *Date, len: 10 }
+          - !Emb { src: *Time, len:  6 }
 
 
     classes:
@@ -195,3 +201,7 @@ packages:
         fields:
           - !Num { name: nmErrors, len: 2}
           - !OCC { name: tabError, len: 49, x: 12, as: *Error }
+      - name: Trinity
+        len: 16
+        fields:
+          - !Emb { src: *Area53, at: 1, len: 16 }

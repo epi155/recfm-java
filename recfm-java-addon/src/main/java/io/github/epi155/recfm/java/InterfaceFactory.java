@@ -10,6 +10,8 @@ import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintWriter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.github.epi155.recfm.util.Tools.notNullOf;
 
@@ -108,7 +110,16 @@ public class InterfaceFactory extends CodeHelper {
     }
 
     private void writeBeginProxy(@NotNull TraitDefine proxy) {
-        printf("public interface %s {%n", proxy.getName());
+        List<String> traits = proxy.getFields()
+                .stream()
+                .filter(FieldEmbedGroup.class::isInstance)
+                .map(it -> ((FieldEmbedGroup) it).getSource().getName())
+                .collect(Collectors.toList());
+        if (traits.isEmpty()) {
+            printf("public interface %s {%n", proxy.getName());
+        } else {
+            printf("public interface %s extends %s {%n", proxy.getName(), String.join(", ", traits));
+        }
     }
 
     private void createMethods(SettableField fld) {

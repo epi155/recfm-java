@@ -30,7 +30,7 @@ public class FieldEmbedGroup extends NakedField implements EmbModel {
             }
         }
         Shifter shifter = new Shifter();
-        return source.getFields().stream().map(shifter::shift);
+        return source.getFields().stream().map(shifter::shift).flatMap(it -> ((NakedField)it).expand());
     }
 
 }

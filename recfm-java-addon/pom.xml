@@ -4,7 +4,7 @@
 
     <groupId>io.github.epi155</groupId>
     <artifactId>recfm-java-addon</artifactId>
-    <version>0.7.0-SNAPSHOT</version>
+    <version>0.7.0</version>
 
     <name>RECFM java code generator</name>
     <description>java code generator for RECFM</description>
@@ -25,7 +25,8 @@
 
     <scm>
         <url>https://github.com/epi155/recfm-java/tree/0.7/recfm-java-addon</url>
-    </scm>
+      <tag>recfm-java-0.7.0</tag>
+  </scm>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

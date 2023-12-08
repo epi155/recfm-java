@@ -17,12 +17,12 @@ public class Action {
     public static final int F_NRM_LT1 = 0x04;
     public static final int F_NRM_MSK = 0x07;
 
-    public static final int F_OVF_ERR = 0x00 << 3;
+    public static final int F_OVF_ERR = 0;
     public static final int F_OVF_TRR = 0x01 << 3;
     public static final int F_OVF_TRL = 0x02 << 3;
     public static final int F_OVF_MSK = 0x03 << 3;
 
-    public static final int F_UNF_ERR = 0x00 << 5;
+    public static final int F_UNF_ERR = 0;
     public static final int F_UNF_PAR = 0x01 << 5;
     public static final int F_UNF_PAL = 0x02 << 5;
     public static final int F_UNF_MSK = 0x03 << 5;

@@ -3,22 +3,21 @@ package io.github.epi155.recfm.java;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Iterator;
 
-public class FixFileReader<T extends FixBasic> implements AutoCloseable, Iterable<T> {
+public class SimpleFixFileReader<T extends FixBasic> implements AutoCloseable, Iterable<T> {
     private final BufferedReader br;
-    private final Constructor<T> ctor;
+    private final FixDecoder<T> decoder;
 
-    public FixFileReader(File file, Class<T> claz, Charset cs) throws IOException, NoSuchMethodException {
+    public SimpleFixFileReader(File file, FixDecoder<T> decoder, Charset cs) throws IOException {
         this.br = Files.newBufferedReader(file.toPath(), cs);
-        this.ctor = claz.getConstructor(String.class);
+        this.decoder = decoder;
     }
-    public FixFileReader(File file, Class<T> claz) throws IOException, NoSuchMethodException {
-        this(file, claz, StandardCharsets.UTF_8);
+    public SimpleFixFileReader(File file, FixDecoder<T> decoder) throws IOException {
+        this(file, decoder, StandardCharsets.UTF_8);
     }
     @Override
     public void close() throws IOException {
@@ -37,7 +36,7 @@ public class FixFileReader<T extends FixBasic> implements AutoCloseable, Iterabl
                         readyItem = null;
                         return false;
                     } else {
-                        readyItem = ctor.newInstance(line);
+                        readyItem = decoder.decode(line);
                         return  true;
                     }
                 } catch (Exception e) {

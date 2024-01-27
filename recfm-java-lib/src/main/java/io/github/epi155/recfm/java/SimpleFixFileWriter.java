@@ -7,13 +7,13 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-public class FixFileWriter<T extends FixBasic> implements AutoCloseable {
+public class SimpleFixFileWriter<T extends FixBasic> implements AutoCloseable {
     private final BufferedWriter bw;
 
-    public FixFileWriter(File file, Charset cs) throws IOException {
+    public SimpleFixFileWriter(File file, Charset cs) throws IOException {
         this.bw = Files.newBufferedWriter(file.toPath(), cs);
     }
-    public FixFileWriter(File file) throws IOException {
+    public SimpleFixFileWriter(File file) throws IOException {
         this(file, StandardCharsets.UTF_8);
     }
 

@@ -1,6 +1,7 @@
 package com.example.testj;
 
 import com.example.sysj.test.Alamos;
+import io.github.epi155.recfm.java.FixDecoder;
 import io.github.epi155.recfm.java.SimpleFixFileReader;
 import io.github.epi155.recfm.java.SimpleFixFileWriter;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Iterator;
 import java.util.logging.Logger;
 
 public class TestIO {
@@ -29,9 +31,24 @@ public class TestIO {
             LOG.severe(dump(e));
         }
 
-        Alamos alamos = new Alamos();
-        try (SimpleFixFileWriter<Alamos> ww = new SimpleFixFileWriter<>(oFile)) {
-            ww.write(alamos);
+
+        try (SimpleFixFileReader<Alamos> rr = new SimpleFixFileReader<>(iFile, new FixDecoder<Alamos>() {
+            @Override
+            public Alamos decode(String line) {
+                return Alamos.decode(line);
+            }
+        })) {
+            Iterator<Alamos> iterator = rr.iterator();
+            while (iterator.hasNext()) {
+                Alamos alamos = iterator.next();
+            }
+        } catch (IOException e) {
+            LOG.severe(dump(e));
+        }
+
+        try (SimpleFixFileWriter<Alamos> wr = new SimpleFixFileWriter<>(oFile)) {
+            Alamos alamos = new Alamos();
+            wr.write(alamos);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

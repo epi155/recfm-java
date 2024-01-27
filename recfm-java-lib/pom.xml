@@ -8,7 +8,7 @@
 
     <name>RECFM java runtime library</name>
     <description>java runtime library of RECFM java code generator</description>
-    <url>https://github.com/epi155/recfm-java/tree/recfm-java-0.7.0/recfm-java-lib</url>
+    <url>https://github.com/epi155/recfm-java/tree/recfm-java-0.7.1/recfm-java-lib</url>
 
     <developers>
         <developer>

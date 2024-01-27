@@ -4,7 +4,7 @@
 
     <groupId>io.github.epi155</groupId>
     <artifactId>recfm-java-lib</artifactId>
-    <version>0.7.1-SNAPSHOT</version>
+    <version>0.7.1</version>
 
     <name>RECFM java runtime library</name>
     <description>java runtime library of RECFM java code generator</description>
@@ -25,7 +25,7 @@
 
     <scm>
         <url>https://github.com/epi155/recfm-java/tree/0.7/recfm-java-lib</url>
-      <tag>HEAD</tag>
+      <tag>recfm-java-0.7.1</tag>
   </scm>
 
     <properties>

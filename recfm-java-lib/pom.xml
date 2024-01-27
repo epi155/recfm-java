@@ -4,11 +4,11 @@
 
     <groupId>io.github.epi155</groupId>
     <artifactId>recfm-java-lib</artifactId>
-    <version>0.7.0</version>
+    <version>0.7.1</version>
 
     <name>RECFM java runtime library</name>
     <description>java runtime library of RECFM java code generator</description>
-    <url>https://github.com/epi155/recfm-java/tree/recfm-java-0.7.0/recfm-java-lib</url>
+    <url>https://github.com/epi155/recfm-java/tree/recfm-java-0.7.1/recfm-java-lib</url>
 
     <developers>
         <developer>
@@ -25,7 +25,7 @@
 
     <scm>
         <url>https://github.com/epi155/recfm-java/tree/0.7/recfm-java-lib</url>
-      <tag>recfm-java-0.7.0</tag>
+      <tag>recfm-java-0.7.1</tag>
   </scm>
 
     <properties>
@@ -43,21 +43,14 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.10.0</version>
+            <version>5.10.1</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.10.0</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.junit.vintage/junit-vintage-engine -->
-        <dependency>
-            <groupId>org.junit.vintage</groupId>
-            <artifactId>junit-vintage-engine</artifactId>
-            <version>5.10.0</version>
+            <version>5.10.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -193,7 +186,7 @@
                     <dependency>
                         <groupId>org.ow2.asm</groupId>
                         <artifactId>asm</artifactId>
-                        <version>9.5</version>
+                        <version>9.6</version>
                     </dependency>
                 </dependencies>
             </plugin>

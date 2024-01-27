@@ -8,9 +8,19 @@ import io.github.epi155.recfm.java.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.CharBuffer;
+import java.util.logging.Logger;
 
 class TestBar {
+    private static final Logger LOG = Logger.getLogger( TestBar.class.getName() );
+    private static String dump(Throwable t) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        t.printStackTrace(pw);
+        return sw.toString();
+    }
     @Test
     void testAlpha() {
         BarAlpha alpha = new BarAlpha();
@@ -133,7 +143,7 @@ class TestBar {
         cust.setDig("     ");
         cust.setDig("12345");
         cust.setDig(null);
-        System.out.println(cust.toString());
+        System.out.println(cust);
         cust.charAt(1);
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> cust.charAt(0), "test OOB");
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> cust.charAt(11), "test OOB");
@@ -179,7 +189,7 @@ class TestBar {
         try {
             cu4.getDig();
         } catch (NotBlankException e) {
-            e.printStackTrace();
+            LOG.severe(dump(e));
         }
 
         cust.setRgt("00");

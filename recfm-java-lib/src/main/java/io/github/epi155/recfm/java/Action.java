@@ -32,7 +32,7 @@ public class Action {
     /**
      * throws FieldOverFlowException / RecordOverflowException
      */
-    public static final int F_OVF_ERR = 0x00 << 3;
+    public static final int F_OVF_ERR = 0;
     /**
      * Truncate right
      */
@@ -49,7 +49,7 @@ public class Action {
     /**
      * throws FieldUnderFlowException / RecordUnderflowException
      */
-    public static final int F_UNF_ERR = 0x00 << 5;
+    public static final int F_UNF_ERR = 0;
     /**
      * Pad right
      */

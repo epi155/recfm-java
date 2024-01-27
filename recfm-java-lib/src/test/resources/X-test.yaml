@@ -43,7 +43,8 @@ packages:
         length: 10
         fields:
           - !Num { name: anno       , at: 23, len: 4 }
-          - !Fil { fill: '-'        , at: 27, len: 1 }
+          - !Fil {         fill: '-', at: 27, len: 1 }
+#          - !Fil { name: sep, fill: '-', at: 27, len: 1 }
           - !Num { name: mese       , at: 28, len: 2 }
           - !Fil { fill: '-'        , at: 30, len: 1 }
           - !Num { name: giorno     , at: 31, len: 2 }

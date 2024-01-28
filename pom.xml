@@ -4,7 +4,7 @@
 
     <groupId>io.github.epi155</groupId>
     <artifactId>recfm-java</artifactId>
-    <version>0.7.1-SNAPSHOT</version>
+    <version>0.7.1</version>
     <packaging>pom</packaging>
     <name>recfm java implementation addon and lib</name>
 
@@ -35,7 +35,7 @@
         <connection>scm:git:git://github.com/epi155/recfm-java.git</connection>
         <developerConnection>scm:git:https://github.com/epi155/recfm-java.git</developerConnection>
         <url>https://github.com/epi155/recfm-java</url>
-        <tag>recfm-java-0.7.0</tag>
+        <tag>recfm-java-0.7.1</tag>
     </scm>
 
 </project>

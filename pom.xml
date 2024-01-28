@@ -8,7 +8,7 @@
     <packaging>pom</packaging>
     <name>recfm java implementation addon and lib</name>
 
-    <!-- mvn versions:set -DnewVersion=x.y.z -->
+    <!-- mvn versions:set -DnewVersion=0.7.1-SNAPSHOT -->
     <!-- mvn release:clean -->
     <!-- mvn versions:display-dependency-updates -->
     <!-- mvn release:prepare -->

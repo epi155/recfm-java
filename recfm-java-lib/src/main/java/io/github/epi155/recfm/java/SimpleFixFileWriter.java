@@ -7,6 +7,20 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
+/**
+ * Simple class for writing a fixed-width file.
+ * <p>
+ * Let {@code Foo} be the class with which to interpret the file record.
+ * The file can be written using code like:
+ * <pre>
+ * try (SimpleFixFileWriter&lt;Foo> wr = new SimpleFixFileWriter&lt;>(file)) {
+ *     Foo foo = ...
+ *     wr.write(foo);
+ * }
+ * </pre>
+ * </p>
+ * @param <T>
+ */
 public class SimpleFixFileWriter<T extends FixBasic> implements AutoCloseable {
     private final BufferedWriter bw;
 

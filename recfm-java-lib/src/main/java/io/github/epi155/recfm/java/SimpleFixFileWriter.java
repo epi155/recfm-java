@@ -13,13 +13,13 @@ import java.nio.file.Files;
  * Let {@code Foo} be the class with which to interpret the file record.
  * The file can be written using code like:
  * <pre>
- * try (SimpleFixFileWriter&lt;Foo> wr = new SimpleFixFileWriter&lt;>(file)) {
+ * try (SimpleFixFileWriter&lt;Foo&gt; wr = new SimpleFixFileWriter&lt;&gt;(file)) {
  *     Foo foo = ...
  *     wr.write(foo);
  * }
  * </pre>
- * </p>
- * @param <T>
+ *
+ * @param <T> fixed-width class
  */
 public class SimpleFixFileWriter<T extends FixBasic> implements AutoCloseable {
     private final BufferedWriter bw;

@@ -14,26 +14,25 @@ import java.util.Iterator;
  * Let {@code Foo} be the class with which to interpret the file record.
  * The file can be read using code like:
  * <pre>
- * try (SimpleFixFileReader&lt;Foo> rd = new SimpleFixFileReader&lt;>(file, Foo::decode)) {
- *     rd.forEach(foo -> ...);
+ * try (SimpleFixFileReader&lt;Foo&gt; rd = new SimpleFixFileReader&lt;&gt;(file, Foo::decode)) {
+ *     rd.forEach(foo -&gt; ...);
  * }
  * </pre>
  * to use the class with java 7 code a few more lines of code are needed:
  * <pre>
- * try (SimpleFixFileReader&lt;Foo> rd = new SimpleFixFileReader&lt;>(file, new FixDecoder&lt;Foo>() {
+ * try (SimpleFixFileReader&lt;Foo&gt; rd = new SimpleFixFileReader&lt;&gt;(file, new FixDecoder&lt;Foo&gt;() {
  *     &#64;Override
  *     public Foo decode(String line) {
  *         return Foo.decode(line);
  *     }
  * })) {
- *     Iterator&lt;Foo> iterator = rd.iterator();
+ *     Iterator&lt;Foo&gt; iterator = rd.iterator();
  *     while (iterator.hasNext()) {
  *         Foo foo = iterator.next();
  *         ...
  *     }
  * }
  * </pre>
- * </p>
  *
  * @param <T> fixed-width class
  */

@@ -4,7 +4,7 @@
 
     <groupId>io.github.epi155</groupId>
     <artifactId>recfm-java-addon</artifactId>
-    <version>0.7.2-SNAPSHOT</version>
+    <version>0.7.1-SNAPSHOT</version>
 
     <name>RECFM java code generator</name>
     <description>java code generator for RECFM</description>

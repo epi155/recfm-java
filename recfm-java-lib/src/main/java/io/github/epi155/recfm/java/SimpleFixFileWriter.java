@@ -30,6 +30,9 @@ public class SimpleFixFileWriter<T extends FixBasic> implements AutoCloseable {
     public SimpleFixFileWriter(File file) throws IOException {
         this(file, StandardCharsets.UTF_8);
     }
+    public SimpleFixFileWriter(BufferedWriter bufferedWriter) {
+        this.bw = bufferedWriter;
+    }
 
     public void write(T t) throws IOException {
         bw.write(t.encode());

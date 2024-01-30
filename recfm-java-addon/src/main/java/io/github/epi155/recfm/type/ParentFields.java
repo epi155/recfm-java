@@ -16,6 +16,7 @@ public interface ParentFields {
     String getName();
 
     List<FieldModel> getFields();
+    default boolean isOverride() { return false; }
 
     int getLength();
 

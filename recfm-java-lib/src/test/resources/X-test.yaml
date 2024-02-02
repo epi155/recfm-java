@@ -206,3 +206,15 @@ packages:
         len: 16
         fields:
           - !Emb { src: *Area53, at: 1, len: 16 }
+
+      - name: BarDate
+        len: 10
+        fields:
+#          - !Abc { name: dataIso, at: 1, len: 10 }
+          - !Grp { name: date   , at: 1, len: 10, ovr: no, fields: [
+            !Num { name: anno, len: 4},
+            !Val { val: "-" , len: 1},
+            !Num { name: mese, len: 2},
+            !Val { val: "-" , len: 1},
+            !Num { name: gior, len: 2}
+          ]}

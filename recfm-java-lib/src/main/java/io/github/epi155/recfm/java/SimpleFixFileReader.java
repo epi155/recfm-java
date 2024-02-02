@@ -65,6 +65,17 @@ public class SimpleFixFileReader<T extends FixBasic> implements AutoCloseable, I
     }
 
     /**
+     * Class constructor from BufferedReader.
+     *
+     * @param bufferedReader bufferedReader
+     * @param decoder   decoder String to Class
+     */
+    public SimpleFixFileReader(BufferedReader bufferedReader, FixDecoder<T> decoder) {
+        this.br = bufferedReader;
+        this.decoder = decoder;
+    }
+
+    /**
      * Close file
      *
      * @throws IOException IO error

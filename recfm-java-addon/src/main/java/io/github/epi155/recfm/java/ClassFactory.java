@@ -68,7 +68,8 @@ public class ClassFactory extends CodeHelper {
         val access = AccessFactory.getInstance(this, defaults, BASE_ONE);
         writeCtorVoid(clazz.getName());
         writeCtorParm(clazz);
-        printf("public int length() { return LRECL; }%n");
+        printf("/** record length */%n");
+        printf("public static int length() { return LRECL; }%n");
         writeInitializer(clazz);
         writeValidator(clazz, BASE_ONE);
         clazz.forEachField(it -> {
@@ -92,7 +93,8 @@ public class ClassFactory extends CodeHelper {
         }
     }
     private void writeConstant(@NotNull ParentFields struct) {
-        printf("    private static final int LRECL = %d;%n", struct.getLength());
+        if (! struct.isOverride())
+            printf("    private static final int LRECL = %d;%n", struct.getLength());
         val preparer = PrepareFactory.getInstance(this);
         struct.forEachField(it -> preparer.prepare(it, 1));
 
@@ -101,11 +103,13 @@ public class ClassFactory extends CodeHelper {
         AccessFactory access;
         if (fld instanceof FieldOccurs) {
             writeBeginClassOccurs((FieldOccurs) fld);
+            if (fld.isOverride()) writeConstant(fld);
             pushPlusIndent(4);
             writeValidator(fld, SHIFT_IT);
             access = AccessFactory.getInstance(this, defaults, SHIFT_IT);
         } else {
             writeBeginClassGroup(fld);
+            if (fld.isOverride()) writeConstant(fld);
             pushPlusIndent(4);
             writeValidator(fld, pos);
             access = AccessFactory.getInstance(this, defaults, pos);
@@ -124,11 +128,13 @@ public class ClassFactory extends CodeHelper {
         AccessFactory access;
         if (trait instanceof FieldOccursTrait) {
             writeBeginClassOccursTrait((FieldOccursTrait) trait);
+            if (trait.isOverride()) writeConstant(trait);
             pushPlusIndent(4);
             writeValidator(trait, SHIFT_IT);
             access = AccessFactory.getInstance(this, defaults, SHIFT_IT);
         } else {
             writeBeginClassGroupTrait(trait);
+            if (trait.isOverride()) writeConstant(trait);
             pushPlusIndent(4);
             writeValidator(trait, pos);
             access = AccessFactory.getInstance(this, defaults, pos);
@@ -320,12 +326,15 @@ public class ClassFactory extends CodeHelper {
         printf("    super(c, LRECL, %b, %b);%n", isOvfErr, isUnfErr);
         closeBrace();
 
+        printf("/** cast constructor */%n");
         printf("public static %s of(FixRecord r) {%n", struct.getName());
         printf("    return new %s(r);%n", struct.getName());
         closeBrace();
+        printf("/** deserialize constructor */%n");
         printf("public static %s decode(String s) {%n", struct.getName());
         printf("    return new %s(s);%n", struct.getName());
         closeBrace();
+        printf("/** deep copy constructor */%n");
         printf("public %s copy() {%n", struct.getName());
         printf("    return new %s(Arrays.copyOf(rawData, LRECL));%n", struct.getName());
         closeBrace();

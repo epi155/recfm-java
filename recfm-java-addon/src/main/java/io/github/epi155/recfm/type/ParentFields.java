@@ -220,7 +220,7 @@ public interface ParentFields {
                 if (fld instanceof FieldGroup) {
                     if (old instanceof FieldGroup) {
                         // GG
-                        log.error("  [#X...] GroupName '{}' duplicate @{}+{} and @{}+{} XXX", fld.getName(),
+                        log.error("  [#X....] GroupName '{}' duplicate @{}+{} and @{}+{} XXX", fld.getName(),
                             old.getOffset(), old.getLength(), it.getOffset(), it.getLength());
                         dup.getAndIncrement();
                     } else {
@@ -235,7 +235,7 @@ public interface ParentFields {
                             dup.getAndIncrement();
                     } else {
                         // fld-F x old-F
-                        log.error("  [#X...] FieldName '{}' duplicate @{}+{} and @{}+{} XXX", fld.getName(),
+                        log.error("  [#X....] FieldName '{}' duplicate @{}+{} and @{}+{} XXX", fld.getName(),
                             old.getOffset(), old.getLength(), it.getOffset(), it.getLength());
                         dup.getAndIncrement();
                     }
@@ -248,10 +248,10 @@ public interface ParentFields {
         if (it instanceof NamedField) {
             NamedField kt = (NamedField) it;
             if (kt.getName() == null) {
-                log.error("  [X....]  null name @{}+{} XXX", it.getOffset(), it.getLength());
+                log.error("  [X.....]  null name @{}+{} XXX", it.getOffset(), it.getLength());
                 dup.getAndIncrement();
             } else if (!kt.getName().matches("[a-zA-Z_][a-zA-Z_0-9$]*")) {
-                log.error("  [X....]  FieldName '{}' not valid @{}+{} XXX", kt.getName(), it.getOffset(), it.getLength());
+                log.error("  [X.....]  FieldName '{}' not valid @{}+{} XXX", kt.getName(), it.getOffset(), it.getLength());
                 dup.getAndIncrement();
             }
         }

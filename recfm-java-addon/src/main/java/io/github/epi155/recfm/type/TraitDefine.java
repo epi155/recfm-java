@@ -36,7 +36,7 @@ public class TraitDefine implements ParentFields, TraitModel {
         val base = getFields().get(0).getOffset();
 
         boolean checkSuccesful = noBadName();
-        checkSuccesful &= checkLength();
+        checkSuccesful &= checkXRef();
         checkSuccesful &= noDuplicateName(Tools::testCollision);
         checkSuccesful &= noHole(base);
         checkSuccesful &= noOverlap(base);

@@ -117,6 +117,7 @@ public class ClassFactory extends CodeHelper {
         fld.forEachField(it -> {
             if (it instanceof SelfCheck) ((SelfCheck) it).selfCheck();
             if (it instanceof FieldGroup) generateGroupCode((FieldGroup) it, pos);
+            if (it instanceof FieldGroupTrait) generateGroupTraitCode((FieldGroupTrait) it, pos);
         });
         fld.forEachField(it -> {
             if (it instanceof FloatingField) access.createMethods((FloatingField) it, doc);

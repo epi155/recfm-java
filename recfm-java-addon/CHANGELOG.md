@@ -1,5 +1,14 @@
 # Change Log
 
+## [0.7.2]
+
+### Added
+- auto length in parent fields, if omitted
+
+### Fixed
+- GRP nested in Grp
+- automatic offset in fields with occurrences
+
 ## [0.7.1]
 
 ### Change

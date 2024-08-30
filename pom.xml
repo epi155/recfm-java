@@ -8,11 +8,9 @@
     <packaging>pom</packaging>
     <name>recfm java implementation addon and lib</name>
 
-    <!-- mvn versions:set -DnewVersion=0.7.1-SNAPSHOT -->
     <!-- mvn release:clean -->
-    <!-- mvn versions:display-dependency-updates -->
     <!-- mvn release:prepare -->
-    <!-- mvn release:perform -->
+    <!-- mvn versions:display-dependency-updates -->
     <!-- mvn release:update-versions -->
     <!-- mvn dependency:tree -->
 
@@ -38,4 +36,18 @@
         <tag>recfm-java-0.7.0</tag>
     </scm>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>3.0.1</version>
+                <configuration>
+                    <tagNameFormat>@{version}</tagNameFormat>
+                    <pushChanges>false</pushChanges>
+                    <arguments>-DskipTests</arguments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

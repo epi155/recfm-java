@@ -32,7 +32,7 @@ public class ClassDefine implements ParentFields, ClassModel {
         autoOffset(1);
 
         boolean checkSuccesful = noBadName();
-        checkSuccesful &= checkLength();
+        checkSuccesful &= checkXRef();
         checkSuccesful &= noDuplicateName(Tools::testCollision);
         checkSuccesful &= noHole();
         checkSuccesful &= noOverlap();

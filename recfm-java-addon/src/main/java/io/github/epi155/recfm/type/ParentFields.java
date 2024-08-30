@@ -1,6 +1,7 @@
 package io.github.epi155.recfm.type;
 
 import io.github.epi155.recfm.api.FieldModel;
+import io.github.epi155.recfm.java.fields.OccursAware;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.event.Level;
@@ -19,6 +20,7 @@ public interface ParentFields {
     default boolean isOverride() { return false; }
 
     int getLength();
+    void setLength(int length);
 
     default int evalPadWidth(int min) {
         NuclearInt wid = new NuclearInt(min);
@@ -36,6 +38,7 @@ public interface ParentFields {
     default void autoOffset(int base) {
         int prevOff = 0;
         int prevLen = 0;
+        final int zero = base;
         String prevName = null;
         for (FieldModel fld: getFields()) {
             if (fld.getOffset() == null) {
@@ -57,25 +60,46 @@ public interface ParentFields {
                 } else {
                     fld.setOffset(base);
                 }
-            } else {
+            } else if (! (fld instanceof  NamedField) || !((NamedField) fld).isOverride()){
                 base = fld.getOffset();
             }
             if (fld instanceof ParentFields) {
                 ParentFields par = (ParentFields) fld;
                 par.autoOffset(fld.getOffset());
             }
+
             if (fld instanceof NamedField) {
                 if (! ((NamedField) fld).isOverride()) {
                     prevOff = base;
                     prevLen = fld.getLength();
                     prevName = ((NamedField) fld).getName();
-                    base += fld.getLength();
+                    if (fld instanceof OccursAware) {
+                        base += fld.getLength() * ((OccursAware) fld).getTimes();
+                    } else {
+                        base += fld.getLength();
+                    }
                 }
             } else {
                 prevOff = base;
                 prevLen = fld.getLength();
                 prevName = null;
                 base += fld.getLength();
+            }
+        }
+        int evalSize = base - zero;
+        if (this instanceof TraitDefine && !getFields().isEmpty()) {
+            Integer zOffs = getFields().get(0).getOffset();
+            if (zOffs != null) {
+                evalSize = base - zOffs;
+            }
+        }
+        int defSize = getLength();
+        if (defSize != evalSize) {
+            if (defSize <= 0) {
+                setLength(evalSize);
+                log.info("  >> Set length of {} to {}", getName(), evalSize);
+            } else {
+                log.warn("  >> Mismatch length of {}: declared {}, computed {}", getName(), getLength(), evalSize);
             }
         }
     }
@@ -265,7 +289,7 @@ public interface ParentFields {
         return noHole(1);
     }
 
-    default boolean checkLength() {
+    default boolean checkXRef() {
         log.info("  [#o....] Checking cross-reference in group {} ...", getName());
         List<FieldEmbedGroup> badEmbeds = getFields().stream()
                 .filter(FieldEmbedGroup.class::isInstance)
@@ -306,7 +330,7 @@ public interface ParentFields {
         forEachField(it -> {
             if (it instanceof ParentFields) {
                 ParentFields par = (ParentFields) it;
-                status.and(par.checkLength());
+                status.and(par.checkXRef());
             }
         });
         if (status.success) {

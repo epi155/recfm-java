@@ -10,9 +10,8 @@ public interface FixBasic extends Validable {
      */
     String encode();
 
-//    /**
-//     * Record length
-//     * @return record length
-//     */
-//    int length();
+    /**
+     * initializes all fields to their default
+     */
+    void initialize();
 }

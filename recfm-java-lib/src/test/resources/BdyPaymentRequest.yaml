@@ -118,3 +118,9 @@ packages:
               !Abc { name: issr , len: 35}  # 1.5.2.1.1.2
             ]}
           - !Abc { name: pmtInfId   , len: 35 } # 2.1
+          - !Abc { name: length   , len: 35 } # 2.1
+          - !Grp { name: copyy   , fields:
+            [
+              !Abc { name: hello   , len: 35 }, # 2.1
+              !Abc { name: world   , len: 35 } # 2.1
+            ] } # 2.1

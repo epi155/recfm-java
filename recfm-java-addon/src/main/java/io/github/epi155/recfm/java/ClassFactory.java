@@ -341,7 +341,7 @@ public class ClassFactory extends CodeHelper {
         closeBrace();
     }
     private void writeInitializer(ClassDefine struct) {
-        printf("protected void initialize() {%n");
+        printf("public void initialize() {%n");
         val initializer = InitializeFactory.getInstance(this, defaults);
         struct.forEachField(it -> initializer.initialize(it, 1));
         closeBrace();

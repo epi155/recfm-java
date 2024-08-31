@@ -2,6 +2,7 @@ package io.github.epi155.recfm.type;
 
 import io.github.epi155.recfm.api.FieldModel;
 import io.github.epi155.recfm.java.fields.OccursAware;
+import io.github.epi155.recfm.util.Tools;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.event.Level;
@@ -277,6 +278,9 @@ public interface ParentFields {
             } else if (!kt.getName().matches("[a-zA-Z_][a-zA-Z_0-9$]*")) {
                 log.error("  [X.....]  FieldName '{}' not valid @{}+{} XXX", kt.getName(), it.getOffset(), it.getLength());
                 dup.getAndIncrement();
+            } else if (it instanceof ParentFields && Tools.RESERVED_NAMES.contains(kt.getName())) {
+                    log.error("  [X.....]  FieldName '{}' not allow @{}+{} XXX", kt.getName(), it.getOffset(), it.getLength());
+                    dup.getAndIncrement();
             }
         }
     }

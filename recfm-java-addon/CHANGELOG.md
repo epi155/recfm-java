@@ -4,12 +4,16 @@
 
 ### Added
 - auto length in parent fields, if omitted
+- check field names against reserved names
+
+### Change
+- `initialize()` from `protected` to `public`
 
 ### Fixed
 - GRP nested in Grp
 - automatic offset in fields with occurrences
 
-## [0.7.1]
+## [0.7.1] - 2024-02-02
 
 ### Change
 - `length()` modifiers to `static`

@@ -8,12 +8,19 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.event.Level;
 
 import java.nio.CharBuffer;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @Slf4j
 public class Tools {
 
     private Tools() {
     }
+
+    public static final Set<String> RESERVED_NAMES = Collections.unmodifiableSet(
+            new HashSet<>(Arrays.asList("copy", "initialize", "length", "toString", "encode")));
 
 
     public static <T> T notNullOf(T u, T v) {

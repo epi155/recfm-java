@@ -12,6 +12,7 @@
 ### Fixed
 - GRP nested in Grp
 - automatic offset in fields with occurrences
+- ignore override fields in hole checking
 
 ## [0.7.1] - 2024-02-02
 

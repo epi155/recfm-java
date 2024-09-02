@@ -107,7 +107,11 @@ public interface ParentFields {
     default boolean noHole(int bias) {
         log.info("  [###o..] Checking for hole in group {}: [{}..{}] ...", getName(), bias, bias + getLength() - 1);
         boolean[] b = new boolean[getLength()];
-        forEachField(it -> ((NakedField)it).mark(b, bias));
+        forEachField(it -> {
+            if (!(it instanceof NamedField) || !((NamedField) it).isOverride()) {
+                ((NakedField) it).mark(b, bias);
+            }
+        });
         List<Integer> hole = new ArrayList<>();
         for (int k = 0; k < getLength(); k++) {
             if (!b[k]) hole.add(k);

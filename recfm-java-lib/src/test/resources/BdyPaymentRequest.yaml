@@ -124,3 +124,10 @@ packages:
               !Abc { name: hello   , len: 35 }, # 2.1
               !Abc { name: world   , len: 35 } # 2.1
             ] } # 2.1
+
+      - name: test2
+        len: 20
+        fields:
+          - !Abc { name: keyId       , len: 15 }
+          - !Fil { len: 5 }
+          - !Abc { name: issr, at: 11, len: 10, ovr: Yes }

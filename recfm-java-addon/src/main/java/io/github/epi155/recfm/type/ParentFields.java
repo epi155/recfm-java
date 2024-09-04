@@ -3,6 +3,7 @@ package io.github.epi155.recfm.type;
 import io.github.epi155.recfm.api.FieldModel;
 import io.github.epi155.recfm.java.fields.OccursAware;
 import io.github.epi155.recfm.util.Tools;
+import lombok.val;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.event.Level;
@@ -10,7 +11,6 @@ import org.slf4j.event.Level;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public interface ParentFields {
     org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ParentFields.class);
@@ -67,6 +67,12 @@ public interface ParentFields {
             if (fld instanceof ParentFields) {
                 ParentFields par = (ParentFields) fld;
                 par.autoOffset(fld.getOffset());
+            } else if (fld instanceof FieldEmbedGroup) {
+                val src = ((FieldEmbedGroup) fld).getSource();
+                if (fld.getLength() <= 0 && src.getLength() > 0) {
+                    fld.setLength(src.getLength());
+                    log.info("  >> Set length of embed {}@{} to {}", src.getName(), fld.getOffset(), fld.getLength());
+                }
             }
 
             if (fld instanceof NamedField) {
@@ -109,6 +115,7 @@ public interface ParentFields {
         boolean[] b = new boolean[getLength()];
         forEachField(it -> {
             if (!(it instanceof NamedField) || !((NamedField) it).isOverride()) {
+                log.debug("  -- span @{}+{}", it.getOffset(), it.getLength());
                 ((NakedField) it).mark(b, bias);
             }
         });
@@ -299,31 +306,29 @@ public interface ParentFields {
 
     default boolean checkXRef() {
         log.info("  [#o....] Checking cross-reference in group {} ...", getName());
-        List<FieldEmbedGroup> badEmbeds = getFields().stream()
-                .filter(FieldEmbedGroup.class::isInstance)
-                .map(it -> (FieldEmbedGroup)it)
-                .filter(it -> it.getLength() != it.getSource().getLength())
-                .collect(Collectors.toList());
-        List<FieldGroupTrait> badTypDef = getFields().stream()
-                .filter(FieldGroupTrait.class::isInstance)
-                .map(it -> (FieldGroupTrait)it)
-                .filter(it -> it.getLength() != it.getTypedef().getLength())
-                .collect(Collectors.toList());
-        if (badEmbeds.isEmpty() && badTypDef.isEmpty()) {
-            return checkLengthChild();
-        } else {
-            if (! badEmbeds.isEmpty()) {
-                badEmbeds.forEach(it -> log.error("  [#X....] length error {}@{}, class: {}, interface: {}",
-                        it.getSource().getName(), it.getOffset(),
-                        it.getLength(), it.getSource().getLength()));
+        boolean success = true;
+        for(FieldModel fld: getFields()) {
+            if (fld instanceof FieldEmbedGroup) {
+                val src = ((FieldEmbedGroup) fld).getSource();
+                if (fld.getLength() != src.getLength()) {
+                    log.error("  [#X....] length error {}@{}, embed: {}, interface: {}",
+                            src.getName(), fld.getOffset(),
+                            fld.getLength(), src.getLength());
+                    success = false;
+                }
             }
-            if (! badTypDef.isEmpty()) {
-                badTypDef.forEach(it -> log.error("  [#X....] length error {}@{}, class: {}, interface: {}",
-                        it.getName(), it.getOffset(),
-                        it.getLength(), it.getTypedef().getLength()));
+            if (fld instanceof FieldGroupTrait) {
+                val typ = ((FieldGroupTrait) fld).getTypedef();
+//                } else
+                if (fld.getLength() != typ.getLength()) {
+                    log.error("  [#X....] length error {}@{}, group: {}, interface: {}",
+                            typ.getName(), fld.getOffset(),
+                            fld.getLength(), typ.getLength());
+                    success = false;
+                }
             }
-            return false;
         }
+        return success;
     }
 
     default boolean checkLengthChild() {
@@ -349,4 +354,6 @@ public interface ParentFields {
             return false;
         }
     }
+
+    void addImplements(String interfaceName);
 }

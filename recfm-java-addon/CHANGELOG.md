@@ -5,12 +5,14 @@
 ### Added
 - auto length in parent fields, if omitted
 - check field names against reserved names
+- copy COBOL at the end of the class
 
 ### Change
 - `initialize()` from `protected` to `public`
 
 ### Fixed
 - GRP nested in Grp
+- Grp nested in Emb
 - automatic offset in fields with occurrences
 - ignore override fields in hole checking
 

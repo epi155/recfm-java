@@ -4,6 +4,8 @@ import io.github.epi155.recfm.api.FieldDefault;
 import io.github.epi155.recfm.api.GenerateArgs;
 import io.github.epi155.recfm.api.LoadOverflowAction;
 import io.github.epi155.recfm.api.LoadUnderflowAction;
+import io.github.epi155.recfm.cobol.CobolEntry;
+import io.github.epi155.recfm.cobol.CopyCobolGenerator;
 import io.github.epi155.recfm.java.factory.AccessFactory;
 import io.github.epi155.recfm.java.factory.InitializeFactory;
 import io.github.epi155.recfm.java.factory.PrepareFactory;
@@ -12,6 +14,7 @@ import io.github.epi155.recfm.type.*;
 import io.github.epi155.recfm.util.DumpFactory;
 import io.github.epi155.recfm.util.DumpInfo;
 import io.github.epi155.recfm.util.Tools;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,10 +24,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntFunction;
-import java.util.stream.Collectors;
 
 import static io.github.epi155.recfm.util.Tools.notNullOf;
 
+@Slf4j
 public class ClassFactory extends CodeHelper {
     private static final IntFunction<String> BASE_ONE = n -> String.format("%d", n - 1);
     private static final IntFunction<String> SHIFT_IT = n -> String.format("%d+shift", n - 1);
@@ -78,18 +81,16 @@ public class ClassFactory extends CodeHelper {
         writeDump(clazz);
         popIndent();
         writeEndClass();
+        copyCobol(clazz);
     }
 
     private void writeBeginClass(@NotNull ClassDefine struct) {
-        List<String> traits = struct.getFields()
-                .stream()
-                .filter(FieldEmbedGroup.class::isInstance)
-                .map(it -> ((FieldEmbedGroup) it).getSource().getName())
-                .collect(Collectors.toList());
-        if (traits.isEmpty()) {
+        embedInterface(struct);
+        List<String> implementsList = struct.getImplementsList();
+        if (implementsList.isEmpty()) {
             printf("public class %s extends FixRecord {%n", struct.getName());
         } else {
-            printf("public class %s extends FixRecord implements %s {%n", struct.getName(), String.join(", ", traits));
+            printf("public class %s extends FixRecord implements %s {%n", struct.getName(), String.join(", ", implementsList));
         }
     }
     private void writeConstant(@NotNull ParentFields struct) {
@@ -125,6 +126,34 @@ public class ClassFactory extends CodeHelper {
         popIndent();
         writeEndClass();
     }
+    private void generateGroupCodeTrace(FieldGroup fld, IntFunction<String> pos) {
+        AccessFactory access;
+        if (fld instanceof FieldOccurs) {
+            writeBeginClassOccurs((FieldOccurs) fld);
+            if (fld.isOverride()) writeConstant(fld);
+            pushPlusIndent(4);
+            writeValidator(fld, SHIFT_IT);
+            access = AccessFactory.getInstance(this, defaults, SHIFT_IT);
+        } else {
+            writeBeginClassGroup(fld);
+            if (fld.isOverride()) writeConstant(fld);
+            pushPlusIndent(4);
+            writeValidator(fld, pos);
+            access = AccessFactory.getInstance(this, defaults, pos);
+        }
+        push(Tools.capitalize(fld.getName()));
+        fld.forEachField(it -> {
+            if (it instanceof SelfCheck) ((SelfCheck) it).selfCheck();
+            if (it instanceof FieldGroup) generateGroupCodeTrace((FieldGroup) it, pos);
+            if (it instanceof FieldGroupTrait) generateGroupTraitCode((FieldGroupTrait) it, pos);
+        });
+        fld.forEachField(it -> {
+            if (it instanceof FloatingField) access.createMethods((FloatingField) it, doc);
+        });
+        pop();
+        popIndent();
+        writeEndClass();
+    }
     private void generateGroupTraitCode(FieldGroupTrait trait, IntFunction<String> pos) {
         AccessFactory access;
         if (trait instanceof FieldOccursTrait) {
@@ -140,20 +169,37 @@ public class ClassFactory extends CodeHelper {
             writeValidator(trait, pos);
             access = AccessFactory.getInstance(this, defaults, pos);
         }
-        trace.addLast(trait.getTypedef().getName());
+        push(trait.getTypedef().getName());
 
         trait.forEachField(fld -> {
             if (fld instanceof SelfCheck) ((SelfCheck) fld).selfCheck();
-            if (fld instanceof FieldGroup) generateGroupCode((FieldGroup) fld, pos);
+            if (fld instanceof FieldGroup) generateGroupCodeTrace((FieldGroup) fld, pos);
             if (fld instanceof FieldGroupTrait) generateGroupTraitCode((FieldGroupTrait) fld, pos);
         });
         trait.forEachField(it -> {
             if (it instanceof FloatingField) access.createMethods((FloatingField) it, doc);
         });
-        trace.removeLast();
+        pop();
         popIndent();
         writeEndClass();
     }
+
+    private void pop() {
+        trace.pop();
+    }
+
+    private void push(String name) {
+        if (trace.isEmpty()) {
+            trace.push(name);
+        } else {
+            if (TraitDefine.contains(name)) {
+                trace.push(name);
+            } else {
+                trace.push(trace.peek() + "." + name);
+            }
+        }
+    }
+
     private void writeBeginClassOccursTrait(FieldOccursTrait occurs) {
         String capName = Tools.capitalize(occurs.getName());
         String traitName = occurs.getTypedef().getName();
@@ -167,12 +213,7 @@ public class ClassFactory extends CodeHelper {
         if (doc)
             javadocGroupDef(occurs);
 
-        List<String> embs = occurs.getTypedef().getFields()
-                .stream()
-                .filter(FieldEmbedGroup.class::isInstance)
-                .map(it -> ((FieldEmbedGroup) it).getSource().getName())
-                .map(it -> capName.equals(it) ? wrtPackage+"."+it : it)
-                .collect(Collectors.toList());
+        List<String> embs = occurs.getImplementsList();
 
         if (embs.isEmpty()) {
             if (capName.equals(traitName)) {
@@ -206,29 +247,21 @@ public class ClassFactory extends CodeHelper {
         if (doc)
             javadocGroupDef(occurs);
 
-        List<String> embs = occurs.getFields()
-                .stream()
-                .filter(FieldEmbedGroup.class::isInstance)
-                .map(it -> ((FieldEmbedGroup) it).getSource().getName())
-                .map(it -> capName.equals(it) ? wrtPackage+"."+it : it)
-                .collect(Collectors.toList());
+        List<String> embs = occurs.getImplementsList();
         if (embs.isEmpty()) {
             if (trace.isEmpty()) {
                 printf("public class %s implements Validable {%n", capName);
             } else {
-                String trait = String.join(".", trace);
-                printf("public class %1$s implements Validable, %2$s.%1$s {%n", capName, trait);
+                printf("public class %1$s implements Validable, %2$s.%1$s {%n", capName, trace.peek());
             }
         } else {
             String traitList = String.join(", ", embs);
             if (trace.isEmpty()) {
                 printf(PUBLIC_CLASS_X_IMPLMENTS_Y, capName, traitList);
             } else {
-                String trait = String.join(".", trace);
-                printf("public class %1$s implements Validable, %2$s.%1$s, %3$s {%n", capName, trait, traitList);
+                printf("public class %1$s implements Validable, %2$s.%1$s, %3$s {%n", capName, trace.peek(), traitList);
             }
         }
-
 
         printf("    private final int shift;%n");
         printf("    private %s(int shift) { this.shift = shift; }%n", capName);
@@ -247,26 +280,19 @@ public class ClassFactory extends CodeHelper {
 
         if (doc) javadocGroupDef(group);
 
-        List<String> embs = group.getFields()
-                .stream()
-                .filter(FieldEmbedGroup.class::isInstance)
-                .map(it -> ((FieldEmbedGroup) it).getSource().getName())
-                .map(it -> capName.equals(it) ? wrtPackage+"."+it : it)
-                .collect(Collectors.toList());
+        List<String> embs = group.getImplementsList();
         if (embs.isEmpty()) {
             if (trace.isEmpty()) {
                 printf("public class %s implements Validable {%n", capName);
             } else {
-                String trait = String.join(".", trace);
-                printf("public class %1$s implements Validable, %2$s.%1$s {%n", capName, trait);
+                printf("public class %1$s implements Validable, %2$s.%1$s {%n", capName, trace.peek());
             }
         } else {
             String traitList = String.join(", ", embs);
             if (trace.isEmpty()) {
                 printf(PUBLIC_CLASS_X_IMPLMENTS_Y, capName, traitList);
             } else {
-                String trait = String.join(".", trace);
-                printf("public class %1$s implements Validable, %2$s.%1$s, %3$s {%n", capName, trait, traitList);
+                printf("public class %1$s implements Validable, %2$s.%1$s, %3$s {%n", capName, trace.peek(), traitList);
             }
         }
     }
@@ -281,13 +307,7 @@ public class ClassFactory extends CodeHelper {
 
         if (doc) javadocGroupDef(group);
 
-        List<String> embs = group.getTypedef().getFields()
-                .stream()
-                .filter(FieldEmbedGroup.class::isInstance)
-                .map(it -> ((FieldEmbedGroup) it).getSource().getName())
-                .map(it -> capName.equals(it) ? wrtPackage+"."+it : it)
-                .collect(Collectors.toList());
-
+        List<String> embs = group.getImplementsList();
         if (embs.isEmpty()) {
             if (capName.equals(traitName)) {
                 printf("public class %s implements Validable, %s.%s {%n", capName, wrtPackage, traitName);
@@ -297,7 +317,7 @@ public class ClassFactory extends CodeHelper {
         } else {
             String traitList = String.join(", ", embs);
             if (capName.equals(traitName)) {
-                printf("public class %s implements Validable, %s.%s,  {%n", capName, wrtPackage, traitName, traitList);
+                printf("public class %s implements Validable, %s.%s, %s {%n", capName, wrtPackage, traitName, traitList);
             } else {
                 printf("public class %s implements Validable, %s, %s {%n", capName, traitName, traitList);
             }
@@ -367,6 +387,14 @@ public class ClassFactory extends CodeHelper {
         }
         closeBrace();
     }
+    private void copyCobol(ClassDefine clazz) {
+        List<CobolEntry> entries = CopyCobolGenerator.create(clazz);
+        printf("//* length %,d%n", clazz.getLength());
+        for(val entry: entries) {
+            printf("// %s%n", entry.code());
+        }
+    }
+
     private void writeDump(ParentFields parent) {
         List<DumpInfo> l3 = DumpFactory.getInstance(parent);
         if (! l3.isEmpty()) {

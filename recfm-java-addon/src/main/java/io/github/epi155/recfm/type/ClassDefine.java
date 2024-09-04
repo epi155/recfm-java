@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static io.github.epi155.recfm.type.TraitDefine.DOT_JAVA;
@@ -23,6 +24,7 @@ public class ClassDefine implements ParentFields, ClassModel {
     private LoadUnderflowAction onUnderflow;
     private Boolean doc;
     private List<FieldModel> fields = new ArrayList<>();
+    private final List<String> implementsList = new LinkedList<>();
 
     @Override
     public void create(String namespace, GenerateArgs ga, FieldDefault defaults) {
@@ -55,5 +57,9 @@ public class ClassDefine implements ParentFields, ClassModel {
         }
 
 
+    }
+
+    public void addImplements(String interfaceName) {
+        implementsList.add(interfaceName);
     }
 }

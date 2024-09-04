@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 @EqualsAndHashCode(callSuper = true)
 public class FieldGroupTrait extends NamedField implements ParentFields, GrpTraitModel, GroupAware {
     private TraitModel typedef;
+    private final List<String> implementsList = new LinkedList<>();
 
     @Override
     public List<FieldModel> getFields() {
@@ -30,6 +32,11 @@ public class FieldGroupTrait extends NamedField implements ParentFields, GrpTrai
     @Override
     public boolean noHole() {
         return noHole(getOffset());
+    }
+
+    @Override
+    public void addImplements(String interfaceName) {
+        implementsList.add(interfaceName);
     }
 
     @Override

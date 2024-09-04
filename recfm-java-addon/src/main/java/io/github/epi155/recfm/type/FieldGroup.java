@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,10 +18,16 @@ import java.util.stream.Collectors;
 @EqualsAndHashCode(callSuper = true)
 public class FieldGroup extends NamedField implements ParentFields, GrpModel, GroupAware {
     private List<FieldModel> fields = new ArrayList<>();
+    private final List<String> implementsList = new LinkedList<>();
 
     @Override
     public boolean noHole() {
         return noHole(getOffset());
+    }
+
+    @Override
+    public void addImplements(String interfaceName) {
+        implementsList.add(interfaceName);
     }
 
     @Override

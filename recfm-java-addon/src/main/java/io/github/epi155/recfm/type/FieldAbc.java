@@ -43,7 +43,6 @@ public class FieldAbc extends FloatingField implements AbcModel {
         res.setOverride(isOverride());
         res.setLength(getLength());
         res.setOffset(getOffset() + plus);
-        log.debug("  -- {} @{}+{} -> {}", getName(), getOffset(), getLength(), res.getOffset());
         return res;
     }
 }

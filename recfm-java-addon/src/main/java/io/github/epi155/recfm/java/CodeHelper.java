@@ -206,14 +206,16 @@ public abstract class CodeHelper implements CodeWriter {
         return "???";
     }
     protected void embedInterface(@NotNull ParentFields struct) {
+        log.debug("  )) Scan for Emb/interface for class {}", struct.getName());
         for(FieldModel fld: struct.getFields()) {
             if (fld instanceof FieldEmbedGroup) {
                 val src = ((FieldEmbedGroup) fld).getSource();
                 String embName = src.getName();
-                struct.addImplements(embName);
-                log.debug("  )) {}", embName);
+                log.debug("  )|) found {}", embName);
+                struct.addTraits(embName);
                 mapChild(src.getFields(), src.getName());
             } else if (fld instanceof FieldGroupTrait) {
+                log.debug("  )|) Scan for Emb/interface for group {}", ((FieldGroupTrait) fld).getName());
                 TraitModel typedef = ((FieldGroupTrait) fld).getTypedef();
                 mapChild(typedef.getFields(), typedef.getName());
             }
@@ -221,14 +223,15 @@ public abstract class CodeHelper implements CodeWriter {
     }
 
     private void mapChild(List<FieldModel> flds, String prefix) {
-        for(val fld: flds) {
+        for(FieldModel fld: flds) {
             if (fld instanceof FieldGroup) {
                 val grpName = Tools.capitalize(((FieldGroup) fld).getName());
                 String fullName = prefix + "." +grpName;
-                ((FieldGroup) fld).addImplements(fullName);
-                log.debug("  )) {}", fullName);
+                log.debug("  )/) found {}", fullName);
+                ((FieldGroup) fld).addTraits(fullName);
                 mapChild(((FieldGroup) fld).getFields(), fullName);
             } else if (fld instanceof FieldGroupTrait) {
+                log.debug("  )/) Scan for Emb/interface for group {}", ((FieldGroupTrait) fld).getName());
                 TraitModel typedef = ((FieldGroupTrait) fld).getTypedef();
                 mapChild(typedef.getFields(), typedef.getName());
             }

@@ -19,6 +19,7 @@ import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
@@ -86,7 +87,7 @@ public class ClassFactory extends CodeHelper {
 
     private void writeBeginClass(@NotNull ClassDefine struct) {
         embedInterface(struct);
-        List<String> implementsList = struct.getImplementsList();
+        Collection<String> implementsList = struct.getTraits();
         if (implementsList.isEmpty()) {
             printf("public class %s extends FixRecord {%n", struct.getName());
         } else {
@@ -213,7 +214,7 @@ public class ClassFactory extends CodeHelper {
         if (doc)
             javadocGroupDef(occurs);
 
-        List<String> embs = occurs.getImplementsList();
+        Collection<String> embs = occurs.getTraits();
 
         if (embs.isEmpty()) {
             if (capName.equals(traitName)) {
@@ -247,7 +248,7 @@ public class ClassFactory extends CodeHelper {
         if (doc)
             javadocGroupDef(occurs);
 
-        List<String> embs = occurs.getImplementsList();
+        Collection<String> embs = occurs.getTraits();
         if (embs.isEmpty()) {
             if (trace.isEmpty()) {
                 printf("public class %s implements Validable {%n", capName);
@@ -280,7 +281,7 @@ public class ClassFactory extends CodeHelper {
 
         if (doc) javadocGroupDef(group);
 
-        List<String> embs = group.getImplementsList();
+        Collection<String> embs = group.getTraits();
         if (embs.isEmpty()) {
             if (trace.isEmpty()) {
                 printf("public class %s implements Validable {%n", capName);
@@ -307,7 +308,7 @@ public class ClassFactory extends CodeHelper {
 
         if (doc) javadocGroupDef(group);
 
-        List<String> embs = group.getImplementsList();
+        Collection<String> embs = group.getTraits();
         if (embs.isEmpty()) {
             if (capName.equals(traitName)) {
                 printf("public class %s implements Validable, %s.%s {%n", capName, wrtPackage, traitName);

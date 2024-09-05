@@ -25,7 +25,6 @@ public class FieldEmbedGroup extends NakedField implements EmbModel {
             private final int targetOffset = getOffset();
             private final int sourceOffset = source.getFields().get(0).getOffset();
             public FieldModel shift(FieldModel fld) {
-                log.debug(" >> @{}+{} -> @{}", fld.getOffset(), fld.getLength(), fld.getOffset()-sourceOffset+targetOffset);
                 fld.setOffset(fld.getOffset()-sourceOffset+targetOffset);
                 if (fld instanceof ParentFields) {
                     ((ParentFields) fld).getFields().forEach(this::shift);
@@ -34,7 +33,6 @@ public class FieldEmbedGroup extends NakedField implements EmbModel {
             }
         }
         Shifter shifter = new Shifter();
-        log.debug("  -- shift {} offset from {} to {}", source.getName(), shifter.sourceOffset, shifter.targetOffset);
         return source.getFields().stream().map(shifter::shift).flatMap(it -> ((NakedField)it).expand());
     }
 

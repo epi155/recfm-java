@@ -355,5 +355,5 @@ public interface ParentFields {
         }
     }
 
-    void addImplements(String interfaceName);
+    void addTraits(String interfaceName);
 }

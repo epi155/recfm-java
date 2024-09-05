@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class TraitDefine implements ParentFields, TraitModel {
     private int length;
     private List<FieldModel> fields = new ArrayList<>();
     private Boolean doc;
-    private final List<String> implementsList = new LinkedList<>();
+    private final Collection<String> traits = new LinkedList<>();
 
     protected static final String DOT_JAVA = ".java";
 
@@ -71,7 +72,7 @@ public class TraitDefine implements ParentFields, TraitModel {
     }
 
     @Override
-    public void addImplements(String interfaceName) {
-        implementsList.add(interfaceName);
+    public void addTraits(String interfaceName) {
+        traits.add(interfaceName);
     }
 }

@@ -29,6 +29,7 @@ public class FieldEmbedGroup extends NakedField implements EmbModel {
                 if (fld instanceof ParentFields) {
                     ((ParentFields) fld).getFields().forEach(this::shift);
                 }
+                ((NakedField) fld).setEmbedded(true);
                 return fld;
             }
         }

@@ -10,8 +10,7 @@ import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintWriter;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Collection;
 
 import static io.github.epi155.recfm.util.Tools.notNullOf;
 
@@ -59,8 +58,12 @@ public class InterfaceFactory extends CodeHelper {
 
     private void generateGroupCode(FieldGroup fld) {
         if (fld instanceof FieldOccurs) {
+            writeOccursGetter(fld);
+            if (fld.isEmbedded()) return;
             writeBeginClassOccurs((FieldOccurs) fld);
         } else {
+            writeGroupGetter(fld);
+            if (fld.isEmbedded()) return;
             writeBeginClassGroup(fld);
         }
         pushPlusIndent(4);
@@ -74,19 +77,35 @@ public class InterfaceFactory extends CodeHelper {
         writeEndClass();
     }
 
+    private void writeOccursGetter(FieldGroup occurs) {
+        val name = occurs.getName();
+        String capName = Tools.capitalize(name);
+        printf("%s %s(int k);%n", capName, name);
+    }
     private void writeBeginClassOccurs(FieldOccurs occurs) {
         String capName = Tools.capitalize(occurs.getName());
-        printf("%s %s(int k);%n", capName, occurs.getName());
         if (doc) javadocGroupDef(occurs);
-        printf("interface %s {%n", capName);
+        if (occurs.getTraits().isEmpty()) {
+            printf("interface %s {%n", capName);
+        } else {
+            printf("interface %s extends %s {%n", capName, String.join(", ", occurs.getTraits()));
+        }
+    }
+    private void writeGroupGetter(FieldGroup group) {
+        val name = group.getName();
+        String capName = Tools.capitalize(name);
+        printf("%s %s();%n", capName, name);
     }
 
     private void writeBeginClassGroup(FieldGroup group) {
         val name = group.getName();
         String capName = Tools.capitalize(name);
-        printf("%s %s();%n", capName, name);
         if (doc) javadocGroupDef(group);
-        printf("interface %s {%n", capName);
+        if (group.getTraits().isEmpty()) {
+            printf("interface %s {%n", capName);
+        } else {
+            printf("interface %s extends %s {%n", capName, String.join(", ", group.getTraits()));
+        }
     }
 
     private void javadocGroupDef(FieldGroup group) {
@@ -97,8 +116,13 @@ public class InterfaceFactory extends CodeHelper {
 
     private void createMethodsGroupProxy(FieldGroupTrait fld) {
         val clsName = fld.getTypedef().getName();
-        if (doc) docProxyGetter(fld);
-        printf("%s %s();%n", clsName, fld.getName());
+        if (fld instanceof FieldOccursTrait) {
+            if (doc) docProxyIndex(fld);
+            printf("%s %s(int k);%n", clsName, fld.getName());
+        } else {
+            if (doc) docProxyGetter(fld);
+            printf("%s %s();%n", clsName, fld.getName());
+        }
     }
 
     private void docProxyGetter(FieldGroupTrait fld) {
@@ -109,12 +133,18 @@ public class InterfaceFactory extends CodeHelper {
         printf(JAVADOC_CLOSE);
     }
 
+    private void docProxyIndex(FieldGroupTrait fld) {
+        val clsName = fld.getTypedef().getName();
+        printf(JAVADOC_OPEN);
+        printf(" * {@link %s}(%d)%n", clsName, fld.getLength());
+        printf(" * @param k index of the value to return%n");
+        printf(" * @return %s value at the specified position%n", clsName);
+        printf(JAVADOC_CLOSE);
+    }
+
     private void writeBeginProxy(@NotNull TraitDefine proxy) {
-        List<String> traits = proxy.getFields()
-                .stream()
-                .filter(FieldEmbedGroup.class::isInstance)
-                .map(it -> ((FieldEmbedGroup) it).getSource().getName())
-                .collect(Collectors.toList());
+        embedInterface(proxy);
+        Collection<String> traits = proxy.getTraits();
         if (traits.isEmpty()) {
             printf("public interface %s {%n", proxy.getName());
         } else {

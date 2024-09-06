@@ -13,6 +13,7 @@
 ### Fixed
 - GRP nested in Grp
 - Grp nested in Emb
+- Emb::interface nested in Emb::class
 - automatic offset in fields with occurrences
 - ignore override fields in hole checking
 

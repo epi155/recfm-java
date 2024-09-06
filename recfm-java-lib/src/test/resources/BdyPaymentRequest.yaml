@@ -63,6 +63,51 @@ packages:
             ]}
           - !Abc { name: iban       , len: 34 } # 2.12.9 ! /BODY:CBIBdyPaymentRequest/BODY:CBIEnvelPaymentRequest/BODY:CBIPaymentRequest/PMRQ:PmtInf/PMRQ:CdtTrfTxInf/PMRQ:Cdtr/PMRQ:CdtrAcct/text()
           - !Abc { name: ustrd      , len: 18 } # 2.12.17.1
+      - &TestA
+        name: ITestA
+        fields:
+          - !Abc { name: aa    , len: 5 }
+          - !Num { name: an    , len: 5 }
+          - !Grp { name: ag    , fields:
+            [ !Abc { name: aga , len: 5},
+              !Num { name: agn , len: 5}
+            ] }
+          - !Occ { name: ao, x: 3, fields:
+            [ !Abc { name: aoa , len: 5},
+              !Num { name: aon , len: 5}
+            ] }
+      - &TestB
+        name: ITestB
+        fields:
+          - !Abc { name: ba    , len: 5 }
+          - !Num { name: bn    , len: 5 }
+          - !Grp { name: bg    , fields:
+            [ !Abc { name: bga , len: 5},
+              !Num { name: bgn , len: 5}
+            ] }
+          - !Occ { name: bo, x: 3, fields:
+            [ !Abc { name: boa , len: 5},
+              !Num { name: bon , len: 5}
+            ] }
+          - !Emb { src: *TestA }
+          - !GRP { name: gb, as: *TestA }
+          - !OCC { name: ob, x: 3, as: *TestA }
+      - &TestC
+        name: ITestC
+        fields:
+          - !Abc { name: ca    , len: 5 }
+          - !Num { name: cn    , len: 5 }
+          - !Grp { name: cg    , fields:
+            [ !Abc { name: cga , len: 5},
+              !Num { name: cgn , len: 5}
+            ] }
+          - !Occ { name: co, x: 3, fields:
+            [ !Abc { name: coa , len: 5},
+              !Num { name: con , len: 5}
+            ] }
+          - !Emb { src: *TestB }
+          - !GRP { name: gc, as: *TestB }
+          - !OCC { name: oc, x: 3, as: *TestB }
 
     classes:
       - name: PayInfo10
@@ -154,3 +199,24 @@ packages:
           - !Emb { src: *CdtTrfTxInf }
           - !Fil {                    len: 82 }
           - !Abc { name: reset, at:  1339, len: 1162, ovr: yes }
+      - name: TestZ
+        fields:
+          - !Abc { name: za    , len: 5 }
+          - !Num { name: zn    , len: 5 }
+          - !Grp { name: zg    , fields:
+            [ !Abc { name: zga , len: 5},
+              !Num { name: zgn , len: 5}
+            ] }
+          - !Occ { name: zo, x: 3, fields:
+            [ !Abc { name: zoa , len: 5},
+              !Num { name: zon , len: 5}
+            ] }
+#          - !Emb { src: *TestA }
+          - !GRP { name: gaz, as: *TestA }
+          - !OCC { name: oaz, x: 3, as: *TestA }
+#          - !Emb { src: *TestB }
+          - !GRP { name: gbz, as: *TestB }
+          - !OCC { name: obz, x: 3, as: *TestB }
+          - !Emb { src: *TestC }
+          - !GRP { name: gcz, as: *TestC }
+          - !OCC { name: ocz, x: 3, as: *TestC }

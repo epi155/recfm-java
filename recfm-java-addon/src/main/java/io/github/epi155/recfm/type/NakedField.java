@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 public abstract class NakedField implements FieldModel {
     private Integer offset;
     private int length;
+    private boolean embedded;
 
     public void mark(boolean[] b, int bias) {
         for (int k = offset - bias, u = 0; u < length; k++, u++) {

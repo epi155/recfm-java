@@ -122,7 +122,7 @@ public class ClassFactory extends CodeHelper {
             if (it instanceof FieldGroupTrait) generateGroupTraitCode((FieldGroupTrait) it, pos);
         });
         fld.forEachField(it -> {
-            if (it instanceof FloatingField) access.createMethods((FloatingField) it, doc);
+            if (it instanceof SettableField) access.createMethods((SettableField) it, doc);
         });
         popIndent();
         writeEndClass();
@@ -149,7 +149,7 @@ public class ClassFactory extends CodeHelper {
             if (it instanceof FieldGroupTrait) generateGroupTraitCode((FieldGroupTrait) it, pos);
         });
         fld.forEachField(it -> {
-            if (it instanceof FloatingField) access.createMethods((FloatingField) it, doc);
+            if (it instanceof SettableField) access.createMethods((SettableField) it, doc);
         });
         pop();
         popIndent();
@@ -178,7 +178,7 @@ public class ClassFactory extends CodeHelper {
             if (fld instanceof FieldGroupTrait) generateGroupTraitCode((FieldGroupTrait) fld, pos);
         });
         trait.forEachField(it -> {
-            if (it instanceof FloatingField) access.createMethods((FloatingField) it, doc);
+            if (it instanceof SettableField) access.createMethods((SettableField) it, doc);
         });
         pop();
         popIndent();

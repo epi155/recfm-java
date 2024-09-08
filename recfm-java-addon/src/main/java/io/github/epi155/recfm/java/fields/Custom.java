@@ -144,7 +144,7 @@ public class Custom extends DelegateWriter implements MutableField<FieldCustom>,
 
     private void chkSetter(@NotNull FieldCustom fld) {
         if (fld.getRegex() != null) {
-            printf("    testRegex(s, PATTERN_AT%sPLUS%d);%n", pos.apply(fld.getOffset() + 1), fld.getLength());
+            printf("    testRegex(s, PATTERN_AT%sPLUS%d);%n", fld.getOffset(), fld.getLength());
             return;
         }
         switch (notNullOf(fld.getCheck(), defaults.getCheck())) {
@@ -170,7 +170,8 @@ public class Custom extends DelegateWriter implements MutableField<FieldCustom>,
 
     private void chkGetter(@NotNull FieldCustom fld) {
         if (fld.getRegex() != null) {
-            printf("    testRegex(%1$s, %2$d, PATTERN_AT%3$sPLUS%2$d);%n", pos.apply(fld.getOffset()), fld.getLength(), pos.apply(fld.getOffset() + 1));
+            printf("    testRegex(%1$s, %2$d, PATTERN_AT%3$sPLUS%2$d);%n",
+                    pos.apply(fld.getOffset()), fld.getLength(), fld.getOffset());
             return;
         }
         switch (notNullOf(fld.getCheck(), defaults.getCheck())) {

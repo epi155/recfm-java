@@ -24,12 +24,13 @@ public class Domain extends DelegateWriter implements MutableField<FieldDomain>,
     public void access(FieldDomain fld, String wrkName, boolean doc) {
         if (doc) docGetter(fld);
         printf("public String get%s() {%n", wrkName);
-        printf("    testArray(%1$s, %2$d, DOMAIN_AT%3$sPLUS%2$d);%n", pos.apply(fld.getOffset()), fld.getLength(), pos.apply(fld.getOffset() + 1));
+        printf("    testArray(%1$s, %2$d, DOMAIN_AT%3$sPLUS%2$d);%n",
+                pos.apply(fld.getOffset()), fld.getLength(), fld.getOffset());
         printf("    return getAbc(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());
         printf("}%n");
         if (doc) docSetter(fld);
         printf("public void set%s(String s) {%n", wrkName);
-        printf("    testArray(s, DOMAIN_AT%sPLUS%d);%n", pos.apply(fld.getOffset() + 1), fld.getLength());
+        printf("    testArray(s, DOMAIN_AT%sPLUS%d);%n", fld.getOffset(), fld.getLength());
         printf("    setDom(s, %s, VALUE_AT%dPLUS%d);%n",
                 pos.apply(fld.getOffset()), fld.getOffset(), fld.getLength());
         printf("}%n");

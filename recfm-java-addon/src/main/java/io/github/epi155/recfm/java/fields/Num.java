@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntFunction;
 
+import static io.github.epi155.recfm.java.ClassFactory.LOW;
 import static io.github.epi155.recfm.java.JavaTools.prefixOf;
 import static io.github.epi155.recfm.util.Tools.notNullOf;
 
@@ -35,6 +36,11 @@ public class Num extends DelegateWriter implements MutableField<FieldNum> {
     @Override
     public void initialize(@NotNull FieldNum fld, int bias) {
         printf("    fill(%5d, %4d, '0');%n", fld.getOffset() - bias, fld.getLength());
+    }
+
+    @Override
+    public void initializeItem(@NotNull FieldNum fld) {
+        printf("    fill(%5d+shift, %4d, '0');%n", fld.getOffset() - LOW, fld.getLength());
     }
 
     @Override

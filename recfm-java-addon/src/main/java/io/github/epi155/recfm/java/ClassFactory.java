@@ -30,6 +30,7 @@ import static io.github.epi155.recfm.util.Tools.notNullOf;
 
 @Slf4j
 public class ClassFactory extends CodeHelper {
+    public static final int LOW = 1;
     private static final IntFunction<String> BASE_ONE = n -> String.format("%d", n - 1);
     private static final IntFunction<String> SHIFT_IT = n -> String.format("%d+shift", n - 1);
     private static final String PUBLIC_CLASS_X_IMPLMENTS_Y = "public class %s implements Validable, %s {%n";
@@ -107,12 +108,14 @@ public class ClassFactory extends CodeHelper {
             writeBeginClassOccurs((FieldOccurs) fld);
             if (fld.isOverride()) writeConstant(fld);
             pushPlusIndent(4);
+            writeInitializerX(fld);
             writeValidator(fld, SHIFT_IT);
             access = AccessFactory.getInstance(this, defaults, SHIFT_IT);
         } else {
             writeBeginClassGroup(fld);
             if (fld.isOverride()) writeConstant(fld);
             pushPlusIndent(4);
+            writeInitializer(fld);
             writeValidator(fld, pos);
             access = AccessFactory.getInstance(this, defaults, pos);
         }
@@ -133,12 +136,14 @@ public class ClassFactory extends CodeHelper {
             writeBeginClassOccurs((FieldOccurs) fld);
             if (fld.isOverride()) writeConstant(fld);
             pushPlusIndent(4);
+            writeInitializerX(fld);
             writeValidator(fld, SHIFT_IT);
             access = AccessFactory.getInstance(this, defaults, SHIFT_IT);
         } else {
             writeBeginClassGroup(fld);
             if (fld.isOverride()) writeConstant(fld);
             pushPlusIndent(4);
+            writeInitializer(fld);
             writeValidator(fld, pos);
             access = AccessFactory.getInstance(this, defaults, pos);
         }
@@ -161,12 +166,14 @@ public class ClassFactory extends CodeHelper {
             writeBeginClassOccursTrait((FieldOccursTrait) trait);
             if (trait.isOverride()) writeConstant(trait);
             pushPlusIndent(4);
+            writeInitializerX(trait);
             writeValidator(trait, SHIFT_IT);
             access = AccessFactory.getInstance(this, defaults, SHIFT_IT);
         } else {
             writeBeginClassGroupTrait(trait);
             if (trait.isOverride()) writeConstant(trait);
             pushPlusIndent(4);
+            writeInitializer(trait);
             writeValidator(trait, pos);
             access = AccessFactory.getInstance(this, defaults, pos);
         }
@@ -361,10 +368,18 @@ public class ClassFactory extends CodeHelper {
         printf("    return new %s(Arrays.copyOf(rawData, LRECL));%n", struct.getName());
         closeBrace();
     }
-    private void writeInitializer(ClassDefine struct) {
+    private void writeInitializer(ParentFields struct) {
+//        printf(OVERRIDE_METHOD);
         printf("public void initialize() {%n");
         val initializer = InitializeFactory.getInstance(this, defaults);
         struct.forEachField(it -> initializer.initialize(it, 1));
+        closeBrace();
+    }
+    private void writeInitializerX(ParentFields occ) {
+//        printf(OVERRIDE_METHOD);
+        printf("public void initialize() {%n");
+        val initializer = InitializeFactory.getInstance(this, defaults);
+        occ.forEachField(initializer::initializeItem);
         closeBrace();
     }
     private void writeValidator(@NotNull ParentFields struct, IntFunction<String> pos) {

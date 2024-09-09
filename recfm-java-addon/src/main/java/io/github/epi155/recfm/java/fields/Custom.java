@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntFunction;
 
+import static io.github.epi155.recfm.java.ClassFactory.LOW;
 import static io.github.epi155.recfm.java.JavaTools.prefixOf;
 import static io.github.epi155.recfm.util.Tools.notNullOf;
 
@@ -34,6 +35,12 @@ public class Custom extends DelegateWriter implements MutableField<FieldCustom>,
     public void initialize(@NotNull FieldCustom fld, int bias) {
         val init = notNullOf(fld.getInitChar(), defaults.getInitChar());
         printf("    fill(%5d, %4d, '%c');%n", fld.getOffset() - bias, fld.getLength(), init);
+    }
+
+    @Override
+    public void initializeItem(@NotNull FieldCustom fld) {
+        val init = notNullOf(fld.getInitChar(), defaults.getInitChar());
+        printf("    fill(%5d+shift, %4d, '%c');%n", fld.getOffset() - LOW, fld.getLength(), init);
     }
 
     @Override

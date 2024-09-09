@@ -8,6 +8,8 @@ import io.github.epi155.recfm.type.FieldFiller;
 import org.apache.commons.text.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 
+import static io.github.epi155.recfm.java.ClassFactory.LOW;
+
 public class Filler extends DelegateWriter implements ImmutableField<FieldFiller> {
     private final FieldDefault.FilDefault defaults;
 
@@ -21,6 +23,13 @@ public class Filler extends DelegateWriter implements ImmutableField<FieldFiller
         char c = fld.getFill() == null ? defaults.getFill() : fld.getFill();
         printf("    fill(%5d, %4d, '%s');%n",
                 fld.getOffset() - bias, fld.getLength(), StringEscapeUtils.escapeJava(String.valueOf(c)));
+    }
+
+    @Override
+    public void initializeItem(@NotNull FieldFiller fld) {
+        char c = fld.getFill() == null ? defaults.getFill() : fld.getFill();
+        printf("    fill(%5d+shift, %4d, '%s');%n",
+                fld.getOffset() - LOW, fld.getLength(), StringEscapeUtils.escapeJava(String.valueOf(c)));
     }
 
 }

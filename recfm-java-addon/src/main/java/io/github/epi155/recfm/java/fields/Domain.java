@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntFunction;
 
+import static io.github.epi155.recfm.java.ClassFactory.LOW;
 import static io.github.epi155.recfm.java.JavaTools.prefixOf;
 
 public class Domain extends DelegateWriter implements MutableField<FieldDomain>, JavaDoc {
@@ -39,6 +40,12 @@ public class Domain extends DelegateWriter implements MutableField<FieldDomain>,
     public void initialize(@NotNull FieldDomain fld, int bias) {
         printf("    fill(%5d, %4d, VALUE_AT%dPLUS%d);%n",
                 fld.getOffset() - bias, fld.getLength(), fld.getOffset(), fld.getLength());
+    }
+
+    @Override
+    public void initializeItem(@NotNull FieldDomain fld) {
+        printf("    fill(%5d+shift, %4d, VALUE_AT%dPLUS%d);%n",
+                fld.getOffset() - LOW, fld.getLength(), fld.getOffset(), fld.getLength());
     }
 
     public void validate(@NotNull FieldDomain fld, int w, @NotNull IntFunction<String> bias, @NotNull AtomicBoolean isFirst) {

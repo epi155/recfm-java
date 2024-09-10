@@ -27,99 +27,89 @@ public class InitializeFactory {
         this.delegateDom = new Domain(pw);
         this.delegateFil = new Filler(pw, defaults.getFil());
         this.delegateVal = new Constant(pw);
-        this.delegateGrp = new Group(pw, defaults);
-        this.delegateOcc = new Occurs(pw, defaults);
-        this.delegateGTr = new GroupTrait(pw, defaults);
-        this.delegateOTr = new OccursTrait(pw, defaults);
+        this.delegateGrp = new Group(pw);
+        this.delegateOcc = new Occurs(pw);
+        this.delegateGTr = new GroupTrait(pw);
+        this.delegateOTr = new OccursTrait(pw);
     }
 
     public static InitializeFactory getInstance(CodeWriter pw, FieldDefault defaults) {
         return new InitializeFactory(pw, defaults);
     }
 
-    protected void initializeOcc(FieldOccurs fld, int bias) {
+    protected void initializeOcc(FieldOccurs fld) {
         if (fld.isOverride()) return;
-        delegateOcc.initialize(fld, bias);
-//        for (int k = 0, shift = 0; k < fld.getTimes(); k++, shift += fld.getLength()) {
-//            int backShift = shift;
-//            fld.forEachField(it -> initialize(it, bias - backShift));
-//        }
+        delegateOcc.initialize(fld);
     }
-    protected void initializeOccTrt(FieldOccursTrait fld, int bias) {
+    protected void initializeOccTrt(FieldOccursTrait fld) {
         if (fld.isOverride()) return;
-        delegateOTr.initialize(fld, bias);
-//        for (int k = 0, shift = 0; k < fld.getTimes(); k++, shift += fld.getLength()) {
-//            int backShift = shift;
-//            fld.forEachField(it -> initialize(it, bias - backShift));
-//        }
+        delegateOTr.initialize(fld);
     }
 
-    protected void initializeDom(FieldDomain fld, int bias) {
+    protected void initializeDom(FieldDomain fld) {
         if (fld.isOverride()) return;
-        delegateDom.initialize(fld, bias);
+        delegateDom.initialize(fld);
     }
 
-    protected void initializeCus(FieldCustom fld, int bias) {
+    protected void initializeCus(FieldCustom fld) {
         if (fld.isOverride()) return;
-        delegateCus.initialize(fld, bias);
+        delegateCus.initialize(fld);
     }
 
-    protected void initializeGrp(FieldGroup fld, int bias) {
+    protected void initializeGrp(FieldGroup fld) {
         if (fld.isOverride()) return;
-//        fld.forEachField(it -> initialize(it, bias));
-        delegateGrp.initialize(fld, bias);
+        delegateGrp.initialize(fld);
     }
-    protected void initializeGrpTrt(FieldGroupTrait fld, int bias) {
+    protected void initializeGrpTrt(FieldGroupTrait fld) {
         if (fld.isOverride()) return;
-//        fld.forEachField(it -> initialize(it, bias));
-        delegateGTr.initialize(fld, bias);
+        delegateGTr.initialize(fld);
     }
 
-    protected void initializeFil(FieldFiller fld, int bias) {
-        delegateFil.initialize(fld, bias);
+    protected void initializeFil(FieldFiller fld) {
+        delegateFil.initialize(fld);
     }
 
-    protected void initializeVal(FieldConstant fld, int bias) {
-        delegateVal.initialize(fld, bias);
+    protected void initializeVal(FieldConstant fld) {
+        delegateVal.initialize(fld);
     }
 
-    protected void initializeNum(FieldNum fld, int bias) {
+    protected void initializeNum(FieldNum fld) {
         if (fld.isOverride()) return;
-        delegateNum.initialize(fld, bias);
+        delegateNum.initialize(fld);
     }
-    protected void initializeNux(FieldNux fld, int bias) {
+    protected void initializeNux(FieldNux fld) {
         if (fld.isOverride()) return;
-        delegateNux.initialize(fld, bias);
+        delegateNux.initialize(fld);
     }
 
-    protected void initializeAbc(FieldAbc fld, int bias) {
+    protected void initializeAbc(FieldAbc fld) {
         if (fld.isOverride()) return;
-        delegateAbc.initialize(fld, bias);
+        delegateAbc.initialize(fld);
     }
 
-    public void initialize(FieldModel fld, int bias) {
+    public void initialize(FieldModel fld) {
         if (fld instanceof FieldAbc) {
-            initializeAbc((FieldAbc) fld, bias);
+            initializeAbc((FieldAbc) fld);
         } else if (fld instanceof FieldNux) {
-            initializeNux((FieldNux) fld, bias);
+            initializeNux((FieldNux) fld);
         } else if (fld instanceof FieldNum) {
-            initializeNum((FieldNum) fld, bias);
+            initializeNum((FieldNum) fld);
         } else if (fld instanceof FieldCustom) {
-            initializeCus((FieldCustom) fld, bias);
+            initializeCus((FieldCustom) fld);
         } else if (fld instanceof FieldDomain) {
-            initializeDom((FieldDomain) fld, bias);
+            initializeDom((FieldDomain) fld);
         } else if (fld instanceof FieldConstant) {
-            initializeVal((FieldConstant) fld, bias);
+            initializeVal((FieldConstant) fld);
         } else if (fld instanceof FieldFiller) {
-            initializeFil((FieldFiller) fld, bias);
+            initializeFil((FieldFiller) fld);
         } else if (fld instanceof FieldOccurs) {
-            initializeOcc((FieldOccurs) fld, bias);
+            initializeOcc((FieldOccurs) fld);
         } else if (fld instanceof FieldGroup) {
-            initializeGrp((FieldGroup) fld, bias);
+            initializeGrp((FieldGroup) fld);
         } else if (fld instanceof FieldOccursTrait) {
-            initializeOccTrt((FieldOccursTrait) fld, bias);
+            initializeOccTrt((FieldOccursTrait) fld);
         } else if (fld instanceof FieldGroupTrait) {
-            initializeGrpTrt((FieldGroupTrait) fld, bias);
+            initializeGrpTrt((FieldGroupTrait) fld);
         } else {
             throw new IllegalStateException("Unknown field type " + fld.getClass().getSimpleName());
         }
@@ -135,7 +125,7 @@ public class InitializeFactory {
         } else if (fld instanceof FieldCustom) {
             initializeCusItem((FieldCustom) fld);
         } else if (fld instanceof FieldDomain) {
-            initializeDom((FieldDomain) fld);
+            initializeDomItem((FieldDomain) fld);
         } else if (fld instanceof FieldConstant) {
             initializeValItem((FieldConstant) fld);
         } else if (fld instanceof FieldFiller) {
@@ -177,7 +167,7 @@ public class InitializeFactory {
         delegateVal.initializeItem(fld);
     }
 
-    private void initializeDom(FieldDomain fld) {
+    private void initializeDomItem(FieldDomain fld) {
         if (fld.isOverride()) return;
         delegateDom.initializeItem(fld);
     }

@@ -31,8 +31,8 @@ public class Abc extends DelegateWriter implements MutableField<FieldAbc>, JavaD
         this.defaults = defaults;
     }
 
-    public void initialize(@NotNull FieldAbc fld, int bias) {
-        printf("    fill(%5d, %4d, ' ');%n", fld.getOffset() - bias, fld.getLength());
+    public void initialize(@NotNull FieldAbc fld) {
+        printf("    fill(%5d, %4d, ' ');%n", fld.getOffset() - LOW, fld.getLength());
     }
 
     @Override

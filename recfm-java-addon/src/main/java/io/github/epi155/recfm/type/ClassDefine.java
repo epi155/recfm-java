@@ -48,7 +48,7 @@ public class ClassDefine implements ParentFields, ClassModel {
                 ClassFactory factory = ClassFactory.newInstance(pw, namespace, ga, defaults);
                 factory.writePackage();
                 factory.writeImport();
-                factory.generateClassCode(this);
+                factory.generateClassCode(this, pkgFolder, namespace);
             } catch (IOException e) {
                 throw new ClassDefineException(e);
             }

@@ -18,13 +18,14 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntFunction;
+import java.util.zip.GZIPOutputStream;
 
 import static io.github.epi155.recfm.util.Tools.notNullOf;
 
@@ -49,12 +50,14 @@ public class ClassFactory extends CodeHelper {
 
     public void writeImport() {
         printf("import java.util.Arrays;%n");
+        printf("import java.util.Collections;%n");
+        printf("import java.util.List;%n");
         println();
         printf("import %s.*;%n", SYSTEM_PACKAGE);
         println();
     }
 
-    public void generateClassCode(ClassDefine clazz) {
+    public void generateClassCode(ClassDefine clazz, File pkgFolder, String namespace) {
         this.doc = notNullOf(clazz.getDoc(), defaults.getCls().isDoc());
         if (doc) {
             println("/**");
@@ -80,7 +83,7 @@ public class ClassFactory extends CodeHelper {
         clazz.forEachField(it -> {
             if (it instanceof SettableField) access.createMethods((SettableField) it, doc);
         });
-        writeDump(clazz);
+        writeDump(clazz, pkgFolder, namespace);
         popIndent();
         writeEndClass();
         copyCobol(clazz);
@@ -369,14 +372,14 @@ public class ClassFactory extends CodeHelper {
         closeBrace();
     }
     private void writeInitializer(ParentFields struct) {
-//        printf(OVERRIDE_METHOD);
+        printf(OVERRIDE_METHOD);
         printf("public void initialize() {%n");
         val initializer = InitializeFactory.getInstance(this, defaults);
-        struct.forEachField(it -> initializer.initialize(it, 1));
+        struct.forEachField(initializer::initialize);
         closeBrace();
     }
     private void writeInitializerX(ParentFields occ) {
-//        printf(OVERRIDE_METHOD);
+        printf(OVERRIDE_METHOD);
         printf("public void initialize() {%n");
         val initializer = InitializeFactory.getInstance(this, defaults);
         occ.forEachField(initializer::initializeItem);
@@ -411,19 +414,44 @@ public class ClassFactory extends CodeHelper {
         }
     }
 
-    private void writeDump(ParentFields parent) {
-        List<DumpInfo> l3 = DumpFactory.getInstance(parent);
+    private void writeDump(ClassDefine clazz, File pkgFolder, String namespace) {
+        List<DumpInfo> l3 = DumpFactory.getInstance(clazz);
         if (! l3.isEmpty()) {
+            // Code too large - Java method exceeds 65535 byte
+            String className = clazz.getName();
+            File mapFile = new File(pkgFolder, className + ".map");
+            try (FileOutputStream fos = new FileOutputStream(mapFile);
+                 OutputStream zos = new GZIPOutputStream(fos);
+                 DataOutputStream dos = new DataOutputStream(zos)
+            ) {
+                for(DumpInfo di: l3) {
+                    dos.writeUTF(di.name);
+                    dos.writeInt(di.offset-LOW);
+                    dos.writeInt(di.length);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            String path = namespace.replace('.', File.separatorChar) + File.separatorChar + className + ".map";
+            printf("private static class Helper {%n");
+            printf("    private static final List<DumpInfo> DIL;%n");
+            printf("    static {%n");
+            printf("        List<DumpInfo> list;%n");
+            printf("        try {%n");
+            printf("            list = DumpInfo.load(%s.class%n", className);
+            printf("                    .getClassLoader()%n");
+            printf("                    .getResourceAsStream(\"%s\"));%n", path);
+            printf("        } catch (RuntimeException e) {%n");
+            printf("            list = Collections.emptyList();%n");
+            printf("        }%n");
+            printf("        DIL = list;%n");
+            printf("    }%n");
+            printf("}%n");
+
             printf(OVERRIDE_METHOD);
             printf("public String toString() {%n");
-            printf("    StringBuilder sb = new StringBuilder();%n");
-            printf("    String eol = System.lineSeparator();%n");
-            l3.forEach(this::writeFieldDump);
-            printf("    return sb.toString();%n");
+            printf("    return dump(Helper.DIL);%n");
             closeBrace();
         }
-    }
-    private void writeFieldDump(DumpInfo it) {
-        printf("    sb.append(\"%s : \").append(dump(%d,%d)).append(eol);%n", it.name, it.offset - 1, it.length);
     }
 }

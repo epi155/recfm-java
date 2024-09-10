@@ -34,12 +34,12 @@ public class Nux extends DelegateWriter implements MutableField<FieldNux> {
 
 
     @Override
-    public void initialize(@NotNull FieldNux fld, int bias) {
+    public void initialize(@NotNull FieldNux fld) {
         val init = notNullOf(fld.getInitialize(), defaults.getInitialize());
         if (init == InitializeNuxMode.Spaces) {
-            printf("    fill(%5d, %4d, ' ');%n", fld.getOffset() - bias, fld.getLength());
+            printf("    fill(%5d, %4d, ' ');%n", fld.getOffset() - LOW, fld.getLength());
         } else {    // InitializeNuxMode.Zeroes
-            printf("    fill(%5d, %4d, '0');%n", fld.getOffset() - bias, fld.getLength());
+            printf("    fill(%5d, %4d, '0');%n", fld.getOffset() - LOW, fld.getLength());
         }
     }
 

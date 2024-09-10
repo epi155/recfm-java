@@ -9,12 +9,14 @@
 
 ### Change
 - `initialize()` from `protected` to `public`
+- `initialize()` nested
 
 ### Fixed
 - GRP nested in Grp
 - Grp nested in Emb
 - Emb::interface nested in Emb::class
 - Val,Cus,Dom nested in Occ,OCC
+- Code too large (initialize, toString)
 - automatic offset in fields with occurrences
 - ignore override fields in hole checking
 

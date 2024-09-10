@@ -32,9 +32,9 @@ public class Custom extends DelegateWriter implements MutableField<FieldCustom>,
     }
 
     @Override
-    public void initialize(@NotNull FieldCustom fld, int bias) {
+    public void initialize(@NotNull FieldCustom fld) {
         val init = notNullOf(fld.getInitChar(), defaults.getInitChar());
-        printf("    fill(%5d, %4d, '%c');%n", fld.getOffset() - bias, fld.getLength(), init);
+        printf("    fill(%5d, %4d, '%c');%n", fld.getOffset() - LOW, fld.getLength(), init);
     }
 
     @Override

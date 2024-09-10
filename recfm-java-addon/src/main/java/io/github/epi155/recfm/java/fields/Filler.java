@@ -19,10 +19,10 @@ public class Filler extends DelegateWriter implements ImmutableField<FieldFiller
     }
 
     @Override
-    public void initialize(@NotNull FieldFiller fld, int bias) {
+    public void initialize(@NotNull FieldFiller fld) {
         char c = fld.getFill() == null ? defaults.getFill() : fld.getFill();
         printf("    fill(%5d, %4d, '%s');%n",
-                fld.getOffset() - bias, fld.getLength(), StringEscapeUtils.escapeJava(String.valueOf(c)));
+                fld.getOffset() - LOW, fld.getLength(), StringEscapeUtils.escapeJava(String.valueOf(c)));
     }
 
     @Override

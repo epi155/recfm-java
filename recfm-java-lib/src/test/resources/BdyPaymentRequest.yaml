@@ -87,7 +87,7 @@ packages:
         name: ITestA
         fields:
           - !Emb { src: *TestR1 }
-#          - !Emb { src: *TestR2 }
+          - !Emb { src: *TestR2 }
           - !Abc { name: aa    , len: 5 }
           - !Num { name: an    , len: 5 }
           - !Grp { name: ag    , fields:

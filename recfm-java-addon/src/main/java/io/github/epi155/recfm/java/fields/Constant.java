@@ -19,9 +19,9 @@ public class Constant extends DelegateWriter implements ImmutableField<FieldCons
     }
 
     @Override
-    public void initialize(@NotNull FieldConstant fld, int bias) {
+    public void initialize(@NotNull FieldConstant fld) {
         printf("    fill(%5d, %4d, VALUE_AT%dPLUS%d);%n",
-                fld.getOffset() - bias, fld.getLength(), fld.getOffset(), fld.getLength());
+                fld.getOffset() - LOW, fld.getLength(), fld.getOffset(), fld.getLength());
     }
 
     @Override

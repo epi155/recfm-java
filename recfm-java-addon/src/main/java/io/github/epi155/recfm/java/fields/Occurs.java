@@ -14,7 +14,6 @@ public class Occurs extends DelegateWriter implements InitializeField<FieldOccur
 
     @Override
     public void initialize(@NotNull FieldOccurs fld) {
-        if (fld.isEmbedded()) return;
         printf("    for(int k=1; k<=%s; k++) %s(k).initialize();%n", fld.getTimes(), fld.getName());
     }
 

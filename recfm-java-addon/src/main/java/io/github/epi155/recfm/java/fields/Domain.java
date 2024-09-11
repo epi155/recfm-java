@@ -39,14 +39,14 @@ public class Domain extends DelegateWriter implements MutableField<FieldDomain>,
 
     @Override
     public void initialize(@NotNull FieldDomain fld) {
-        printf("    fill(%5d, %4d, VALUE_AT%dPLUS%d);%n",
-                fld.getOffset() - LOW, fld.getLength(), fld.getOffset(), fld.getLength());
+        printf("    fill(%5d, %4d, VALUE_AT%dPLUS%d);\t// %s%n",
+                fld.getOffset() - LOW, fld.getLength(), fld.getOffset(), fld.getLength(), fld.getName());
     }
 
     @Override
     public void initializeItem(@NotNull FieldDomain fld) {
-        printf("    fill(%5d+shift, %4d, VALUE_AT%dPLUS%d);%n",
-                fld.getOffset() - LOW, fld.getLength(), fld.getOffset(), fld.getLength());
+        printf("    fill(%5d+shift, %4d, VALUE_AT%dPLUS%d);\t// %s%n",
+                fld.getOffset() - LOW, fld.getLength(), fld.getOffset(), fld.getLength(), fld.getName());
     }
 
     public void validate(@NotNull FieldDomain fld, int w, @NotNull IntFunction<String> bias, @NotNull AtomicBoolean isFirst) {

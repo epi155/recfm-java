@@ -18,14 +18,13 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntFunction;
-import java.util.zip.GZIPOutputStream;
 
 import static io.github.epi155.recfm.util.Tools.notNullOf;
 
@@ -57,7 +56,7 @@ public class ClassFactory extends CodeHelper {
         println();
     }
 
-    public void generateClassCode(ClassDefine clazz, File pkgFolder, String namespace) {
+    public void generateClassCode(ClassDefine clazz) {
         this.doc = notNullOf(clazz.getDoc(), defaults.getCls().isDoc());
         if (doc) {
             println("/**");
@@ -83,7 +82,7 @@ public class ClassFactory extends CodeHelper {
         clazz.forEachField(it -> {
             if (it instanceof SettableField) access.createMethods((SettableField) it, doc);
         });
-        writeDump(clazz, pkgFolder, namespace);
+        writeDump(clazz);
         popIndent();
         writeEndClass();
         copyCobol(clazz);
@@ -414,44 +413,41 @@ public class ClassFactory extends CodeHelper {
         }
     }
 
-    private void writeDump(ClassDefine clazz, File pkgFolder, String namespace) {
+    private void writeDump(ClassDefine clazz) {
         List<DumpInfo> l3 = DumpFactory.getInstance(clazz);
-        if (! l3.isEmpty()) {
-            // Code too large - Java method exceeds 65535 byte
-            String className = clazz.getName();
-            File mapFile = new File(pkgFolder, className + ".map");
-            try (FileOutputStream fos = new FileOutputStream(mapFile);
-                 OutputStream zos = new GZIPOutputStream(fos);
-                 DataOutputStream dos = new DataOutputStream(zos)
-            ) {
-                for(DumpInfo di: l3) {
-                    dos.writeUTF(di.name);
-                    dos.writeInt(di.offset-LOW);
-                    dos.writeInt(di.length);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            String path = namespace.replace('.', File.separatorChar) + File.separatorChar + className + ".map";
-            printf("private static class Helper {%n");
-            printf("    private static final List<DumpInfo> DIL;%n");
-            printf("    static {%n");
-            printf("        List<DumpInfo> list;%n");
-            printf("        try {%n");
-            printf("            list = DumpInfo.load(%s.class%n", className);
-            printf("                    .getClassLoader()%n");
-            printf("                    .getResourceAsStream(\"%s\"));%n", path);
-            printf("        } catch (RuntimeException e) {%n");
-            printf("            list = Collections.emptyList();%n");
-            printf("        }%n");
-            printf("        DIL = list;%n");
-            printf("    }%n");
-            printf("}%n");
+        if (l3.isEmpty()) return;
 
-            printf(OVERRIDE_METHOD);
-            printf("public String toString() {%n");
-            printf("    return dump(Helper.DIL);%n");
-            closeBrace();
+        printf("private static class Helper {%n");
+        printf("    private static final DumpInfo[] DIL = new DumpInfo[%d];%n", l3.size());
+        int k=0;
+        int n=0;
+        for(DumpInfo di: l3) {
+            if (k % 2000 == 0) {
+                if (k>0) {
+                    printf("    };%n");
+                }
+                    printf("    private static void init%d() {%n", n++);
+            }
+            printf("        DIL[%d] = new DumpInfo(\"%s\", %d, %d);%n", k, di.name, di.offset - LOW, di.length);
+            k++;
         }
+        printf("    };%n");
+        printf("    static {%n");
+        for(int j=0; j<n; j++) {
+            printf("        init%d();%n", j);
+        }
+        printf("    }%n");
+        printf("}%n");
+
+        printf(OVERRIDE_METHOD);
+        printf("public String toString() {%n");
+        printf("    StringBuilder sb = new StringBuilder();%n");
+        printf("    String eol = System.lineSeparator();%n");
+        printf("    for(DumpInfo di: Helper.DIL) {%n");
+        printf("        sb.append(di.lab).append(\" : \").append(dump(di.at, di.len)).append(eol);%n");
+        printf("    }%n");
+        printf("    return sb.toString();%n");
+        closeBrace();
+
     }
 }

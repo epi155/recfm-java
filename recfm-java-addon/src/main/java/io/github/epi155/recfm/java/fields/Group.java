@@ -14,13 +14,11 @@ public class Group extends DelegateWriter implements InitializeField<FieldGroup>
 
     @Override
     public void initialize(@NotNull FieldGroup fld) {
-        if (! fld.isEmbedded())
-            printf("    %s.initialize();%n", fld.getName());
+        printf("    %s.initialize();%n", fld.getName());
     }
 
     @Override
     public void initializeItem(@NotNull FieldGroup fld) {
-        if (! fld.isEmbedded())
-            printf("    %s.initialize();%n", fld.getName());
+        printf("    %s.initialize();%n", fld.getName());
     }
 }

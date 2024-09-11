@@ -48,7 +48,7 @@ public class ClassDefine implements ParentFields, ClassModel {
                 ClassFactory factory = ClassFactory.newInstance(pw, namespace, ga, defaults);
                 factory.writePackage();
                 factory.writeImport();
-                factory.generateClassCode(this, pkgFolder, namespace);
+                factory.generateClassCode(this);
             } catch (IOException e) {
                 throw new ClassDefineException(e);
             }
@@ -56,8 +56,6 @@ public class ClassDefine implements ParentFields, ClassModel {
         } else {
             throw new ClassDefineException("Class <" + getName() + "> bad defined");
         }
-
-
     }
 
     public void addTraits(String interfaceName) {

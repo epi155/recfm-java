@@ -14,13 +14,11 @@ public class GroupTrait extends DelegateWriter  implements InitializeField<Field
 
     @Override
     public void initialize(@NotNull FieldGroupTrait fld) {
-        if (! fld.isEmbedded())
-            printf("    %s.initialize();%n", fld.getName());
+        printf("    %s.initialize();%n", fld.getName());
     }
 
     @Override
     public void initializeItem(@NotNull FieldGroupTrait fld) {
-        if (! fld.isEmbedded())
-            printf("    %s.initialize();%n", fld.getName());
+        printf("    %s.initialize();%n", fld.getName());
     }
 }

@@ -34,13 +34,13 @@ public class Custom extends DelegateWriter implements MutableField<FieldCustom>,
     @Override
     public void initialize(@NotNull FieldCustom fld) {
         val init = notNullOf(fld.getInitChar(), defaults.getInitChar());
-        printf("    fill(%5d, %4d, '%c');%n", fld.getOffset() - LOW, fld.getLength(), init);
+        printf("    fill(%5d, %4d, '%c');\t// %s%n", fld.getOffset() - LOW, fld.getLength(), init, fld.getName());
     }
 
     @Override
     public void initializeItem(@NotNull FieldCustom fld) {
         val init = notNullOf(fld.getInitChar(), defaults.getInitChar());
-        printf("    fill(%5d+shift, %4d, '%c');%n", fld.getOffset() - LOW, fld.getLength(), init);
+        printf("    fill(%5d+shift, %4d, '%c');\t// %s%n", fld.getOffset() - LOW, fld.getLength(), init, fld.getName());
     }
 
     @Override
@@ -92,7 +92,7 @@ public class Custom extends DelegateWriter implements MutableField<FieldCustom>,
         if (doc) docInitialize(fld);
         printf("public void initialize%s() {%n", wrkName);
         val init = notNullOf(fld.getInitChar(), defaults.getInitChar());
-        printf("    fill(%s, %d, '%c');%n", pos.apply(fld.getOffset()), fld.getLength(), init);
+        printf("    fill(%s, %d, '%c');\t// %s%n", pos.apply(fld.getOffset()), fld.getLength(), init, fld.getName());
         printf("}%n");
     }
 

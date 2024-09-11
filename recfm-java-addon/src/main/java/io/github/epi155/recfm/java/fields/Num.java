@@ -35,12 +35,12 @@ public class Num extends DelegateWriter implements MutableField<FieldNum> {
 
     @Override
     public void initialize(@NotNull FieldNum fld) {
-        printf("    fill(%5d, %4d, '0');%n", fld.getOffset() - LOW, fld.getLength());
+        printf("    fill(%5d, %4d, '0');\t// %s%n", fld.getOffset() - LOW, fld.getLength(), fld.getName());
     }
 
     @Override
     public void initializeItem(@NotNull FieldNum fld) {
-        printf("    fill(%5d+shift, %4d, '0');%n", fld.getOffset() - LOW, fld.getLength());
+        printf("    fill(%5d+shift, %4d, '0');\t// %s%n", fld.getOffset() - LOW, fld.getLength(), fld.getName());
     }
 
     @Override

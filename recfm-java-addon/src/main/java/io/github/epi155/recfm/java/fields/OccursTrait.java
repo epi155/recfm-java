@@ -14,7 +14,6 @@ public class OccursTrait extends DelegateWriter implements InitializeField<Field
 
     @Override
     public void initialize(@NotNull FieldOccursTrait fld) {
-        if (fld.isEmbedded()) return;
         printf("    for(int k=1; k<=%s; k++) %s(k).initialize();%n", fld.getTimes(), fld.getName());
     }
 

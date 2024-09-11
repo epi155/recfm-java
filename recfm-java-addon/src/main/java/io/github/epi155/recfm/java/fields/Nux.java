@@ -37,9 +37,9 @@ public class Nux extends DelegateWriter implements MutableField<FieldNux> {
     public void initialize(@NotNull FieldNux fld) {
         val init = notNullOf(fld.getInitialize(), defaults.getInitialize());
         if (init == InitializeNuxMode.Spaces) {
-            printf("    fill(%5d, %4d, ' ');%n", fld.getOffset() - LOW, fld.getLength());
+            printf("    fill(%5d, %4d, ' ');\t// %s%n", fld.getOffset() - LOW, fld.getLength(), fld.getName());
         } else {    // InitializeNuxMode.Zeroes
-            printf("    fill(%5d, %4d, '0');%n", fld.getOffset() - LOW, fld.getLength());
+            printf("    fill(%5d, %4d, '0');\t// %s%n", fld.getOffset() - LOW, fld.getLength(), fld.getName());
         }
     }
 
@@ -47,9 +47,9 @@ public class Nux extends DelegateWriter implements MutableField<FieldNux> {
     public void initializeItem(@NotNull FieldNux fld) {
         val init = notNullOf(fld.getInitialize(), defaults.getInitialize());
         if (init == InitializeNuxMode.Spaces) {
-            printf("    fill(%5d+shift, %4d, ' ');%n", fld.getOffset() - LOW, fld.getLength());
+            printf("    fill(%5d+shift, %4d, ' ');\t// %s%n", fld.getOffset() - LOW, fld.getLength(), fld.getName());
         } else {    // InitializeNuxMode.Zeroes
-            printf("    fill(%5d+shift, %4d, '0');%n", fld.getOffset() - LOW, fld.getLength());
+            printf("    fill(%5d+shift, %4d, '0');\t// %s%n", fld.getOffset() - LOW, fld.getLength(), fld.getName());
         }
     }
 

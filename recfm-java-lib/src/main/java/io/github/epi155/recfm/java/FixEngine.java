@@ -3,7 +3,6 @@ package io.github.epi155.recfm.java;
 import java.nio.CharBuffer;
 import java.text.NumberFormat;
 import java.util.Arrays;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -840,22 +839,6 @@ abstract class FixEngine {
             }
             sb.append(c);
         }
-        return sb.toString();
-    }
-
-    /**
-     * Dump fix-record toString
-     *
-     * @param list dump parameters
-     * @return  toString
-     */
-    protected String dump(List<DumpInfo> list) {
-        if (list.isEmpty())
-            return "<Error Reading Parameter Map>";
-        StringBuilder sb = new StringBuilder();
-        String eol = System.lineSeparator();
-        for(DumpInfo di: list)
-            sb.append(di.lab).append(" : ").append(dump(di.at, di.len)).append(eol);
         return sb.toString();
     }
 

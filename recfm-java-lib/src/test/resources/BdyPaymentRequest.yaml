@@ -220,7 +220,17 @@ packages:
             ]}  # 2.8.+
           - !Emb { src: *CdtTrfTxInf }
           - !Fil {                    len: 82 }
-          - !Abc { name: reset, at:  1339, len: 1162, ovr: yes }
+          - !Abc { name: reset, at:  1339, len: 162, ovr: yes }
+
+#      - name: TestQ
+#        len: 20
+#        fields:
+#          - !Abc { name: one  , at:  1, len:  5 }
+#          - !Grp { name: grp  , at:  6, len: 15, fields:
+#            [ !Abc { name: two, at:  6, len: 10 },
+#              !Num { name: ten, at: 16, len: 10 }
+#            ] }
+
       - name: TestX
         fields:
           - !Occ { name: xo, x: 3, fields:

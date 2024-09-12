@@ -114,7 +114,10 @@ public interface ParentFields {
         log.info("  [###o..] Checking for hole in group {}: [{}..{}] ...", getName(), bias, bias + getLength() - 1);
         boolean[] b = new boolean[getLength()];
         forEachField(it -> {
-            if (!(it instanceof NamedField) || !((NamedField) it).isOverride()) {
+            log.debug("  -- span @{}+{}", it.getOffset(), it.getLength());
+            if (it instanceof NamedField && ((NamedField) it).isOverride()) {
+                ((NakedField) it).tryMark(b, bias);
+            } else {
                 log.debug("  -- span @{}+{}", it.getOffset(), it.getLength());
                 ((NakedField) it).mark(b, bias);
             }

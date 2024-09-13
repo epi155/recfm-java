@@ -9,7 +9,7 @@
 
 ### Change
 - `initialize()` from `protected` to `public`
-- `initialize()` nested
+- `initialize()` nested (group level)
 
 ### Fixed
 - GRP nested in Grp

@@ -9,9 +9,4 @@ public interface FixBasic extends Validable {
      * @return  serialized string
      */
     String encode();
-
-    /**
-     * initializes all fields to their default
-     */
-    void initialize();
 }

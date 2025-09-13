@@ -45,7 +45,7 @@ public interface ParentFields {
             if (fld.getOffset() == null) {
                 if (fld instanceof NamedField && ((NamedField) fld).isOverride()) {
                     if (prevOff>0) {
-                        if (fld.getLength()!=prevLen) {
+                        if (fld.getLength()>0 && fld.getLength()!=prevLen) {
                             if (prevName == null) {
                                 log.warn("field {} overrides field @{}+{}, but lengths are different, expected {} provided {}",
                                         ((NamedField) fld).getName(), prevOff, prevLen, prevLen, fld.getLength());

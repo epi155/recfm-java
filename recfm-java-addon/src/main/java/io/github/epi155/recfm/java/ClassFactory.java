@@ -336,7 +336,7 @@ public class ClassFactory extends CodeHelper {
     private void writeCtorVoid(String name) {
         printf("public %s() {%n", name);
         printf("    super(LRECL);%n");
-        printf("    initialize();%n");
+        printf("    initValues();%n");
         closeBrace();
     }
     private void closeBrace() {
@@ -349,12 +349,15 @@ public class ClassFactory extends CodeHelper {
         val isUnfErr = unf == LoadUnderflowAction.Error;
         printf("private %s(String s) {%n", struct.getName());
         printf("    super(s, LRECL, %b, %b);%n", isOvfErr, isUnfErr);
+        printf("    initValues();%n");
         closeBrace();
         printf("private %s(FixRecord r) {%n", struct.getName());
         printf("    super(r, LRECL, %b, %b);%n", isOvfErr, isUnfErr);
+        printf("    initValues();%n");
         closeBrace();
         printf("private %s(char[] c) {%n", struct.getName());
         printf("    super(c, LRECL, %b, %b);%n", isOvfErr, isUnfErr);
+        printf("    initValues();%n");
         closeBrace();
 
         printf("/** cast constructor */%n");

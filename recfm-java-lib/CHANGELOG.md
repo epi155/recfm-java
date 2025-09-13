@@ -1,6 +1,11 @@
 # Change Log
 
-## [0.7.2]
+## [0.7.3]
+
+### Fixed
+- group initialize underflow
+
+## [0.7.2] - 2024-09-15
 
 ### Change
 - `initialize()` from class level to group level

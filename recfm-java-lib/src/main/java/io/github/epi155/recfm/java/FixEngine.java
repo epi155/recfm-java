@@ -20,6 +20,8 @@ abstract class FixEngine {
      */
     protected final char[] rawData;
 
+    protected final int dataLength;
+
     /**
      * Raw constructor
      *
@@ -27,6 +29,7 @@ abstract class FixEngine {
      */
     protected FixEngine(int length) {
         this.rawData = new char[length];
+        this.dataLength = 0;
     }
 
     /**
@@ -38,6 +41,7 @@ abstract class FixEngine {
      * @param underflowError underflow behaviour
      */
     protected FixEngine(char[] c, int lrec, boolean overflowError, boolean underflowError) {
+        this.dataLength = c.length;
         if (c.length == lrec) {
             rawData = c;
         } else if (c.length > lrec) {
@@ -48,8 +52,18 @@ abstract class FixEngine {
             if (underflowError)
                 throw new RecordUnderflowException(RECORD_LENGTH + c.length + EXPECTED + lrec);
             this.rawData = new char[lrec];
-            initialize();
             System.arraycopy(c, 0, rawData, 0, c.length);
+        }
+    }
+    final protected void initValues() {
+        if (dataLength >= rawData.length) return;
+        if (dataLength == 0) {
+            initialize();
+        } else if (dataLength > 0) {
+            char[] swap = new char[dataLength];
+            System.arraycopy(rawData, 0, swap, 0, dataLength);  // save
+            initialize();
+            System.arraycopy(swap, 0, rawData, 0, dataLength);  // restore
         }
     }
 

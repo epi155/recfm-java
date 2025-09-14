@@ -2,10 +2,13 @@ package io.github.epi155.recfm.java;
 
 import io.github.epi155.recfm.api.FieldModel;
 import io.github.epi155.recfm.api.GenerateArgs;
+import io.github.epi155.recfm.api.TraitModel;
 import io.github.epi155.recfm.java.factory.CodeWriter;
 import io.github.epi155.recfm.type.*;
 import io.github.epi155.recfm.util.Tools;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,9 +22,11 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 
+@Slf4j
 public abstract class CodeHelper implements CodeWriter {
     protected static final String SYSTEM_PACKAGE = "io.github.epi155.recfm.java";
     protected static final String OVERRIDE_METHOD = "@Override%n";
@@ -199,5 +204,37 @@ public abstract class CodeHelper implements CodeWriter {
         if (field instanceof FieldOccursTrait) return "OCC";
         if (field instanceof FieldGroupTrait) return "GRP";
         return "???";
+    }
+    protected void embedInterface(@NotNull ParentFields struct) {
+        log.debug("  )) Scan for Emb/interface for class {}", struct.getName());
+        for(FieldModel fld: struct.getFields()) {
+            if (fld instanceof FieldEmbedGroup) {
+                val src = ((FieldEmbedGroup) fld).getSource();
+                String embName = src.getName();
+                log.debug("  )|) found {}", embName);
+                struct.addTraits(embName);
+                mapChild(src.getFields(), src.getName());
+            } else if (fld instanceof FieldGroupTrait) {
+                log.debug("  )|) Scan for Emb/interface for group {}", ((FieldGroupTrait) fld).getName());
+                TraitModel typedef = ((FieldGroupTrait) fld).getTypedef();
+                mapChild(typedef.getFields(), typedef.getName());
+            }
+        }
+    }
+
+    private void mapChild(List<FieldModel> flds, String prefix) {
+        for(FieldModel fld: flds) {
+            if (fld instanceof FieldGroup) {
+                val grpName = Tools.capitalize(((FieldGroup) fld).getName());
+                String fullName = prefix + "." +grpName;
+                log.debug("  )/) found {}", fullName);
+                ((FieldGroup) fld).addTraits(fullName);
+                mapChild(((FieldGroup) fld).getFields(), fullName);
+            } else if (fld instanceof FieldGroupTrait) {
+                log.debug("  )/) Scan for Emb/interface for group {}", ((FieldGroupTrait) fld).getName());
+                TraitModel typedef = ((FieldGroupTrait) fld).getTypedef();
+                mapChild(typedef.getFields(), typedef.getName());
+            }
+        }
     }
 }

@@ -1,0 +1,24 @@
+package io.github.epi155.recfm.java.fields;
+
+import io.github.epi155.recfm.java.factory.CodeWriter;
+import io.github.epi155.recfm.java.factory.DelegateWriter;
+import io.github.epi155.recfm.java.rule.InitializeField;
+import io.github.epi155.recfm.type.FieldOccursTrait;
+import org.jetbrains.annotations.NotNull;
+
+public class OccursTrait extends DelegateWriter implements InitializeField<FieldOccursTrait> {
+
+    public OccursTrait(CodeWriter pw) {
+        super(pw);
+    }
+
+    @Override
+    public void initialize(@NotNull FieldOccursTrait fld) {
+        printf("    for(int k=1; k<=%s; k++) %s(k).initialize();%n", fld.getTimes(), fld.getName());
+    }
+
+    @Override
+    public void initializeItem(@NotNull FieldOccursTrait fld) {
+        initialize(fld);
+    }
+}

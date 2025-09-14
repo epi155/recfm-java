@@ -6,10 +6,12 @@ import io.github.epi155.recfm.api.CheckAbc;
 import io.github.epi155.recfm.api.NormalizeAbcMode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
+@Slf4j
 public class FieldAbc extends FloatingField implements AbcModel {
     private char padChar = ' ';
     private CheckAbc check;

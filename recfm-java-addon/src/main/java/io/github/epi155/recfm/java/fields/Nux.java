@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntFunction;
 
+import static io.github.epi155.recfm.java.ClassFactory.LOW;
 import static io.github.epi155.recfm.java.JavaTools.prefixOf;
 import static io.github.epi155.recfm.util.Tools.notNullOf;
 
@@ -33,12 +34,22 @@ public class Nux extends DelegateWriter implements MutableField<FieldNux> {
 
 
     @Override
-    public void initialize(@NotNull FieldNux fld, int bias) {
+    public void initialize(@NotNull FieldNux fld) {
         val init = notNullOf(fld.getInitialize(), defaults.getInitialize());
         if (init == InitializeNuxMode.Spaces) {
-            printf("    fill(%5d, %4d, ' ');%n", fld.getOffset() - bias, fld.getLength());
+            printf("    fill(%5d, %4d, ' ');\t// %s%n", fld.getOffset() - LOW, fld.getLength(), fld.getName());
         } else {    // InitializeNuxMode.Zeroes
-            printf("    fill(%5d, %4d, '0');%n", fld.getOffset() - bias, fld.getLength());
+            printf("    fill(%5d, %4d, '0');\t// %s%n", fld.getOffset() - LOW, fld.getLength(), fld.getName());
+        }
+    }
+
+    @Override
+    public void initializeItem(@NotNull FieldNux fld) {
+        val init = notNullOf(fld.getInitialize(), defaults.getInitialize());
+        if (init == InitializeNuxMode.Spaces) {
+            printf("    fill(%5d+shift, %4d, ' ');\t// %s%n", fld.getOffset() - LOW, fld.getLength(), fld.getName());
+        } else {    // InitializeNuxMode.Zeroes
+            printf("    fill(%5d+shift, %4d, '0');\t// %s%n", fld.getOffset() - LOW, fld.getLength(), fld.getName());
         }
     }
 

@@ -1,6 +1,9 @@
 package io.github.epi155.recfm.type;
 
 import io.github.epi155.recfm.api.FieldModel;
+import io.github.epi155.recfm.java.fields.OccursAware;
+import io.github.epi155.recfm.util.Tools;
+import lombok.val;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.event.Level;
@@ -8,7 +11,6 @@ import org.slf4j.event.Level;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public interface ParentFields {
     org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ParentFields.class);
@@ -19,6 +21,7 @@ public interface ParentFields {
     default boolean isOverride() { return false; }
 
     int getLength();
+    void setLength(int length);
 
     default int evalPadWidth(int min) {
         NuclearInt wid = new NuclearInt(min);
@@ -36,6 +39,7 @@ public interface ParentFields {
     default void autoOffset(int base) {
         int prevOff = 0;
         int prevLen = 0;
+        final int zero = base;
         String prevName = null;
         for (FieldModel fld: getFields()) {
             if (fld.getOffset() == null) {
@@ -57,19 +61,30 @@ public interface ParentFields {
                 } else {
                     fld.setOffset(base);
                 }
-            } else {
+            } else if (! (fld instanceof  NamedField) || !((NamedField) fld).isOverride()){
                 base = fld.getOffset();
             }
             if (fld instanceof ParentFields) {
                 ParentFields par = (ParentFields) fld;
                 par.autoOffset(fld.getOffset());
+            } else if (fld instanceof FieldEmbedGroup) {
+                val src = ((FieldEmbedGroup) fld).getSource();
+                if (fld.getLength() <= 0 && src.getLength() > 0) {
+                    fld.setLength(src.getLength());
+                    log.info("  >> Set length of embed {}@{} to {}", src.getName(), fld.getOffset(), fld.getLength());
+                }
             }
+
             if (fld instanceof NamedField) {
                 if (! ((NamedField) fld).isOverride()) {
                     prevOff = base;
                     prevLen = fld.getLength();
                     prevName = ((NamedField) fld).getName();
-                    base += fld.getLength();
+                    if (fld instanceof OccursAware) {
+                        base += fld.getLength() * ((OccursAware) fld).getTimes();
+                    } else {
+                        base += fld.getLength();
+                    }
                 }
             } else {
                 prevOff = base;
@@ -78,11 +93,35 @@ public interface ParentFields {
                 base += fld.getLength();
             }
         }
+        int evalSize = base - zero;
+        if (this instanceof TraitDefine && !getFields().isEmpty()) {
+            Integer zOffs = getFields().get(0).getOffset();
+            if (zOffs != null) {
+                evalSize = base - zOffs;
+            }
+        }
+        int defSize = getLength();
+        if (defSize != evalSize) {
+            if (defSize <= 0) {
+                setLength(evalSize);
+                log.info("  >> Set length of {} to {}", getName(), evalSize);
+            } else {
+                log.warn("  >> Mismatch length of {}: declared {}, computed {}", getName(), getLength(), evalSize);
+            }
+        }
     }
     default boolean noHole(int bias) {
         log.info("  [###o..] Checking for hole in group {}: [{}..{}] ...", getName(), bias, bias + getLength() - 1);
         boolean[] b = new boolean[getLength()];
-        forEachField(it -> ((NakedField)it).mark(b, bias));
+        forEachField(it -> {
+            log.debug("  -- span @{}+{}", it.getOffset(), it.getLength());
+            if (it instanceof NamedField && ((NamedField) it).isOverride()) {
+                ((NakedField) it).tryMark(b, bias);
+            } else {
+                log.debug("  -- span @{}+{}", it.getOffset(), it.getLength());
+                ((NakedField) it).mark(b, bias);
+            }
+        });
         List<Integer> hole = new ArrayList<>();
         for (int k = 0; k < getLength(); k++) {
             if (!b[k]) hole.add(k);
@@ -220,7 +259,7 @@ public interface ParentFields {
                 if (fld instanceof FieldGroup) {
                     if (old instanceof FieldGroup) {
                         // GG
-                        log.error("  [#X...] GroupName '{}' duplicate @{}+{} and @{}+{} XXX", fld.getName(),
+                        log.error("  [#X....] GroupName '{}' duplicate @{}+{} and @{}+{} XXX", fld.getName(),
                             old.getOffset(), old.getLength(), it.getOffset(), it.getLength());
                         dup.getAndIncrement();
                     } else {
@@ -235,7 +274,7 @@ public interface ParentFields {
                             dup.getAndIncrement();
                     } else {
                         // fld-F x old-F
-                        log.error("  [#X...] FieldName '{}' duplicate @{}+{} and @{}+{} XXX", fld.getName(),
+                        log.error("  [#X....] FieldName '{}' duplicate @{}+{} and @{}+{} XXX", fld.getName(),
                             old.getOffset(), old.getLength(), it.getOffset(), it.getLength());
                         dup.getAndIncrement();
                     }
@@ -248,11 +287,14 @@ public interface ParentFields {
         if (it instanceof NamedField) {
             NamedField kt = (NamedField) it;
             if (kt.getName() == null) {
-                log.error("  [X....]  null name @{}+{} XXX", it.getOffset(), it.getLength());
+                log.error("  [X.....]  null name @{}+{} XXX", it.getOffset(), it.getLength());
                 dup.getAndIncrement();
             } else if (!kt.getName().matches("[a-zA-Z_][a-zA-Z_0-9$]*")) {
-                log.error("  [X....]  FieldName '{}' not valid @{}+{} XXX", kt.getName(), it.getOffset(), it.getLength());
+                log.error("  [X.....]  FieldName '{}' not valid @{}+{} XXX", kt.getName(), it.getOffset(), it.getLength());
                 dup.getAndIncrement();
+            } else if (it instanceof ParentFields && Tools.RESERVED_NAMES.contains(kt.getName())) {
+                    log.error("  [X.....]  FieldName '{}' not allow @{}+{} XXX", kt.getName(), it.getOffset(), it.getLength());
+                    dup.getAndIncrement();
             }
         }
     }
@@ -265,33 +307,31 @@ public interface ParentFields {
         return noHole(1);
     }
 
-    default boolean checkLength() {
+    default boolean checkXRef() {
         log.info("  [#o....] Checking cross-reference in group {} ...", getName());
-        List<FieldEmbedGroup> badEmbeds = getFields().stream()
-                .filter(FieldEmbedGroup.class::isInstance)
-                .map(it -> (FieldEmbedGroup)it)
-                .filter(it -> it.getLength() != it.getSource().getLength())
-                .collect(Collectors.toList());
-        List<FieldGroupTrait> badTypDef = getFields().stream()
-                .filter(FieldGroupTrait.class::isInstance)
-                .map(it -> (FieldGroupTrait)it)
-                .filter(it -> it.getLength() != it.getTypedef().getLength())
-                .collect(Collectors.toList());
-        if (badEmbeds.isEmpty() && badTypDef.isEmpty()) {
-            return checkLengthChild();
-        } else {
-            if (! badEmbeds.isEmpty()) {
-                badEmbeds.forEach(it -> log.error("  [#X....] length error {}@{}, class: {}, interface: {}",
-                        it.getSource().getName(), it.getOffset(),
-                        it.getLength(), it.getSource().getLength()));
+        boolean success = true;
+        for(FieldModel fld: getFields()) {
+            if (fld instanceof FieldEmbedGroup) {
+                val src = ((FieldEmbedGroup) fld).getSource();
+                if (fld.getLength() != src.getLength()) {
+                    log.error("  [#X....] length error {}@{}, embed: {}, interface: {}",
+                            src.getName(), fld.getOffset(),
+                            fld.getLength(), src.getLength());
+                    success = false;
+                }
             }
-            if (! badTypDef.isEmpty()) {
-                badTypDef.forEach(it -> log.error("  [#X....] length error {}@{}, class: {}, interface: {}",
-                        it.getName(), it.getOffset(),
-                        it.getLength(), it.getTypedef().getLength()));
+            if (fld instanceof FieldGroupTrait) {
+                val typ = ((FieldGroupTrait) fld).getTypedef();
+//                } else
+                if (fld.getLength() != typ.getLength()) {
+                    log.error("  [#X....] length error {}@{}, group: {}, interface: {}",
+                            typ.getName(), fld.getOffset(),
+                            fld.getLength(), typ.getLength());
+                    success = false;
+                }
             }
-            return false;
         }
+        return success;
     }
 
     default boolean checkLengthChild() {
@@ -306,7 +346,7 @@ public interface ParentFields {
         forEachField(it -> {
             if (it instanceof ParentFields) {
                 ParentFields par = (ParentFields) it;
-                status.and(par.checkLength());
+                status.and(par.checkXRef());
             }
         });
         if (status.success) {
@@ -317,4 +357,6 @@ public interface ParentFields {
             return false;
         }
     }
+
+    void addTraits(String interfaceName);
 }

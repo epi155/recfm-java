@@ -14,17 +14,26 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 @Data
 @Slf4j
 public class TraitDefine implements ParentFields, TraitModel {
+    private static final List<String> LIST = new LinkedList<>();
     private String name;
     private int length;
     private List<FieldModel> fields = new ArrayList<>();
     private Boolean doc;
+    private final Collection<String> traits = new LinkedList<>();
 
     protected static final String DOT_JAVA = ".java";
+
+    public static boolean contains(String name) {
+        return LIST.contains(name);
+    }
+
     @Override
     public void create(String namespace, GenerateArgs ga, FieldDefault defaults) {
         if (getFields().isEmpty()) return;
@@ -36,7 +45,7 @@ public class TraitDefine implements ParentFields, TraitModel {
         val base = getFields().get(0).getOffset();
 
         boolean checkSuccesful = noBadName();
-        checkSuccesful &= checkLength();
+        checkSuccesful &= checkXRef();
         checkSuccesful &= noDuplicateName(Tools::testCollision);
         checkSuccesful &= noHole(base);
         checkSuccesful &= noOverlap(base);
@@ -53,11 +62,17 @@ public class TraitDefine implements ParentFields, TraitModel {
                 throw new ClassDefineException(e);
             }
             log.info("  [######] Created.");
+            LIST.add(getName());
         } else {
             throw new ClassDefineException("Class <" + getName() + "> bad defined");
         }
 
 
 
+    }
+
+    @Override
+    public void addTraits(String interfaceName) {
+        traits.add(interfaceName);
     }
 }

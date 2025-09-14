@@ -18,4 +18,9 @@ public interface Validable {
      * @return <b>true</b> if there is any mistake, <b>false</b> if there are no errors
      */
     boolean validateAllFails(FieldValidateHandler handler);
+
+    /**
+     * initializes all fields to their default values
+     */
+    void initialize();
 }

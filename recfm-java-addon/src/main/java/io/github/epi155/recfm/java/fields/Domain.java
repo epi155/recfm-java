@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntFunction;
 
+import static io.github.epi155.recfm.java.ClassFactory.LOW;
 import static io.github.epi155.recfm.java.JavaTools.prefixOf;
 
 public class Domain extends DelegateWriter implements MutableField<FieldDomain>, JavaDoc {
@@ -24,20 +25,28 @@ public class Domain extends DelegateWriter implements MutableField<FieldDomain>,
     public void access(FieldDomain fld, String wrkName, boolean doc) {
         if (doc) docGetter(fld);
         printf("public String get%s() {%n", wrkName);
-        printf("    testArray(%1$s, %2$d, DOMAIN_AT%3$sPLUS%2$d);%n", pos.apply(fld.getOffset()), fld.getLength(), pos.apply(fld.getOffset() + 1));
+        printf("    testArray(%1$s, %2$d, DOMAIN_AT%3$sPLUS%2$d);%n",
+                pos.apply(fld.getOffset()), fld.getLength(), fld.getOffset());
         printf("    return getAbc(%s, %d);%n", pos.apply(fld.getOffset()), fld.getLength());
         printf("}%n");
         if (doc) docSetter(fld);
         printf("public void set%s(String s) {%n", wrkName);
-        printf("    testArray(s, DOMAIN_AT%sPLUS%d);%n", pos.apply(fld.getOffset() + 1), fld.getLength());
+        printf("    testArray(s, DOMAIN_AT%sPLUS%d);%n", fld.getOffset(), fld.getLength());
         printf("    setDom(s, %s, VALUE_AT%dPLUS%d);%n",
                 pos.apply(fld.getOffset()), fld.getOffset(), fld.getLength());
         printf("}%n");
     }
 
-    public void initialize(@NotNull FieldDomain fld, int bias) {
-        printf("    fill(%5d, %4d, VALUE_AT%dPLUS%d);%n",
-                fld.getOffset() - bias, fld.getLength(), fld.getOffset(), fld.getLength());
+    @Override
+    public void initialize(@NotNull FieldDomain fld) {
+        printf("    fill(%5d, %4d, VALUE_AT%dPLUS%d);\t// %s%n",
+                fld.getOffset() - LOW, fld.getLength(), fld.getOffset(), fld.getLength(), fld.getName());
+    }
+
+    @Override
+    public void initializeItem(@NotNull FieldDomain fld) {
+        printf("    fill(%5d+shift, %4d, VALUE_AT%dPLUS%d);\t// %s%n",
+                fld.getOffset() - LOW, fld.getLength(), fld.getOffset(), fld.getLength(), fld.getName());
     }
 
     public void validate(@NotNull FieldDomain fld, int w, @NotNull IntFunction<String> bias, @NotNull AtomicBoolean isFirst) {

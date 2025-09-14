@@ -8,12 +8,19 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.event.Level;
 
 import java.nio.CharBuffer;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @Slf4j
 public class Tools {
 
     private Tools() {
     }
+
+    public static final Set<String> RESERVED_NAMES = Collections.unmodifiableSet(
+            new HashSet<>(Arrays.asList("copy", "initialize", "length", "toString", "encode")));
 
 
     public static <T> T notNullOf(T u, T v) {
@@ -43,20 +50,20 @@ public class Tools {
         if (fld.getOffset().equals(grp.getOffset()) && fld.getLength()==grp.getLength()) {
             // fld and grp full overlap
             if (grp.isOverride() && !fld.isOverride()) {
-                log.info("  [#>...] Name '{}' group override field @{}+{} >>>", fld.getName(),
+                log.info("  [#>....] Name '{}' group override field @{}+{} >>>", fld.getName(),
                     fld.getOffset(), fld.getLength());
                 return Level.INFO;
             } else if (fld.isOverride() && !grp.isOverride()) {
-                log.info("  [#>...] Name '{}' field override group @{}+{} >>>", fld.getName(),
+                log.info("  [#>....] Name '{}' field override group @{}+{} >>>", fld.getName(),
                     fld.getOffset(), fld.getLength());
                 return Level.INFO;
             } else {
-                log.warn("  [#X...] Group/Field Name '{}' duplicate @{}+{} XXX", fld.getName(),
+                log.warn("  [#X....] Group/Field Name '{}' duplicate @{}+{} XXX", fld.getName(),
                     fld.getOffset(), fld.getLength());
                 return Level.ERROR;
             }
         } else {
-            log.warn("  [#>...] Name '{}' used by field @{}+{} and group @{}+{} >>>", fld.getName(),
+            log.warn("  [#>....] Name '{}' used by field @{}+{} and group @{}+{} >>>", fld.getName(),
                 fld.getOffset(), fld.getLength(), grp.getOffset(), grp.getLength());
             return Level.WARN;
         }

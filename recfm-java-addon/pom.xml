@@ -4,11 +4,11 @@
 
     <groupId>io.github.epi155</groupId>
     <artifactId>recfm-java-addon</artifactId>
-    <version>0.7.1</version>
+    <version>0.7.2</version>
 
     <name>RECFM java code generator</name>
     <description>java code generator for RECFM</description>
-    <url>https://github.com/epi155/recfm-java/tree/recfm-java-0.7.1/recfm-java-addon</url>
+    <url>https://github.com/epi155/recfm-java/tree/0.7.2/recfm-java-addon</url>
 
     <developers>
         <developer>
@@ -25,7 +25,7 @@
 
     <scm>
         <url>https://github.com/epi155/recfm-java/tree/0.7/recfm-java-addon</url>
-      <tag>recfm-java-0.7.1</tag>
+      <tag>0.7.2</tag>
   </scm>
 
     <properties>
@@ -48,14 +48,14 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
+            <version>1.18.34</version>
             <scope>provided</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>2.0.11</version>
+            <version>2.0.16</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
         <dependency>
@@ -73,7 +73,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
-            <version>1.11.0</version>
+            <version>1.12.0</version>
         </dependency>
     </dependencies>
 

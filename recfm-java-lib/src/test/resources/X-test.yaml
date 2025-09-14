@@ -97,8 +97,22 @@ packages:
           - !Emb { src: *Date, len: 10 }
           - !Emb { src: *Time, len:  6 }
 
+      - &Area54
+        name: IArea54
+        fields:
+          - !Abc { name: aaa, len: 5 }
+          - !Grp { name: ggg, fields:
+            [ !Abc { name: gaa, len: 5},
+              !Abc { name: gbb, len: 5},
+            ]}
+
 
     classes:
+      - name: KArea54
+        fields:
+          - !Abc { name: xxx, len: 5}
+          - !Emb { src: *Area54 }
+
       - name: KDate
         length: 10
         fields:

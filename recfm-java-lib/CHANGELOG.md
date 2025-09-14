@@ -1,6 +1,11 @@
 # Change Log
 
-## [0.7.1]
+## [0.7.2]
+
+### Change
+- `initialize()` from class level to group level
+
+## [0.7.1] - 2024-02-02
 
 ### Added
 - [Simple IO Reader/Writer](changelog/a001.md)

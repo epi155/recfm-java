@@ -32,6 +32,6 @@ public class DisplayOver {
     }
 
     public void close() {
-        log.error("   [###X.]  Field overlap {}..{}, {} XXX", lo, hi, ov);
+        log.error("   [###X..]  Field overlap {}..{}, {} XXX", lo, hi, ov);
     }
 }

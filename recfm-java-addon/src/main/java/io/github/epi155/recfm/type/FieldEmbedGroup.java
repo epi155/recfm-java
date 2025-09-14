@@ -26,6 +26,10 @@ public class FieldEmbedGroup extends NakedField implements EmbModel {
             private final int sourceOffset = source.getFields().get(0).getOffset();
             public FieldModel shift(FieldModel fld) {
                 fld.setOffset(fld.getOffset()-sourceOffset+targetOffset);
+                if (fld instanceof ParentFields) {
+                    ((ParentFields) fld).getFields().forEach(this::shift);
+                }
+                ((NakedField) fld).setEmbedded(true);
                 return fld;
             }
         }

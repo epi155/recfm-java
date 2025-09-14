@@ -24,6 +24,6 @@ public class DisplayHoles {
     }
 
     public void close() {
-        log.error("  [##X..] Offset {}..{} (@{}+{}) unassigned XXX", lo + 1, hi + 1, lo + 1, hi - lo + 1);
+        log.error("  [##X...] Offset {}..{} (@{}+{}) unassigned XXX", lo + 1, hi + 1, lo + 1, hi - lo + 1);
     }
 }

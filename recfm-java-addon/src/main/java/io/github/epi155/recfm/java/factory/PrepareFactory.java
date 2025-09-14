@@ -46,17 +46,11 @@ public class PrepareFactory {
 
     private void prepareOcc(@NotNull FieldOccurs fld, int bias) {
         if (fld.isOverride()) return;
-        for (int k = 0, shift = 0; k < fld.getTimes(); k++, shift += fld.getLength()) {
-            int backShift = shift;
-            fld.forEachField(it -> prepare(it, bias - backShift));
-        }
+        fld.forEachField(it -> prepare(it, bias));
     }
     private void prepareOccTrt(@NotNull FieldOccursTrait fld, int bias) {
         if (fld.isOverride()) return;
-        for (int k = 0, shift = 0; k < fld.getTimes(); k++, shift += fld.getLength()) {
-            int backShift = shift;
-            fld.forEachField(it -> prepare(it, bias - backShift));
-        }
+        fld.forEachField(it -> prepare(it, bias));
     }
 
     @SuppressWarnings("StatementWithEmptyBody")

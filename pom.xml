@@ -4,15 +4,13 @@
 
     <groupId>io.github.epi155</groupId>
     <artifactId>recfm-java</artifactId>
-    <version>0.7.1</version>
+    <version>0.7.2</version>
     <packaging>pom</packaging>
     <name>recfm java implementation addon and lib</name>
 
-    <!-- mvn versions:set -DnewVersion=0.7.1-SNAPSHOT -->
     <!-- mvn release:clean -->
-    <!-- mvn versions:display-dependency-updates -->
     <!-- mvn release:prepare -->
-    <!-- mvn release:perform -->
+    <!-- mvn versions:display-dependency-updates -->
     <!-- mvn release:update-versions -->
     <!-- mvn dependency:tree -->
 
@@ -35,7 +33,21 @@
         <connection>scm:git:git://github.com/epi155/recfm-java.git</connection>
         <developerConnection>scm:git:https://github.com/epi155/recfm-java.git</developerConnection>
         <url>https://github.com/epi155/recfm-java</url>
-        <tag>recfm-java-0.7.1</tag>
+        <tag>0.7.2</tag>
     </scm>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>3.0.1</version>
+                <configuration>
+                    <tagNameFormat>@{version}</tagNameFormat>
+                    <pushChanges>false</pushChanges>
+                    <arguments>-DskipTests</arguments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

@@ -10,6 +10,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 import static io.github.epi155.recfm.type.TraitDefine.DOT_JAVA;
@@ -23,6 +25,7 @@ public class ClassDefine implements ParentFields, ClassModel {
     private LoadUnderflowAction onUnderflow;
     private Boolean doc;
     private List<FieldModel> fields = new ArrayList<>();
+    private final Collection<String> traits = new LinkedList<>();
 
     @Override
     public void create(String namespace, GenerateArgs ga, FieldDefault defaults) {
@@ -32,7 +35,7 @@ public class ClassDefine implements ParentFields, ClassModel {
         autoOffset(1);
 
         boolean checkSuccesful = noBadName();
-        checkSuccesful &= checkLength();
+        checkSuccesful &= checkXRef();
         checkSuccesful &= noDuplicateName(Tools::testCollision);
         checkSuccesful &= noHole();
         checkSuccesful &= noOverlap();
@@ -53,7 +56,9 @@ public class ClassDefine implements ParentFields, ClassModel {
         } else {
             throw new ClassDefineException("Class <" + getName() + "> bad defined");
         }
+    }
 
-
+    public void addTraits(String interfaceName) {
+        traits.add(interfaceName);
     }
 }

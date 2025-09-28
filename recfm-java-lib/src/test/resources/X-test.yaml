@@ -124,6 +124,7 @@ packages:
     #      - !GRP { name: messageArea    , at:   1, len: 100, proxy: *MessageArea }
     #      - !GRP { name: transactionArea, at:   1, len:  12, as: *TransactionArea }
           - !Emb { src: *TransactionArea, at:   1, len:  12 }
+#          - !Emb { src: ITransactionArea, at:   1, len:  12 }
           - !Emb { src: *MessageArea    , at:  13, len: 100 }
           - !Fil {                        at: 113, len:   1 }
     #      - !GRP { name: messageArea    , at:  14, len: 100, as: *MessageArea }

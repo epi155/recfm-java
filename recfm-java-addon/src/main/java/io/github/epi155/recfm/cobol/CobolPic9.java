@@ -11,7 +11,7 @@ public class CobolPic9 extends CobolValue {
                 level() + " " +
                 name() +
                 spacePic() +
-                " PIC X(" + length() + ")."
+                " PIC 9(" + length() + ")."
 //                + tail()
                 ;
     }

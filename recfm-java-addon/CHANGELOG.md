@@ -1,6 +1,14 @@
 # Change Log
 
-## [0.7.3]
+## [0.7.4]
+
+### Fixed
+- copy cobol: Num -> PIC 9
+
+### Added
+- Create the package directory if it doesn't exist (the directory is usually created by the plugin, but it's more correct to have the addon create it)
+
+## [0.7.3] - 2025-09-15
 
 ### Fixed
 - group initialize underflow

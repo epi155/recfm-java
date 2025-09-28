@@ -77,7 +77,7 @@
             <plugin>
                 <groupId>io.github.epi155</groupId>
                 <artifactId>recfm-maven-plugin</artifactId>
-                <version>0.7.0</version>
+                <version>0.7.1-SNAPSHOT</version>
                 <executions>
                     <execution>
                         <id>enforced</id>

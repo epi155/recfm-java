@@ -53,6 +53,7 @@ public class TraitDefine implements ParentFields, TraitModel {
             log.info("  [#####o] Creating ...");
             File srcMainJava = new File(ga.sourceDirectory);
             File pkgFolder = new File(srcMainJava, namespace.replace('.', File.separatorChar));
+            if (! pkgFolder.exists()) pkgFolder.mkdirs();
             File clsFile = new File(pkgFolder, getName()+DOT_JAVA);
             try (PrintWriter pw = new PrintWriter(clsFile)) {
                 InterfaceFactory factory = InterfaceFactory.newInstance(pw, namespace, ga, defaults);
